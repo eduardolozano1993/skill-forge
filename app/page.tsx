@@ -22,22 +22,22 @@ const highlights = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(251,146,60,0.20),_transparent_32%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_45%,_#f8fafc_100%)]">
-      <section className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center gap-12 px-6 py-20 lg:px-10">
-        <div className="max-w-3xl space-y-6">
-          <span className="inline-flex items-center rounded-full border border-orange-200 bg-white/80 px-4 py-1 text-sm font-medium text-orange-700 shadow-sm backdrop-blur">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_hsl(var(--brand-soft))_0%,_transparent_34%),linear-gradient(180deg,_hsl(var(--background))_0%,_#f4f0e7_52%,_hsl(var(--background))_100%)]">
+      <section className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center gap-3xl px-lg py-4xl lg:px-2xl">
+        <div className="max-w-3xl space-y-xl">
+          <span className="inline-flex items-center rounded-full border border-brand/20 bg-surface/85 px-md py-2xs text-sm font-semibold tracking-[0.01em] text-brand shadow-soft backdrop-blur">
             Fresh Next.js workspace
           </span>
-          <div className="space-y-4">
-            <h1 className="font-heading text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl">
+          <div className="space-y-md">
+            <h1 className="font-heading text-5xl font-semibold text-text-strong sm:text-6xl lg:text-7xl">
               Build your product surface, not your boilerplate.
             </h1>
-            <p className="text-balance text-xl text-slate-600">
+            <p className="text-balance max-w-2xl text-xl leading-8 text-text-soft">
               This starter combines Next.js, Tailwind CSS, and shadcn/ui so you can
               move directly into feature work with a solid UI foundation.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-sm">
             <Button size="lg" className="gap-2">
               Start building
               <ArrowRight className="size-4" />
@@ -48,19 +48,19 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-lg md:grid-cols-3">
           {highlights.map(({ icon: Icon, title, description }) => (
             <article
               key={title}
-              className="rounded-3xl border border-white/70 bg-white/75 p-6 shadow-[0_20px_70px_-35px_rgba(15,23,42,0.35)] backdrop-blur"
+              className="surface-card rounded-lg border border-white/70 p-xl backdrop-blur"
             >
-              <div className="mb-4 inline-flex rounded-2xl bg-slate-950 p-3 text-orange-400">
+              <div className="mb-lg inline-flex rounded-md bg-surface-strong p-sm text-brand">
                 <Icon className="size-5" />
               </div>
-              <h2 className="font-heading text-xl font-semibold text-slate-950">
+              <h2 className="font-heading text-xl text-text-strong">
                 {title}
               </h2>
-              <p className="mt-2 text-base text-slate-600">{description}</p>
+              <p className="mt-sm text-base leading-7 text-text-soft">{description}</p>
             </article>
           ))}
         </div>

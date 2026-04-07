@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Source_Sans_3 } from "next/font/google";
+import { IBM_Plex_Mono, Manrope } from "next/font/google";
 
 import "./globals.css";
 
-const heading = Space_Grotesk({
+const sans = Manrope({
   subsets: ["latin"],
-  variable: "--font-heading",
+  variable: "--font-sans",
+  display: "swap",
 });
 
-const body = Source_Sans_3({
+const mono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-mono",
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${heading.variable} ${body.variable} font-sans`}>
+      <body className={`${sans.variable} ${mono.variable} font-sans`}>
         {children}
       </body>
     </html>

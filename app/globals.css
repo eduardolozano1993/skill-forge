@@ -4,26 +4,60 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 47.4% 11.2%;
+    --background: 44 33% 98%;
+    --foreground: 220 30% 16%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 220 30% 16%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 24 95% 53%;
+    --popover-foreground: 220 30% 16%;
+    --primary: 218 48% 18%;
+    --primary-foreground: 44 33% 98%;
+    --secondary: 205 32% 94%;
+    --secondary-foreground: 218 48% 18%;
+    --muted: 45 20% 94%;
+    --muted-foreground: 218 14% 42%;
+    --accent: 22 88% 56%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 24 95% 53%;
-    --radius: 1rem;
+    --destructive-foreground: 44 33% 98%;
+    --border: 214 22% 88%;
+    --input: 214 22% 88%;
+    --ring: 22 88% 56%;
+
+    --surface: 0 0% 100%;
+    --surface-muted: 45 24% 95%;
+    --surface-strong: 218 48% 18%;
+    --surface-inverse: 220 34% 12%;
+    --text-strong: 220 34% 12%;
+    --text-soft: 218 14% 42%;
+    --text-inverse: 44 33% 98%;
+    --brand: 22 88% 56%;
+    --brand-soft: 22 100% 95%;
+    --brand-strong: 20 82% 49%;
+
+    --space-2xs: 0.375rem;
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4.5rem;
+    --space-4xl: 6rem;
+
+    --radius-xs: 0.5rem;
+    --radius-sm: 0.75rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+    --radius-pill: 9999px;
+
+    --shadow-soft: 0 22px 60px -28px rgba(15, 23, 42, 0.16);
+    --shadow-card: 0 20px 50px -30px rgba(15, 23, 42, 0.18);
+  }
+
+  html {
+    font-size: 16px;
   }
 
   * {
@@ -32,11 +66,30 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "liga" 1, "calt" 1;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-semibold tracking-tight text-[hsl(var(--text-strong))];
+    line-height: 1.1;
+  }
+
+  p {
+    @apply text-[hsl(var(--text-soft))];
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .surface-card {
+    background-color: hsl(var(--surface) / 0.82);
+    box-shadow: var(--shadow-card);
   }
 }
