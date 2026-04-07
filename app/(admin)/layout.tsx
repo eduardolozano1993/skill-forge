@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
+
 export default function AdminLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return <div className="min-h-screen bg-surface-muted">{children}</div>;
 }
