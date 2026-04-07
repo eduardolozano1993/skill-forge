@@ -17,8 +17,7 @@ export default function SignInPage() {
         <CardHeader>
           <CardTitle className="font-heading">Sign in</CardTitle>
           <CardDescription>
-            Placeholder auth route inside the <code className="font-mono">/(auth)</code>{" "}
-            group. Replace this with your actual sign-in form or provider buttons.
+            Minimal placeholder route inside <code className="font-mono">/(auth)</code>.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-md">
@@ -29,7 +28,7 @@ export default function SignInPage() {
         </CardContent>
         <CardFooter>
           <Button variant="ghost" className="px-0" asChild>
-            <Link href="/">Back to marketing</Link>
+            <Link href="/">Back to home</Link>
           </Button>
         </CardFooter>
       </Card>

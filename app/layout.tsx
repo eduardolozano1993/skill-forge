@@ -18,7 +18,7 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "Skill Forge",
-  description: "Next.js starter with Tailwind CSS and shadcn/ui components.",
+  description: "Application shell foundation for Skill Forge.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${sans.variable} ${mono.variable} font-sans`}>
+      <body className={`${sans.variable} ${mono.variable} bg-background font-sans text-foreground`}>
         {children}
       </body>
     </html>

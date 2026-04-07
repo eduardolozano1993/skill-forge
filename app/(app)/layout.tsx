@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
+
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/admin", label: "Admin" },
@@ -12,22 +14,33 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-surface-muted">
-      <header className="border-b border-border bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-lg py-md">
+    <AuthenticatedShell
+      header={
+        <>
           <Link href="/" className="font-heading text-lg font-semibold text-text-strong">
             Skill Forge
           </Link>
-          <nav className="flex items-center gap-md text-sm text-text-soft">
+          <div className="text-sm text-text-soft">Authenticated shell</div>
+        </>
+      }
+      sidebar={
+        <nav className="rounded-lg border border-border bg-surface p-md shadow-soft">
+          <ul className="space-y-xs text-sm">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className="transition-colors hover:text-brand">
-                {item.label}
-              </Link>
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="block rounded-md px-sm py-xs text-text-soft transition-colors hover:bg-surface-muted hover:text-text-strong"
+                >
+                  {item.label}
+                </Link>
+              </li>
             ))}
-          </nav>
-        </div>
-      </header>
-      <div>{children}</div>
-    </div>
+          </ul>
+        </nav>
+      }
+    >
+      {children}
+    </AuthenticatedShell>
   );
 }
