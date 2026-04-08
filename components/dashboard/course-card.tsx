@@ -11,37 +11,32 @@ import {
 type CourseCardProps = {
   title: string;
   summary: string;
-  progressLabel: string;
-  durationLabel: string;
+  dueDateLabel: string;
 };
 
 export function CourseCard({
   title,
   summary,
-  progressLabel,
-  durationLabel,
+  dueDateLabel,
 }: CourseCardProps) {
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-sm">
-        <div className="flex items-start justify-between gap-md">
-          <div className="space-y-xs">
-            <div className="flex items-center gap-xs text-sm font-medium text-brand">
-              <PlayCircle className="size-4" />
-              <span>Course</span>
-            </div>
-            <CardTitle className="font-heading text-2xl text-text-strong">{title}</CardTitle>
+    <Card className="h-full min-w-0">
+      <CardHeader className="space-y-sm p-lg pb-sm">
+        <div className="min-w-0 space-y-xs">
+          <div className="flex items-center gap-xs text-xs font-medium uppercase tracking-[0.12em] text-brand">
+            <PlayCircle className="size-3.5" />
+            <span>Course</span>
           </div>
-          <div className="rounded-full bg-brand-soft px-sm py-2xs text-xs font-medium text-brand-strong">
-            {progressLabel}
-          </div>
+          <CardTitle className="line-clamp-2 font-heading text-lg text-text-strong">
+            {title}
+          </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-md">
-        <CardDescription className="max-w-md text-sm leading-6">{summary}</CardDescription>
-        <div className="flex items-center gap-xs text-sm text-text-soft">
-          <Clock3 className="size-4 text-brand" />
-          <span>{durationLabel}</span>
+      <CardContent className="space-y-sm p-lg pt-0 text-left">
+        <CardDescription className="line-clamp-3 text-sm leading-5">{summary}</CardDescription>
+        <div className="flex w-full items-center justify-start gap-xs self-start text-left text-xs text-text-soft">
+          <Clock3 className="size-3.5 text-brand" />
+          <span>Due {dueDateLabel}</span>
         </div>
       </CardContent>
     </Card>

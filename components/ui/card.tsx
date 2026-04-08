@@ -63,7 +63,7 @@ export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("px-xl pb-xl", className)} {...props} />
+    <div ref={ref} className={cn("px-lg pb-xl", className)} {...props} />
   ),
 );
 CardContent.displayName = "CardContent";
