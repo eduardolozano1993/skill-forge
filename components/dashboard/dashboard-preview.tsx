@@ -7,7 +7,6 @@ import { CourseList } from "@/components/dashboard/course-list";
 import {
   DashboardSection,
   DashboardSectionBody,
-  DashboardSectionEmptyState,
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { Button } from "@/components/ui/button";
@@ -52,14 +51,7 @@ export function DashboardPreview({
           description="Repeatable activity items with a dedicated loading state."
         />
         <DashboardSectionBody>
-          {recentActivity.length > 0 ? (
-            <ActivityList items={recentActivity} />
-          ) : (
-            <DashboardSectionEmptyState
-              title="No activity yet"
-              description="New dashboard activity will appear here once the real data source is connected."
-            />
-          )}
+          <ActivityList items={recentActivity} />
         </DashboardSectionBody>
       </DashboardSection>
     </>
