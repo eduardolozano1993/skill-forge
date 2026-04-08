@@ -5,9 +5,16 @@ import type { DashboardCourse } from "@/app/(app)/dashboard/mock-data";
 type CourseListProps = {
   courses: DashboardCourse[];
   isLoading?: boolean;
+  favoriteCourseIds?: Set<string>;
+  onFavoriteToggle?: (course: DashboardCourse) => void;
 };
 
-export function CourseList({ courses, isLoading = false }: CourseListProps) {
+export function CourseList({
+  courses,
+  isLoading = false,
+  favoriteCourseIds,
+  onFavoriteToggle,
+}: CourseListProps) {
   if (isLoading) {
     return (
       <DashboardListLayout variant="course-grid">
@@ -21,7 +28,12 @@ export function CourseList({ courses, isLoading = false }: CourseListProps) {
   return (
     <DashboardListLayout variant="course-grid">
       {courses.map((course) => (
-        <CourseCard key={course.id} {...course} />
+        <CourseCard
+          key={course.id}
+          {...course}
+          isFavorite={favoriteCourseIds?.has(course.id)}
+          onFavoriteToggle={onFavoriteToggle ? () => onFavoriteToggle(course) : undefined}
+        />
       ))}
     </DashboardListLayout>
   );
