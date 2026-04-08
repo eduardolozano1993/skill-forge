@@ -1,4 +1,4 @@
-import { Clock3, PlayCircle, Star } from "lucide-react";
+import { CheckCircle2, Clock3, PlayCircle, Star } from "lucide-react";
 
 import {
   DashboardItemBody,
@@ -12,7 +12,9 @@ type CourseCardProps = {
   summary: string;
   dueDateLabel: string;
   isFavorite?: boolean;
+  isCompleted?: boolean;
   onFavoriteToggle?: () => void;
+  onCompletedToggle?: () => void;
 };
 
 export function CourseCard({
@@ -20,7 +22,9 @@ export function CourseCard({
   summary,
   dueDateLabel,
   isFavorite = false,
+  isCompleted = false,
   onFavoriteToggle,
+  onCompletedToggle,
 }: CourseCardProps) {
   return (
     <DashboardItemShell className="min-w-0">
@@ -31,16 +35,30 @@ export function CourseCard({
               <PlayCircle className="size-3.5" />
               <span>Course</span>
             </div>
-            {onFavoriteToggle ? (
-              <button
-                type="button"
-                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                onClick={onFavoriteToggle}
-                className="shrink-0 rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft"
-              >
-                <Star className="size-4" fill={isFavorite ? "currentColor" : "none"} />
-              </button>
-            ) : null}
+            <div className="flex shrink-0 items-center gap-1">
+              {onFavoriteToggle ? (
+                <button
+                  type="button"
+                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  onClick={onFavoriteToggle}
+                  className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft"
+                >
+                  <Star className="size-4" fill={isFavorite ? "currentColor" : "none"} />
+                </button>
+              ) : null}
+              {onCompletedToggle ? (
+                <button
+                  type="button"
+                  aria-label={isCompleted ? "Mark course as incomplete" : "Mark course as complete"}
+                  onClick={onCompletedToggle}
+                  className="rounded-full p-1 transition-colors hover:bg-brand-soft"
+                >
+                  <CheckCircle2
+                    className={isCompleted ? "size-4 text-emerald-500" : "size-4 text-text-soft"}
+                  />
+                </button>
+              ) : null}
+            </div>
           </div>
           <CardTitle className="line-clamp-2 font-heading text-lg text-text-strong">
             {title}
@@ -68,7 +86,10 @@ export function CourseCardSkeleton() {
               <div className="h-3.5 w-3.5 rounded-full bg-surface-muted" />
               <div className="h-3 w-16 rounded bg-surface-muted" />
             </div>
-            <div className="h-6 w-6 rounded-full bg-surface-muted" />
+            <div className="flex items-center gap-1">
+              <div className="h-6 w-6 rounded-full bg-surface-muted" />
+              <div className="h-6 w-6 rounded-full bg-surface-muted" />
+            </div>
           </div>
           <div className="space-y-xs">
             <div className="h-6 w-3/4 rounded bg-surface-muted" />

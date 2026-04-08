@@ -6,14 +6,18 @@ type CourseListProps = {
   courses: DashboardCourse[];
   isLoading?: boolean;
   favoriteCourseIds?: Set<string>;
+  completedCourseIds?: Set<string>;
   onFavoriteToggle?: (course: DashboardCourse) => void;
+  onCompletedToggle?: (course: DashboardCourse) => void;
 };
 
 export function CourseList({
   courses,
   isLoading = false,
   favoriteCourseIds,
+  completedCourseIds,
   onFavoriteToggle,
+  onCompletedToggle,
 }: CourseListProps) {
   if (isLoading) {
     return (
@@ -32,7 +36,9 @@ export function CourseList({
           key={course.id}
           {...course}
           isFavorite={favoriteCourseIds?.has(course.id)}
+          isCompleted={completedCourseIds?.has(course.id)}
           onFavoriteToggle={onFavoriteToggle ? () => onFavoriteToggle(course) : undefined}
+          onCompletedToggle={onCompletedToggle ? () => onCompletedToggle(course) : undefined}
         />
       ))}
     </DashboardListLayout>

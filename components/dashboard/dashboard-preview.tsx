@@ -84,6 +84,14 @@ export function DashboardPreview({
         courses.findIndex((item) => item.id === course.id) === index,
     ) ?? [];
 
+  const assignedCompletedCount =
+    state.assignedCourses?.filter((course) => state.completedCourseIds.has(course.id)).length ?? 0;
+  const assignedTotalCount = state.assignedCourses?.length ?? 0;
+  const recommendedCompletedCount =
+    state.recommendedCourses?.filter((course) => state.completedCourseIds.has(course.id)).length ??
+    0;
+  const recommendedTotalCount = state.recommendedCourses?.length ?? 0;
+
   return (
     <>
       <DashboardSection>
@@ -109,7 +117,14 @@ export function DashboardPreview({
 
       <DashboardSection>
         <DashboardSectionHeader
-          title="Assigned courses"
+          title={
+            <div className="flex items-center gap-sm">
+              <span>Assigned courses</span>
+              <span className="text-sm font-medium text-text-soft">
+                {assignedCompletedCount}/{assignedTotalCount}
+              </span>
+            </div>
+          }
           description="Repeatable compact cards with stable ids from the mock data file."
           action={<Button size="sm" variant="subtle">View all</Button>}
         />
@@ -119,7 +134,11 @@ export function DashboardPreview({
             <CourseList
               courses={filteredAssignedCourses}
               favoriteCourseIds={state.favoriteCourseIds}
+              completedCourseIds={state.completedCourseIds}
               onFavoriteToggle={(course) => dispatch({ type: "favorite_added", course })}
+              onCompletedToggle={(course) =>
+                dispatch({ type: "course_completion_toggled", course })
+              }
             />
             ) : (
               <DashboardSectionEmptyState
@@ -143,7 +162,14 @@ export function DashboardPreview({
 
       <DashboardSection>
         <DashboardSectionHeader
-          title="Recommended courses"
+          title={
+            <div className="flex items-center gap-sm">
+              <span>Recommended courses</span>
+              <span className="text-sm font-medium text-text-soft">
+                {recommendedCompletedCount}/{recommendedTotalCount}
+              </span>
+            </div>
+          }
           description="Same card system, different collection."
         />
         <DashboardSectionBody>
@@ -152,7 +178,11 @@ export function DashboardPreview({
             <CourseList
               courses={filteredRecommendedCourses}
               favoriteCourseIds={state.favoriteCourseIds}
+              completedCourseIds={state.completedCourseIds}
               onFavoriteToggle={(course) => dispatch({ type: "favorite_added", course })}
+              onCompletedToggle={(course) =>
+                dispatch({ type: "course_completion_toggled", course })
+              }
             />
             ) : (
               <DashboardSectionEmptyState
@@ -184,8 +214,12 @@ export function DashboardPreview({
             <CourseList
               courses={favoriteState}
               favoriteCourseIds={state.favoriteCourseIds}
+              completedCourseIds={state.completedCourseIds}
               onFavoriteToggle={(course) =>
                 dispatch({ type: "favorite_removal_requested", course })
+              }
+              onCompletedToggle={(course) =>
+                dispatch({ type: "course_completion_toggled", course })
               }
             />
           ) : (
