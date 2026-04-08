@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 import {
   type DashboardActivity,
@@ -9,6 +9,10 @@ import {
 } from "@/app/(app)/dashboard/mock-data";
 import { ActivityList } from "@/components/dashboard/activity-list";
 import { CourseList } from "@/components/dashboard/course-list";
+import {
+  createDashboardPreviewInitialState,
+  dashboardPreviewReducer,
+} from "@/components/dashboard/dashboard-preview-state";
 import {
   DashboardSection,
   DashboardSectionBody,
@@ -31,76 +35,54 @@ export function DashboardPreview({
   favoriteCourses,
   recentActivity,
 }: DashboardPreviewProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [assignedState] = useState<DashboardCourse[] | null>(assignedCourses);
-  const [recommendedState, setRecommendedState] = useState<DashboardCourse[] | null>(
-    recommendedCourses,
-  );
-  const [favoriteCourseIds, setFavoriteCourseIds] = useState<Set<string>>(
-    () => new Set((favoriteCourses ?? []).map((course) => course.id)),
-  );
-  const [pendingFavoriteRemoval, setPendingFavoriteRemoval] = useState<DashboardCourse | null>(
-    null,
+  const [state, dispatch] = useReducer(
+    dashboardPreviewReducer,
+    {
+      assignedCourses,
+      recommendedCourses,
+      favoriteCourses,
+    },
+    createDashboardPreviewInitialState,
   );
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
+      dispatch({ type: "search_debounced" });
     }, 250);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [searchQuery]);
+  }, [state.searchQuery]);
 
-  const normalizedSearch = debouncedSearchQuery.trim().toLowerCase();
+  const normalizedSearch = state.debouncedSearchQuery.trim().toLowerCase();
 
   const filteredAssignedCourses =
-    !assignedState || !normalizedSearch
-      ? assignedState
-      : assignedState.filter((course) =>
+    !state.assignedCourses || !normalizedSearch
+      ? state.assignedCourses
+      : state.assignedCourses.filter((course) =>
           `${course.title} ${course.summary}`.toLowerCase().includes(normalizedSearch),
         );
 
   const filteredRecommendedCourses =
-    !recommendedState || !normalizedSearch
-      ? recommendedState
-      : recommendedState.filter((course) =>
+    !state.recommendedCourses || !normalizedSearch
+      ? state.recommendedCourses
+      : state.recommendedCourses.filter((course) =>
           `${course.title} ${course.summary}`.toLowerCase().includes(normalizedSearch),
         );
 
   const allVisibleCourses = [
-    ...(assignedState ?? []),
-    ...(recommendedState ?? []),
+    ...(state.assignedCourses ?? []),
+    ...(state.recommendedCourses ?? []),
     ...(favoriteCourses ?? []),
   ];
 
   const favoriteState =
     allVisibleCourses.filter(
       (course, index, courses) =>
-        favoriteCourseIds.has(course.id) &&
+        state.favoriteCourseIds.has(course.id) &&
         courses.findIndex((item) => item.id === course.id) === index,
     ) ?? [];
-
-  function addFavorite(course: DashboardCourse) {
-    setFavoriteCourseIds((current) => new Set(current).add(course.id));
-  }
-
-  function requestFavoriteRemoval(course: DashboardCourse) {
-    setPendingFavoriteRemoval(course);
-  }
-
-  function confirmFavoriteRemoval() {
-    if (!pendingFavoriteRemoval) return;
-
-    setFavoriteCourseIds((current) => {
-      const next = new Set(current);
-      next.delete(pendingFavoriteRemoval.id);
-      return next;
-    });
-    setPendingFavoriteRemoval(null);
-  }
 
   return (
     <>
@@ -114,8 +96,10 @@ export function DashboardPreview({
             <span className="sr-only">Search courses</span>
             <input
               type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              value={state.searchQuery}
+              onChange={(event) =>
+                dispatch({ type: "search_changed", value: event.target.value })
+              }
               placeholder="Search assigned and recommended courses"
               className="w-full rounded-full border border-input bg-background px-md py-sm text-sm text-text-strong outline-none transition focus:border-brand focus:ring-2 focus:ring-[hsl(var(--brand)/0.2)]"
             />
@@ -134,8 +118,8 @@ export function DashboardPreview({
             filteredAssignedCourses.length > 0 ? (
             <CourseList
               courses={filteredAssignedCourses}
-              favoriteCourseIds={favoriteCourseIds}
-              onFavoriteToggle={addFavorite}
+              favoriteCourseIds={state.favoriteCourseIds}
+              onFavoriteToggle={(course) => dispatch({ type: "favorite_added", course })}
             />
             ) : (
               <DashboardSectionEmptyState
@@ -167,8 +151,8 @@ export function DashboardPreview({
             filteredRecommendedCourses.length > 0 ? (
             <CourseList
               courses={filteredRecommendedCourses}
-              favoriteCourseIds={favoriteCourseIds}
-              onFavoriteToggle={addFavorite}
+              favoriteCourseIds={state.favoriteCourseIds}
+              onFavoriteToggle={(course) => dispatch({ type: "favorite_added", course })}
             />
             ) : (
               <DashboardSectionEmptyState
@@ -199,8 +183,10 @@ export function DashboardPreview({
           {favoriteState.length > 0 ? (
             <CourseList
               courses={favoriteState}
-              favoriteCourseIds={favoriteCourseIds}
-              onFavoriteToggle={requestFavoriteRemoval}
+              favoriteCourseIds={state.favoriteCourseIds}
+              onFavoriteToggle={(course) =>
+                dispatch({ type: "favorite_removal_requested", course })
+              }
             />
           ) : (
             <DashboardSectionEmptyState
@@ -233,7 +219,7 @@ export function DashboardPreview({
         </DashboardSectionBody>
       </DashboardSection>
 
-      {pendingFavoriteRemoval ? (
+      {state.pendingFavoriteRemoval ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-strong/20 p-md">
           <div className="w-full max-w-md rounded-xl border border-border bg-surface p-lg shadow-card">
             <div className="space-y-xs">
@@ -241,16 +227,21 @@ export function DashboardPreview({
               <p className="text-sm text-text-soft">
                 Remove{" "}
                 <span className="font-medium text-text-strong">
-                  {pendingFavoriteRemoval.title}
+                  {state.pendingFavoriteRemoval.title}
                 </span>{" "}
                 from your favorites list?
               </p>
             </div>
             <div className="mt-lg flex justify-end gap-sm">
-              <Button variant="outline" onClick={() => setPendingFavoriteRemoval(null)}>
+              <Button
+                variant="outline"
+                onClick={() => dispatch({ type: "favorite_removal_cancelled" })}
+              >
                 Cancel
               </Button>
-              <Button onClick={confirmFavoriteRemoval}>Ok</Button>
+              <Button onClick={() => dispatch({ type: "favorite_removal_confirmed" })}>
+                Ok
+              </Button>
             </div>
           </div>
         </div>
