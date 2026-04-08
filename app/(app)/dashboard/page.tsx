@@ -1,8 +1,33 @@
-import { getDashboardMockData } from "@/app/(app)/dashboard/mock-data";
+import {
+  getAssignedCourses,
+  getFavoriteCourses,
+  getRecommendedCourses,
+  getRecentActivity,
+} from "@/app/(app)/dashboard/mock-data";
 import { DashboardPreview } from "@/components/dashboard/dashboard-preview";
 
 export default async function DashboardPage() {
-  const { assignedCourses, recommendedCourses, recentActivity } = await getDashboardMockData();
+  const [
+    assignedCoursesResult,
+    recommendedCoursesResult,
+    favoriteCoursesResult,
+    recentActivityResult,
+  ] =
+    await Promise.allSettled([
+      getAssignedCourses(),
+      getRecommendedCourses(),
+      getFavoriteCourses(),
+      getRecentActivity(),
+    ]);
+
+  const assignedCourses =
+    assignedCoursesResult.status === "fulfilled" ? assignedCoursesResult.value : null;
+  const recommendedCourses =
+    recommendedCoursesResult.status === "fulfilled" ? recommendedCoursesResult.value : null;
+  const favoriteCourses =
+    favoriteCoursesResult.status === "fulfilled" ? favoriteCoursesResult.value : null;
+  const recentActivity =
+    recentActivityResult.status === "fulfilled" ? recentActivityResult.value : null;
 
   return (
     <section className="space-y-lg">
@@ -19,6 +44,7 @@ export default async function DashboardPage() {
       <DashboardPreview
         assignedCourses={assignedCourses}
         recommendedCourses={recommendedCourses}
+        favoriteCourses={favoriteCourses}
         recentActivity={recentActivity}
       />
     </section>

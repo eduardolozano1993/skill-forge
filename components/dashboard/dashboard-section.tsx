@@ -26,6 +26,13 @@ type DashboardSectionEmptyStateProps = {
   className?: string;
 };
 
+type DashboardSectionErrorStateProps = {
+  title: ReactNode;
+  description: ReactNode;
+  action?: ReactNode;
+  className?: string;
+};
+
 export function DashboardSection({ children, className }: DashboardSectionProps) {
   return (
     <section
@@ -70,6 +77,28 @@ export function DashboardSectionEmptyState({
     <div
       className={cn(
         "rounded-lg border border-dashed border-border bg-surface p-lg text-left",
+        className,
+      )}
+    >
+      <div className="space-y-1">
+        <h3 className="font-heading text-base text-text-strong">{title}</h3>
+        <p className="text-sm text-text-soft">{description}</p>
+      </div>
+      {action ? <div className="mt-md">{action}</div> : null}
+    </div>
+  );
+}
+
+export function DashboardSectionErrorState({
+  title,
+  description,
+  action,
+  className,
+}: DashboardSectionErrorStateProps) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border border-[hsl(var(--brand)/0.25)] bg-brand-soft p-lg text-left",
         className,
       )}
     >

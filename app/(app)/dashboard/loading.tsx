@@ -41,6 +41,16 @@ export default function DashboardLoading() {
 
       <DashboardSection>
         <DashboardSectionHeader
+          title="Favorite courses"
+          description="Saved courses you want to revisit quickly."
+        />
+        <DashboardSectionBody>
+          <CourseList courses={[]} isLoading />
+        </DashboardSectionBody>
+      </DashboardSection>
+
+      <DashboardSection>
+        <DashboardSectionHeader
           title="Recent activity"
           description="Activity feed placeholder with stable spacing."
         />

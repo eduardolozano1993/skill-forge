@@ -107,8 +107,36 @@ export const recentActivity: DashboardActivity[] = [
 
 const dashboardMockDelayMs = 750;
 
-export async function getDashboardMockData() {
+async function delayDashboardMockData() {
   await new Promise((resolve) => setTimeout(resolve, dashboardMockDelayMs));
+}
+
+export async function getAssignedCourses() {
+  await delayDashboardMockData();
+
+  return assignedCourses;
+}
+
+export async function getRecommendedCourses() {
+  await delayDashboardMockData();
+
+  return recommendedCourses;
+}
+
+export async function getFavoriteCourses(): Promise<DashboardCourse[]> {
+  await delayDashboardMockData();
+
+  return [];
+}
+
+export async function getRecentActivity() {
+  await delayDashboardMockData();
+
+  return recentActivity;
+}
+
+export async function getDashboardMockData() {
+  await delayDashboardMockData();
 
   return {
     assignedCourses,
