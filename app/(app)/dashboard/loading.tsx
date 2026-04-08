@@ -41,7 +41,7 @@ export default function DashboardLoading() {
 
       <DashboardSection>
         <DashboardSectionHeader
-          title="Favorite courses"
+          title="Bookmarked courses"
           description="Saved courses you want to revisit quickly."
         />
         <DashboardSectionBody>

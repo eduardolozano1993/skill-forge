@@ -123,7 +123,7 @@ export async function getRecommendedCourses() {
   return recommendedCourses;
 }
 
-export async function getFavoriteCourses(): Promise<DashboardCourse[]> {
+export async function getBookmarkedCourses(): Promise<DashboardCourse[]> {
   await delayDashboardMockData();
 
   return [];

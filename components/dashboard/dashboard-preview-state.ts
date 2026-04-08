@@ -3,7 +3,7 @@ import type { DashboardCourse } from "@/app/(app)/dashboard/mock-data";
 type DashboardPreviewStateInput = {
   assignedCourses: DashboardCourse[] | null;
   recommendedCourses: DashboardCourse[] | null;
-  favoriteCourses: DashboardCourse[] | null;
+  bookmarkedCourses: DashboardCourse[] | null;
 };
 
 export type DashboardPreviewState = {
@@ -28,14 +28,14 @@ export type DashboardPreviewAction =
 export function createDashboardPreviewInitialState({
   assignedCourses,
   recommendedCourses,
-  favoriteCourses,
+  bookmarkedCourses,
 }: DashboardPreviewStateInput): DashboardPreviewState {
   return {
     searchQuery: "",
     debouncedSearchQuery: "",
     assignedCourses,
     recommendedCourses,
-    bookmarkedCourseIds: new Set((favoriteCourses ?? []).map((course) => course.id)),
+    bookmarkedCourseIds: new Set((bookmarkedCourses ?? []).map((course) => course.id)),
     completedCourseIds: new Set<string>(),
     pendingBookmarkRemoval: null,
   };

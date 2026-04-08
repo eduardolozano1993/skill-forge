@@ -25,14 +25,14 @@ import { Button } from "@/components/ui/button";
 type DashboardPreviewProps = {
   assignedCourses: DashboardCourse[] | null;
   recommendedCourses: DashboardCourse[] | null;
-  favoriteCourses: DashboardCourse[] | null;
+  bookmarkedCourses: DashboardCourse[] | null;
   recentActivity: DashboardActivity[] | null;
 };
 
 export function DashboardPreview({
   assignedCourses,
   recommendedCourses,
-  favoriteCourses,
+  bookmarkedCourses,
   recentActivity,
 }: DashboardPreviewProps) {
   const [state, dispatch] = useReducer(
@@ -40,7 +40,7 @@ export function DashboardPreview({
     {
       assignedCourses,
       recommendedCourses,
-      favoriteCourses,
+      bookmarkedCourses,
     },
     createDashboardPreviewInitialState,
   );
@@ -74,10 +74,10 @@ export function DashboardPreview({
   const allVisibleCourses = [
     ...(state.assignedCourses ?? []),
     ...(state.recommendedCourses ?? []),
-    ...(favoriteCourses ?? []),
+    ...(bookmarkedCourses ?? []),
   ];
 
-  const bookmarkedCourses =
+  const bookmarkedCourseList =
     allVisibleCourses.filter(
       (course, index, courses) =>
         state.bookmarkedCourseIds.has(course.id) &&
@@ -217,9 +217,9 @@ export function DashboardPreview({
           description="Saved courses you want to revisit quickly."
         />
         <DashboardSectionBody>
-          {bookmarkedCourses.length > 0 ? (
+          {bookmarkedCourseList.length > 0 ? (
             <CourseList
-              courses={bookmarkedCourses}
+              courses={bookmarkedCourseList}
               bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
               onBookmarkToggle={(course) =>
