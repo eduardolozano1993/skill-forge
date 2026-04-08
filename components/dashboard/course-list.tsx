@@ -5,18 +5,18 @@ import type { DashboardCourse } from "@/app/(app)/dashboard/mock-data";
 type CourseListProps = {
   courses: DashboardCourse[];
   isLoading?: boolean;
-  favoriteCourseIds?: Set<string>;
+  bookmarkedCourseIds?: Set<string>;
   completedCourseIds?: Set<string>;
-  onFavoriteToggle?: (course: DashboardCourse) => void;
+  onBookmarkToggle?: (course: DashboardCourse) => void;
   onCompletedToggle?: (course: DashboardCourse) => void;
 };
 
 export function CourseList({
   courses,
   isLoading = false,
-  favoriteCourseIds,
+  bookmarkedCourseIds,
   completedCourseIds,
-  onFavoriteToggle,
+  onBookmarkToggle,
   onCompletedToggle,
 }: CourseListProps) {
   if (isLoading) {
@@ -35,9 +35,9 @@ export function CourseList({
         <CourseCard
           key={course.id}
           {...course}
-          isFavorite={favoriteCourseIds?.has(course.id)}
+          isBookmarked={bookmarkedCourseIds?.has(course.id)}
           isCompleted={completedCourseIds?.has(course.id)}
-          onFavoriteToggle={onFavoriteToggle ? () => onFavoriteToggle(course) : undefined}
+          onBookmarkToggle={onBookmarkToggle ? () => onBookmarkToggle(course) : undefined}
           onCompletedToggle={onCompletedToggle ? () => onCompletedToggle(course) : undefined}
         />
       ))}

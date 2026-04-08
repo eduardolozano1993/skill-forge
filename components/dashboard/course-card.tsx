@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, PlayCircle, Star } from "lucide-react";
+import { Bookmark, CheckCircle2, Clock3, PlayCircle } from "lucide-react";
 
 import {
   DashboardItemBody,
@@ -11,9 +11,9 @@ type CourseCardProps = {
   title: string;
   summary: string;
   dueDateLabel: string;
-  isFavorite?: boolean;
+  isBookmarked?: boolean;
   isCompleted?: boolean;
-  onFavoriteToggle?: () => void;
+  onBookmarkToggle?: () => void;
   onCompletedToggle?: () => void;
 };
 
@@ -21,9 +21,9 @@ export function CourseCard({
   title,
   summary,
   dueDateLabel,
-  isFavorite = false,
+  isBookmarked = false,
   isCompleted = false,
-  onFavoriteToggle,
+  onBookmarkToggle,
   onCompletedToggle,
 }: CourseCardProps) {
   return (
@@ -36,14 +36,14 @@ export function CourseCard({
               <span>Course</span>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              {onFavoriteToggle ? (
+              {onBookmarkToggle ? (
                 <button
                   type="button"
-                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                  onClick={onFavoriteToggle}
+                  aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                  onClick={onBookmarkToggle}
                   className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft"
                 >
-                  <Star className="size-4" fill={isFavorite ? "currentColor" : "none"} />
+                  <Bookmark className="size-4" fill={isBookmarked ? "currentColor" : "none"} />
                 </button>
               ) : null}
               {onCompletedToggle ? (

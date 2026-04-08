@@ -11,18 +11,18 @@ export type DashboardPreviewState = {
   debouncedSearchQuery: string;
   assignedCourses: DashboardCourse[] | null;
   recommendedCourses: DashboardCourse[] | null;
-  favoriteCourseIds: Set<string>;
+  bookmarkedCourseIds: Set<string>;
   completedCourseIds: Set<string>;
-  pendingFavoriteRemoval: DashboardCourse | null;
+  pendingBookmarkRemoval: DashboardCourse | null;
 };
 
 export type DashboardPreviewAction =
   | { type: "search_changed"; value: string }
   | { type: "search_debounced" }
-  | { type: "favorite_added"; course: DashboardCourse }
-  | { type: "favorite_removal_requested"; course: DashboardCourse }
-  | { type: "favorite_removal_confirmed" }
-  | { type: "favorite_removal_cancelled" }
+  | { type: "bookmark_added"; course: DashboardCourse }
+  | { type: "bookmark_removal_requested"; course: DashboardCourse }
+  | { type: "bookmark_removal_confirmed" }
+  | { type: "bookmark_removal_cancelled" }
   | { type: "course_completion_toggled"; course: DashboardCourse };
 
 export function createDashboardPreviewInitialState({
@@ -35,9 +35,9 @@ export function createDashboardPreviewInitialState({
     debouncedSearchQuery: "",
     assignedCourses,
     recommendedCourses,
-    favoriteCourseIds: new Set((favoriteCourses ?? []).map((course) => course.id)),
+    bookmarkedCourseIds: new Set((favoriteCourses ?? []).map((course) => course.id)),
     completedCourseIds: new Set<string>(),
-    pendingFavoriteRemoval: null,
+    pendingBookmarkRemoval: null,
   };
 }
 
@@ -56,37 +56,37 @@ export function dashboardPreviewReducer(
         ...state,
         debouncedSearchQuery: state.searchQuery,
       };
-    case "favorite_added": {
-      const nextFavoriteCourseIds = new Set(state.favoriteCourseIds);
-      nextFavoriteCourseIds.add(action.course.id);
+    case "bookmark_added": {
+      const nextBookmarkedCourseIds = new Set(state.bookmarkedCourseIds);
+      nextBookmarkedCourseIds.add(action.course.id);
       return {
         ...state,
-        favoriteCourseIds: nextFavoriteCourseIds,
+        bookmarkedCourseIds: nextBookmarkedCourseIds,
       };
     }
-    case "favorite_removal_requested":
+    case "bookmark_removal_requested":
       return {
         ...state,
-        pendingFavoriteRemoval: action.course,
+        pendingBookmarkRemoval: action.course,
       };
-    case "favorite_removal_confirmed": {
-      if (!state.pendingFavoriteRemoval) {
+    case "bookmark_removal_confirmed": {
+      if (!state.pendingBookmarkRemoval) {
         return state;
       }
 
-      const nextFavoriteCourseIds = new Set(state.favoriteCourseIds);
-      nextFavoriteCourseIds.delete(state.pendingFavoriteRemoval.id);
+      const nextBookmarkedCourseIds = new Set(state.bookmarkedCourseIds);
+      nextBookmarkedCourseIds.delete(state.pendingBookmarkRemoval.id);
 
       return {
         ...state,
-        favoriteCourseIds: nextFavoriteCourseIds,
-        pendingFavoriteRemoval: null,
+        bookmarkedCourseIds: nextBookmarkedCourseIds,
+        pendingBookmarkRemoval: null,
       };
     }
-    case "favorite_removal_cancelled":
+    case "bookmark_removal_cancelled":
       return {
         ...state,
-        pendingFavoriteRemoval: null,
+        pendingBookmarkRemoval: null,
       };
     case "course_completion_toggled": {
       const nextCompletedCourseIds = new Set(state.completedCourseIds);

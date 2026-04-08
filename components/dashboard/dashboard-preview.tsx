@@ -77,10 +77,17 @@ export function DashboardPreview({
     ...(favoriteCourses ?? []),
   ];
 
-  const favoriteState =
+  const bookmarkedCourses =
     allVisibleCourses.filter(
       (course, index, courses) =>
-        state.favoriteCourseIds.has(course.id) &&
+        state.bookmarkedCourseIds.has(course.id) &&
+        courses.findIndex((item) => item.id === course.id) === index,
+    ) ?? [];
+
+  const completedCourses =
+    allVisibleCourses.filter(
+      (course, index, courses) =>
+        state.completedCourseIds.has(course.id) &&
         courses.findIndex((item) => item.id === course.id) === index,
     ) ?? [];
 
@@ -133,9 +140,9 @@ export function DashboardPreview({
             filteredAssignedCourses.length > 0 ? (
             <CourseList
               courses={filteredAssignedCourses}
-              favoriteCourseIds={state.favoriteCourseIds}
+              bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
-              onFavoriteToggle={(course) => dispatch({ type: "favorite_added", course })}
+              onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
               onCompletedToggle={(course) =>
                 dispatch({ type: "course_completion_toggled", course })
               }
@@ -177,9 +184,9 @@ export function DashboardPreview({
             filteredRecommendedCourses.length > 0 ? (
             <CourseList
               courses={filteredRecommendedCourses}
-              favoriteCourseIds={state.favoriteCourseIds}
+              bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
-              onFavoriteToggle={(course) => dispatch({ type: "favorite_added", course })}
+              onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
               onCompletedToggle={(course) =>
                 dispatch({ type: "course_completion_toggled", course })
               }
@@ -206,17 +213,17 @@ export function DashboardPreview({
 
       <DashboardSection>
         <DashboardSectionHeader
-          title="Favorite courses"
+          title="Bookmarked courses"
           description="Saved courses you want to revisit quickly."
         />
         <DashboardSectionBody>
-          {favoriteState.length > 0 ? (
+          {bookmarkedCourses.length > 0 ? (
             <CourseList
-              courses={favoriteState}
-              favoriteCourseIds={state.favoriteCourseIds}
+              courses={bookmarkedCourses}
+              bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
-              onFavoriteToggle={(course) =>
-                dispatch({ type: "favorite_removal_requested", course })
+              onBookmarkToggle={(course) =>
+                dispatch({ type: "bookmark_removal_requested", course })
               }
               onCompletedToggle={(course) =>
                 dispatch({ type: "course_completion_toggled", course })
@@ -224,8 +231,33 @@ export function DashboardPreview({
             />
           ) : (
             <DashboardSectionEmptyState
-              title="No favorite courses yet"
-              description="Courses you save for later will appear here."
+              title="No bookmarked courses yet"
+              description="Courses you bookmark for later will appear here."
+            />
+          )}
+        </DashboardSectionBody>
+      </DashboardSection>
+
+      <DashboardSection>
+        <DashboardSectionHeader
+          title="Completed courses"
+          description="Courses you have marked as completed across your dashboard."
+        />
+        <DashboardSectionBody>
+          {completedCourses.length > 0 ? (
+            <CourseList
+              courses={completedCourses}
+              bookmarkedCourseIds={state.bookmarkedCourseIds}
+              completedCourseIds={state.completedCourseIds}
+              onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
+              onCompletedToggle={(course) =>
+                dispatch({ type: "course_completion_toggled", course })
+              }
+            />
+          ) : (
+            <DashboardSectionEmptyState
+              title="No completed courses yet"
+              description="Completed courses will appear here once you mark them done."
             />
           )}
         </DashboardSectionBody>
@@ -253,27 +285,27 @@ export function DashboardPreview({
         </DashboardSectionBody>
       </DashboardSection>
 
-      {state.pendingFavoriteRemoval ? (
+      {state.pendingBookmarkRemoval ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-strong/20 p-md">
           <div className="w-full max-w-md rounded-xl border border-border bg-surface p-lg shadow-card">
             <div className="space-y-xs">
-              <h2 className="font-heading text-xl text-text-strong">Remove favorite course?</h2>
+              <h2 className="font-heading text-xl text-text-strong">Remove bookmarked course?</h2>
               <p className="text-sm text-text-soft">
                 Remove{" "}
                 <span className="font-medium text-text-strong">
-                  {state.pendingFavoriteRemoval.title}
+                  {state.pendingBookmarkRemoval.title}
                 </span>{" "}
-                from your favorites list?
+                from your bookmarked courses?
               </p>
             </div>
             <div className="mt-lg flex justify-end gap-sm">
               <Button
                 variant="outline"
-                onClick={() => dispatch({ type: "favorite_removal_cancelled" })}
+                onClick={() => dispatch({ type: "bookmark_removal_cancelled" })}
               >
                 Cancel
               </Button>
-              <Button onClick={() => dispatch({ type: "favorite_removal_confirmed" })}>
+              <Button onClick={() => dispatch({ type: "bookmark_removal_confirmed" })}>
                 Ok
               </Button>
             </div>
