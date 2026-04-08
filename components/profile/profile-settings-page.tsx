@@ -141,13 +141,12 @@ export function ProfileSettingsPage() {
 
   return (
     <div className="space-y-lg">
-      <section className="space-y-lg rounded-[2rem] border border-border bg-surface px-lg py-lg shadow-card md:px-xl md:py-xl">
+      <section className="space-y-lg">
         <div className="flex flex-col gap-sm md:flex-row md:items-end md:justify-between">
           <div className="space-y-xs">
-            <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">
+            <h1 className="font-heading text-3xl font-semibold text-brand md:text-4xl">
               Profile settings
-            </p>
-            <h1 className="font-heading text-3xl text-text-strong">Account profile</h1>
+            </h1>
             <p className="max-w-2xl text-sm text-text-soft">
               Review your profile details and update the mock account information stored in local
               component state.
@@ -268,12 +267,11 @@ export function ProfileSettingsPage() {
         </div>
       </section>
 
-      <section className="space-y-lg rounded-[2rem] border border-border bg-surface px-lg py-lg shadow-card md:px-xl md:py-xl">
+      <section className="space-y-lg">
         <div className="space-y-xs">
-          <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">
+          <h2 className="font-heading text-3xl font-semibold text-brand md:text-4xl">
             Application settings
-          </p>
-          <h2 className="font-heading text-3xl text-text-strong">Interface preferences</h2>
+          </h2>
           <p className="max-w-2xl text-sm text-text-soft">
             Manage visual preferences for this browser session and local workspace experience.
           </p>
