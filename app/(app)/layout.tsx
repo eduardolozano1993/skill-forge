@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { AppPreferencesActions } from "@/components/layouts/app-preferences-actions";
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
+import { ProfileMenu } from "@/components/layouts/profile-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardEyebrow, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -38,6 +39,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               Review week
             </Button>
             <Button size="sm">Resume course</Button>
+            <ProfileMenu />
           </div>
         </div>
       }

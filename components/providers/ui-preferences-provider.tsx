@@ -5,7 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -23,6 +23,15 @@ const STORAGE_KEYS = {
   theme: "skill-forge.ui.theme",
 } as const;
 
+const UI_PREFERENCES_EVENT = "skill-forge:ui-preferences-changed";
+
+const defaultPreferences = {
+  sidebarCollapsed: false,
+  theme: "light" as UiTheme,
+};
+
+let cachedPreferences = defaultPreferences;
+
 const UiPreferencesContext = createContext<UiPreferencesContextValue | null>(
   null,
 );
@@ -31,48 +40,97 @@ type UiPreferencesProviderProps = {
   children: ReactNode;
 };
 
+function readPreferences() {
+  if (typeof window === "undefined") {
+    return defaultPreferences;
+  }
+
+  const storedTheme = window.localStorage.getItem(STORAGE_KEYS.theme);
+  const nextPreferences = {
+    sidebarCollapsed:
+      window.localStorage.getItem(STORAGE_KEYS.sidebarCollapsed) === "true",
+    theme:
+      storedTheme === "light" || storedTheme === "dark"
+        ? storedTheme
+        : defaultPreferences.theme,
+  };
+
+  if (
+    cachedPreferences.sidebarCollapsed === nextPreferences.sidebarCollapsed &&
+    cachedPreferences.theme === nextPreferences.theme
+  ) {
+    return cachedPreferences;
+  }
+
+  cachedPreferences = nextPreferences;
+
+  return cachedPreferences;
+}
+
+function subscribe(callback: () => void) {
+  if (typeof window === "undefined") {
+    return () => undefined;
+  }
+
+  const handleStorage = (event: StorageEvent) => {
+    if (
+      !event.key ||
+      event.key === STORAGE_KEYS.sidebarCollapsed ||
+      event.key === STORAGE_KEYS.theme
+    ) {
+      callback();
+    }
+  };
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(UI_PREFERENCES_EVENT, callback);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(UI_PREFERENCES_EVENT, callback);
+  };
+}
+
+function emitPreferencesChanged() {
+  window.dispatchEvent(new Event(UI_PREFERENCES_EVENT));
+}
+
 export function UiPreferencesProvider({
   children,
 }: UiPreferencesProviderProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [theme, setTheme] = useState<UiTheme>("light");
+  const preferences = useSyncExternalStore(
+    subscribe,
+    readPreferences,
+    () => defaultPreferences,
+  );
 
   useEffect(() => {
-    const storedSidebarCollapsed = window.localStorage.getItem(
-      STORAGE_KEYS.sidebarCollapsed,
-    );
-    const storedTheme = window.localStorage.getItem(STORAGE_KEYS.theme);
-
-    if (storedSidebarCollapsed === "true") {
-      setSidebarCollapsed(true);
-    }
-
-    if (storedTheme === "light" || storedTheme === "dark") {
-      setTheme(storedTheme);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEYS.sidebarCollapsed,
-      String(sidebarCollapsed),
-    );
-  }, [sidebarCollapsed]);
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEYS.theme, theme);
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    document.documentElement.dataset.theme = preferences.theme;
+  }, [preferences.theme]);
 
   const value = useMemo(
     () => ({
-      sidebarCollapsed,
-      theme,
-      toggleSidebarCollapsed: () => setSidebarCollapsed((current) => !current),
-      toggleTheme: () =>
-        setTheme((current) => (current === "light" ? "dark" : "light")),
+      sidebarCollapsed: preferences.sidebarCollapsed,
+      theme: preferences.theme,
+      toggleSidebarCollapsed: () => {
+        const nextValue = !preferences.sidebarCollapsed;
+
+        window.localStorage.setItem(
+          STORAGE_KEYS.sidebarCollapsed,
+          String(nextValue),
+        );
+        emitPreferencesChanged();
+      },
+      toggleTheme: () => {
+        const nextTheme: UiTheme =
+          preferences.theme === "light" ? "dark" : "light";
+
+        window.localStorage.setItem(STORAGE_KEYS.theme, nextTheme);
+        document.documentElement.dataset.theme = nextTheme;
+        emitPreferencesChanged();
+      },
     }),
-    [sidebarCollapsed, theme],
+    [preferences],
   );
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useUiPreferences } from "@/components/providers/ui-preferences-provider";
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils";
 type AuthenticatedShellProps = {
   children: ReactNode;
   header: ReactNode;
-  sidebar: ReactNode;
+  sidebar?: ReactNode;
   contentClassName?: string;
 };
 
@@ -19,6 +20,8 @@ export function AuthenticatedShell({
   contentClassName,
 }: AuthenticatedShellProps) {
   const { sidebarCollapsed } = useUiPreferences();
+  const pathname = usePathname();
+  const showSidebar = Boolean(sidebar) && pathname.startsWith("/dashboard");
 
   return (
     <div className="min-h-screen bg-surface-muted">
@@ -30,12 +33,14 @@ export function AuthenticatedShell({
       <div
         className={cn(
           "mx-auto grid w-full max-w-7xl gap-lg px-md py-md md:items-start lg:px-lg lg:py-lg",
-          sidebarCollapsed
-            ? "md:grid-cols-[minmax(0,1fr)]"
-            : "md:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[18rem_minmax(0,1fr)]",
+          showSidebar && !sidebarCollapsed
+            ? "md:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[18rem_minmax(0,1fr)]"
+            : "md:grid-cols-[minmax(0,1fr)]",
         )}
       >
-        {!sidebarCollapsed ? <aside className="min-w-0 md:sticky md:top-lg">{sidebar}</aside> : null}
+        {showSidebar && !sidebarCollapsed ? (
+          <aside className="min-w-0 md:sticky md:top-lg">{sidebar}</aside>
+        ) : null}
         <main className="min-w-0">
           <div
             className={cn(
