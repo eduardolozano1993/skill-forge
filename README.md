@@ -37,6 +37,8 @@ Reusable React components.
 - `components/layouts/`
   Structural wrappers that compose pages.
   Example: `authenticated-shell.tsx`.
+- `components/dashboard/`
+  Dashboard-specific building blocks. Keep list wrappers, item shells, and section primitives here instead of rebuilding section markup in the route.
 
 ### `lib/`
 
@@ -83,10 +85,66 @@ If a page belongs to a URL area and a product context, choose the route group ba
   `bg-surface`, `text-text-soft`, `border-border`, `text-brand`
 - Avoid one-off arbitrary values unless there is a strong reason.
 
+## UI Patterns
+
+These patterns are now established in the dashboard and are worth preserving as the app grows.
+
+### Separate route code from feature UI
+
+- Keep route files thin.
+- Let `app/(app)/dashboard/page.tsx` orchestrate data loading.
+- Keep display logic in `components/dashboard/`.
+- Keep mock datasets close to the route when they are temporary and likely to be deleted once the real backend is connected.
+
+### Prefer composable section APIs over boolean-heavy components
+
+- Use section primitives that accept content as children or slots instead of adding flags for every layout variation.
+- `components/dashboard/dashboard-section.tsx` is the reference pattern:
+  `DashboardSection`, `DashboardSectionHeader`, `DashboardSectionBody`, `DashboardSectionEmptyState`, `DashboardSectionErrorState`.
+- This keeps headers, actions, bodies, empty states, and error states swappable without creating one oversized component API.
+
+### Model loading, empty, error, and data as first-class UI states
+
+- Every repeatable dashboard block should have an intentional state model:
+  loading, success, empty, and error when the feature needs partial failure handling.
+- Use route-level loading for server data:
+  `app/(app)/dashboard/loading.tsx`.
+- Use section-level fallback UIs when one widget can fail without taking down the whole screen.
+- Do not rely on one global error path if the page is composed of independent widgets.
+
+### Use stable keys from data, not array positions
+
+- Real list items must use durable IDs from the data model.
+- `components/dashboard/course-list.tsx` and `components/dashboard/activity-list.tsx` use `course.id` and `item.id`.
+- Index keys are acceptable only for placeholder skeletons that have no long-term identity.
+
+### Reuse layout shells for repeated card structure
+
+- Shared item spacing and card framing belong in wrappers, not duplicated across each component.
+- `components/dashboard/dashboard-item-shell.tsx` centralizes repeated card shell, header, and body layout.
+- `components/dashboard/dashboard-list-layout.tsx` centralizes repeated list container layouts like the course grid and activity stack.
+
+### Match skeletons to final structure
+
+- Skeleton UIs should resemble the real component shape, not generic gray rectangles.
+- `CourseCardSkeleton` and `NotificationItemSkeleton` mirror the final card layout so loading states preserve rhythm and reduce layout shift.
+
+### Keep mock data isolated and disposable
+
+- Dashboard mock content should live in `app/(app)/dashboard/mock-data.ts`, not inline in the route.
+- This makes it easy to delete the file when the real database replaces it.
+- Temporary UI-only mocks should not leak into shared libraries unless they are genuinely reused outside the feature.
+
+### Split data sources when sections can fail independently
+
+- If one dashboard section can fail without invalidating the whole page, fetch it independently.
+- `app/(app)/dashboard/page.tsx` uses separate async loaders and `Promise.allSettled(...)` so one widget can degrade without breaking unrelated sections.
+
 ## Practical Rules
 
 - Put shared UI building blocks in `components/ui/`.
 - Put page shells and structural wrappers in `components/layouts/`.
+- Put feature-specific composition primitives near the feature, for example in `components/dashboard/`.
 - Put sample data, helpers, and pure utilities in `lib/`.
 - Keep marketing copy and dashboard mock content static unless there is a real need for fetching.
 - Reuse the authenticated shell for learner-facing app pages instead of rebuilding headers and sidebars per route.
@@ -110,6 +168,15 @@ app/
   globals.css
   layout.tsx
 components/
+  dashboard/
+    activity-list.tsx
+    course-card.tsx
+    course-list.tsx
+    dashboard-item-shell.tsx
+    dashboard-list-layout.tsx
+    dashboard-preview.tsx
+    dashboard-section.tsx
+    notification-item.tsx
   layouts/
     authenticated-shell.tsx
   ui/
