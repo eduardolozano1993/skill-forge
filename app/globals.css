@@ -56,6 +56,40 @@
     --shadow-card: 0 20px 50px -30px rgba(15, 23, 42, 0.18);
   }
 
+  :root[data-theme="dark"] {
+    --background: 222 27% 8%;
+    --foreground: 42 30% 94%;
+    --card: 222 24% 12%;
+    --card-foreground: 42 30% 94%;
+    --popover: 222 24% 12%;
+    --popover-foreground: 42 30% 94%;
+    --primary: 42 85% 60%;
+    --primary-foreground: 222 27% 8%;
+    --secondary: 218 18% 18%;
+    --secondary-foreground: 42 30% 94%;
+    --muted: 218 18% 18%;
+    --muted-foreground: 220 10% 68%;
+    --accent: 22 88% 56%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 52%;
+    --destructive-foreground: 42 30% 94%;
+    --border: 218 14% 24%;
+    --input: 218 14% 24%;
+    --ring: 42 85% 60%;
+    --surface: 222 24% 12%;
+    --surface-muted: 220 18% 15%;
+    --surface-strong: 42 85% 60%;
+    --surface-inverse: 42 30% 94%;
+    --text-strong: 42 30% 94%;
+    --text-soft: 220 10% 68%;
+    --text-inverse: 222 27% 8%;
+    --brand: 42 85% 60%;
+    --brand-soft: 42 45% 18%;
+    --brand-strong: 42 90% 66%;
+    --shadow-soft: 0 22px 60px -28px rgba(0, 0, 0, 0.45);
+    --shadow-card: 0 20px 50px -30px rgba(0, 0, 0, 0.55);
+  }
+
   html {
     font-size: 16px;
   }

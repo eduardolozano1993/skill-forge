@@ -1,5 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
 
+import { useUiPreferences } from "@/components/providers/ui-preferences-provider";
 import { cn } from "@/lib/utils";
 
 type AuthenticatedShellProps = {
@@ -15,6 +18,8 @@ export function AuthenticatedShell({
   sidebar,
   contentClassName,
 }: AuthenticatedShellProps) {
+  const { sidebarCollapsed } = useUiPreferences();
+
   return (
     <div className="min-h-screen bg-surface-muted">
       <header className="border-b border-border bg-surface/95 backdrop-blur">
@@ -22,8 +27,15 @@ export function AuthenticatedShell({
           {header}
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-7xl gap-lg px-md py-md md:grid-cols-[16rem_minmax(0,1fr)] md:items-start lg:px-lg lg:py-lg xl:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside className="min-w-0 md:sticky md:top-lg">{sidebar}</aside>
+      <div
+        className={cn(
+          "mx-auto grid w-full max-w-7xl gap-lg px-md py-md md:items-start lg:px-lg lg:py-lg",
+          sidebarCollapsed
+            ? "md:grid-cols-[minmax(0,1fr)]"
+            : "md:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[18rem_minmax(0,1fr)]",
+        )}
+      >
+        {!sidebarCollapsed ? <aside className="min-w-0 md:sticky md:top-lg">{sidebar}</aside> : null}
         <main className="min-w-0">
           <div
             className={cn(

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { AppPreferencesActions } from "@/components/layouts/app-preferences-actions";
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardEyebrow, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +33,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <p className="mt-2xs text-sm text-text-soft">Learner dashboard</p>
           </div>
           <div className="flex items-center gap-sm">
+            <AppPreferencesActions />
             <Button variant="subtle" size="sm">
               Review week
             </Button>
