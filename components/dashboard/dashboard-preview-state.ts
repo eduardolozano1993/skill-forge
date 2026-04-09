@@ -7,7 +7,6 @@ type DashboardPreviewStateInput = {
 };
 
 export type DashboardPreviewState = {
-  searchQuery: string;
   assignedCourses: MockCourse[] | null;
   recommendedCourses: MockCourse[] | null;
   bookmarkedCourseIds: Set<number>;
@@ -16,7 +15,6 @@ export type DashboardPreviewState = {
 };
 
 export type DashboardPreviewAction =
-  | { type: "search_changed"; value: string }
   | { type: "bookmark_added"; course: MockCourse }
   | { type: "bookmark_removal_requested"; course: MockCourse }
   | { type: "bookmark_removal_confirmed" }
@@ -29,7 +27,6 @@ export function createDashboardPreviewInitialState({
   bookmarkedCourses,
 }: DashboardPreviewStateInput): DashboardPreviewState {
   return {
-    searchQuery: "",
     assignedCourses,
     recommendedCourses,
     bookmarkedCourseIds: new Set((bookmarkedCourses ?? []).map((course) => course.id)),
@@ -43,11 +40,6 @@ export function dashboardPreviewReducer(
   action: DashboardPreviewAction,
 ): DashboardPreviewState {
   switch (action.type) {
-    case "search_changed":
-      return {
-        ...state,
-        searchQuery: action.value,
-      };
     case "bookmark_added": {
       const nextBookmarkedCourseIds = new Set(state.bookmarkedCourseIds);
       nextBookmarkedCourseIds.add(action.course.id);

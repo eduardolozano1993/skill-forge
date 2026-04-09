@@ -1,4 +1,3 @@
-import { ActivityList } from "@/components/dashboard/activity-list";
 import { CourseList } from "@/components/dashboard/course-list";
 import {
   DashboardSection,
@@ -14,7 +13,7 @@ export default function DashboardLoading() {
         <div>
           <h1 className="font-heading text-3xl font-semibold text-text-strong">Loading dashboard</h1>
           <p className="mt-xs max-w-2xl text-base text-text-soft">
-            Course lists and activity blocks are rendering their loading state.
+            Course collections are rendering their loading state.
           </p>
         </div>
       </header>
@@ -51,11 +50,11 @@ export default function DashboardLoading() {
 
       <DashboardSection>
         <DashboardSectionHeader
-          title="Recent activity"
-          description="Activity feed placeholder with stable spacing."
+          title="Completed courses"
+          description="Courses you have marked as completed across your dashboard."
         />
         <DashboardSectionBody>
-          <ActivityList items={[]} isLoading />
+          <CourseList courses={[]} isLoading />
         </DashboardSectionBody>
       </DashboardSection>
     </section>

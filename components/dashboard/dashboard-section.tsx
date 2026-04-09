@@ -1,10 +1,9 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-type DashboardSectionProps = {
+type DashboardSectionProps = ComponentProps<"section"> & {
   children: ReactNode;
-  className?: string;
 };
 
 type DashboardSectionHeaderProps = {
@@ -33,9 +32,14 @@ type DashboardSectionErrorStateProps = {
   className?: string;
 };
 
-export function DashboardSection({ children, className }: DashboardSectionProps) {
+export function DashboardSection({
+  children,
+  className,
+  ...props
+}: DashboardSectionProps) {
   return (
     <section
+      {...props}
       className={cn(
         "rounded-xl border border-dashed border-border bg-surface/70 p-md md:p-lg",
         className,

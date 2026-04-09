@@ -121,7 +121,7 @@ These patterns are now established in the dashboard and are worth preserving as 
 ### Use stable keys from data, not array positions
 
 - Real list items must use durable IDs from the data model.
-- `components/dashboard/course-list.tsx` and `components/dashboard/activity-list.tsx` use `course.id` and `item.id`.
+- `components/dashboard/course-list.tsx` uses stable `course.id` values for real items.
 - Index keys are acceptable only for placeholder skeletons that have no long-term identity.
 
 ### Reuse layout shells for repeated card structure
@@ -175,7 +175,6 @@ app/
   layout.tsx
 components/
   dashboard/
-    activity-list.tsx
     course-card.tsx
     course-list.tsx
     dashboard-bookmark-dialog.tsx

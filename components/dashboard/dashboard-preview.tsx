@@ -1,14 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useDeferredValue, useReducer } from "react";
+import { useReducer } from "react";
 
-import { type DashboardActivity } from "@/app/(app)/dashboard/mock-data";
-import { ActivityList } from "@/components/dashboard/activity-list";
 import { DashboardBookmarkDialog } from "@/components/dashboard/dashboard-bookmark-dialog";
 import { DashboardCourseSection } from "@/components/dashboard/dashboard-course-section";
 import { CourseList } from "@/components/dashboard/course-list";
-import { CourseSearchInput } from "@/components/dashboard/course-search-input";
 import {
   createDashboardPreviewInitialState,
   dashboardPreviewReducer,
@@ -17,7 +13,6 @@ import {
   DashboardSection,
   DashboardSectionBody,
   DashboardSectionEmptyState,
-  DashboardSectionErrorState,
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { getDashboardPreviewCollections } from "@/components/dashboard/dashboard-preview-selectors";
@@ -25,17 +20,17 @@ import { Button } from "@/components/ui/button";
 import { type MockCourse } from "@/lib/mock-courses";
 
 type DashboardPreviewProps = {
+  query: string;
   assignedCourses: MockCourse[] | null;
   recommendedCourses: MockCourse[] | null;
   bookmarkedCourses: MockCourse[] | null;
-  recentActivity: DashboardActivity[] | null;
 };
 
 export function DashboardPreview({
+  query,
   assignedCourses,
   recommendedCourses,
   bookmarkedCourses,
-  recentActivity,
 }: DashboardPreviewProps) {
   const [state, dispatch] = useReducer(
     dashboardPreviewReducer,
@@ -46,7 +41,6 @@ export function DashboardPreview({
     },
     createDashboardPreviewInitialState,
   );
-  const deferredSearchQuery = useDeferredValue(state.searchQuery);
   const {
     filteredAssignedCourses,
     filteredRecommendedCourses,
@@ -54,25 +48,10 @@ export function DashboardPreview({
     completedCourses,
     assignedProgress,
     recommendedProgress,
-  } = getDashboardPreviewCollections(state, bookmarkedCourses, deferredSearchQuery);
+  } = getDashboardPreviewCollections(state, bookmarkedCourses, query);
 
   return (
     <>
-      <DashboardSection>
-        <DashboardSectionHeader
-          title="Course search"
-          description="Filter assigned and recommended courses by title or summary."
-        />
-        <DashboardSectionBody>
-          <CourseSearchInput
-            label="Search assigned and recommended courses"
-            placeholder="Search assigned and recommended courses"
-            value={state.searchQuery}
-            onChange={(value) => dispatch({ type: "search_changed", value })}
-          />
-        </DashboardSectionBody>
-      </DashboardSection>
-
       <DashboardCourseSection
         title="Assigned courses"
         description="Repeatable compact cards with stable ids from the mock data file."
@@ -155,28 +134,6 @@ export function DashboardPreview({
             <DashboardSectionEmptyState
               title="No completed courses yet"
               description="Completed courses will appear here once you mark them done."
-            />
-          )}
-        </DashboardSectionBody>
-      </DashboardSection>
-
-      <DashboardSection>
-        <DashboardSectionHeader
-          title="Recent activity"
-          description="Repeatable activity items with a dedicated loading state."
-        />
-        <DashboardSectionBody>
-          {recentActivity ? (
-            <ActivityList items={recentActivity} />
-          ) : (
-            <DashboardSectionErrorState
-              title="Recent activity unavailable"
-              description="Activity updates could not be loaded right now."
-              action={
-                <Button size="sm" variant="outline" asChild>
-                  <Link href="/dashboard">Retry section</Link>
-                </Button>
-              }
             />
           )}
         </DashboardSectionBody>

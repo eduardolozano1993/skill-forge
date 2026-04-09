@@ -36,7 +36,7 @@ export function getCourseProgressCount(
 export function getDashboardPreviewCollections(
   state: DashboardPreviewState,
   bookmarkedCourses: MockCourse[] | null,
-  deferredSearchQuery: string,
+  query: string,
 ) {
   const allVisibleCourses = [
     ...(state.assignedCourses ?? []),
@@ -45,11 +45,8 @@ export function getDashboardPreviewCollections(
   ];
 
   return {
-    filteredAssignedCourses: getFilteredCourses(state.assignedCourses, deferredSearchQuery),
-    filteredRecommendedCourses: getFilteredCourses(
-      state.recommendedCourses,
-      deferredSearchQuery,
-    ),
+    filteredAssignedCourses: getFilteredCourses(state.assignedCourses, query),
+    filteredRecommendedCourses: getFilteredCourses(state.recommendedCourses, query),
     bookmarkedCourses: getUniqueMatchingCourses(allVisibleCourses, state.bookmarkedCourseIds),
     completedCourses: getUniqueMatchingCourses(allVisibleCourses, state.completedCourseIds),
     assignedProgress: getCourseProgressCount(
