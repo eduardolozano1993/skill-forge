@@ -3,7 +3,6 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,23 +23,28 @@ type MockCourseOverridesProviderProps = {
   children: ReactNode;
 };
 
-export function MockCourseOverridesProvider({ children }: MockCourseOverridesProviderProps) {
-  const [overrides, setOverrides] = useState<Map<number, string>>(new Map());
+function readStoredOverrides() {
+  if (typeof window === "undefined") {
+    return new Map<number, string>();
+  }
 
-  useEffect(() => {
-    try {
-      const storedValue = window.localStorage.getItem(STORAGE_KEY);
+  try {
+    const storedValue = window.localStorage.getItem(STORAGE_KEY);
 
-      if (!storedValue) {
-        return;
-      }
-
-      const parsedValue = JSON.parse(storedValue) as MockCourseContentOverride[];
-      setOverrides(new Map(parsedValue.map((item) => [item.courseId, item.content])));
-    } catch {
-      setOverrides(new Map());
+    if (!storedValue) {
+      return new Map<number, string>();
     }
-  }, []);
+
+    const parsedValue = JSON.parse(storedValue) as MockCourseContentOverride[];
+
+    return new Map(parsedValue.map((item) => [item.courseId, item.content]));
+  } catch {
+    return new Map<number, string>();
+  }
+}
+
+export function MockCourseOverridesProvider({ children }: MockCourseOverridesProviderProps) {
+  const [overrides, setOverrides] = useState<Map<number, string>>(readStoredOverrides);
 
   const value = useMemo<MockCourseOverridesContextValue>(
     () => ({

@@ -39,6 +39,8 @@ Reusable React components.
   Example: `authenticated-shell.tsx`.
 - `components/dashboard/`
   Dashboard-specific building blocks. Keep list wrappers, item shells, and section primitives here instead of rebuilding section markup in the route.
+- `components/profile/`
+  Profile-specific UI, schema, and local feature helpers. Keep the page entry component thin and move feature-only form pieces here.
 
 ### `lib/`
 
@@ -70,12 +72,16 @@ If a page belongs to a URL area and a product context, choose the route group ba
   `button.tsx`, `card.tsx`, `authenticated-shell.tsx`
 - Avoid feature-specific names in `components/ui/`.
   If a component is tied to one screen or domain, keep it near that feature instead of forcing it into `ui/`.
+- Co-locate feature-only helpers with the feature:
+  small files like `profile-settings.schema.ts`, `profile-settings.types.ts`, or selector helpers should stay in the feature folder when they are not reused broadly.
+- Move types to a separate file only when they are shared across multiple files in the same feature or they materially improve readability in the entry component.
 
 ### Pages and layouts
 
 - Use Next.js conventions directly:
   `page.tsx`, `layout.tsx`
 - Keep route files thin when possible. Move repeated structure into `components/layouts/` and repeated data into `lib/`.
+- Keep feature entry components thin when possible. Extract repeated presentational sections, form fields, and derived-data helpers before the file turns into a mixed concerns component.
 
 ### Tokens and styling
 
@@ -172,13 +178,24 @@ components/
     activity-list.tsx
     course-card.tsx
     course-list.tsx
+    dashboard-bookmark-dialog.tsx
+    dashboard-course-section.tsx
     dashboard-item-shell.tsx
     dashboard-list-layout.tsx
     dashboard-preview.tsx
+    dashboard-preview-selectors.ts
     dashboard-section.tsx
     notification-item.tsx
   layouts/
     authenticated-shell.tsx
+  profile/
+    profile-edit-card.tsx
+    profile-field.tsx
+    profile-settings-page.tsx
+    profile-settings.schema.ts
+    profile-settings.types.ts
+    profile-summary-card.tsx
+    theme-preferences-section.tsx
   ui/
     button.tsx
     card.tsx

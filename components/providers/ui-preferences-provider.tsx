@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-type UiTheme = "light" | "dark";
+export type UiTheme = "light" | "dark";
 
 type UiPreferencesContextValue = {
   sidebarCollapsed: boolean;

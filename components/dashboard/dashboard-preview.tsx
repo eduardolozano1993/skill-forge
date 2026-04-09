@@ -5,6 +5,8 @@ import { useDeferredValue, useReducer } from "react";
 
 import { type DashboardActivity } from "@/app/(app)/dashboard/mock-data";
 import { ActivityList } from "@/components/dashboard/activity-list";
+import { DashboardBookmarkDialog } from "@/components/dashboard/dashboard-bookmark-dialog";
+import { DashboardCourseSection } from "@/components/dashboard/dashboard-course-section";
 import { CourseList } from "@/components/dashboard/course-list";
 import { CourseSearchInput } from "@/components/dashboard/course-search-input";
 import {
@@ -18,8 +20,9 @@ import {
   DashboardSectionErrorState,
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
+import { getDashboardPreviewCollections } from "@/components/dashboard/dashboard-preview-selectors";
 import { Button } from "@/components/ui/button";
-import { filterCoursesByQuery, type MockCourse } from "@/lib/mock-courses";
+import { type MockCourse } from "@/lib/mock-courses";
 
 type DashboardPreviewProps = {
   assignedCourses: MockCourse[] | null;
@@ -44,42 +47,14 @@ export function DashboardPreview({
     createDashboardPreviewInitialState,
   );
   const deferredSearchQuery = useDeferredValue(state.searchQuery);
-
-  const filteredAssignedCourses =
-    !state.assignedCourses ? state.assignedCourses : filterCoursesByQuery(state.assignedCourses, deferredSearchQuery);
-
-  const filteredRecommendedCourses =
-    !state.recommendedCourses
-      ? state.recommendedCourses
-      : filterCoursesByQuery(state.recommendedCourses, deferredSearchQuery);
-
-  const allVisibleCourses = [
-    ...(state.assignedCourses ?? []),
-    ...(state.recommendedCourses ?? []),
-    ...(bookmarkedCourses ?? []),
-  ];
-
-  const bookmarkedCourseList =
-    allVisibleCourses.filter(
-      (course, index, courses) =>
-        state.bookmarkedCourseIds.has(course.id) &&
-        courses.findIndex((item) => item.id === course.id) === index,
-    ) ?? [];
-
-  const completedCourses =
-    allVisibleCourses.filter(
-      (course, index, courses) =>
-        state.completedCourseIds.has(course.id) &&
-        courses.findIndex((item) => item.id === course.id) === index,
-    ) ?? [];
-
-  const assignedCompletedCount =
-    state.assignedCourses?.filter((course) => state.completedCourseIds.has(course.id)).length ?? 0;
-  const assignedTotalCount = state.assignedCourses?.length ?? 0;
-  const recommendedCompletedCount =
-    state.recommendedCourses?.filter((course) => state.completedCourseIds.has(course.id)).length ??
-    0;
-  const recommendedTotalCount = state.recommendedCourses?.length ?? 0;
+  const {
+    filteredAssignedCourses,
+    filteredRecommendedCourses,
+    bookmarkedCourses: bookmarkedCourseList,
+    completedCourses,
+    assignedProgress,
+    recommendedProgress,
+  } = getDashboardPreviewCollections(state, bookmarkedCourses, deferredSearchQuery);
 
   return (
     <>
@@ -98,94 +73,40 @@ export function DashboardPreview({
         </DashboardSectionBody>
       </DashboardSection>
 
-      <DashboardSection>
-        <DashboardSectionHeader
-          title={
-            <div className="flex items-center gap-sm">
-              <span>Assigned courses</span>
-              <span className="text-sm font-medium text-text-soft">
-                {assignedCompletedCount}/{assignedTotalCount}
-              </span>
-            </div>
-          }
-          description="Repeatable compact cards with stable ids from the mock data file."
-          action={<Button size="sm" variant="subtle">View all</Button>}
-        />
-        <DashboardSectionBody>
-          {filteredAssignedCourses ? (
-            filteredAssignedCourses.length > 0 ? (
-            <CourseList
-              courses={filteredAssignedCourses}
-              bookmarkedCourseIds={state.bookmarkedCourseIds}
-              completedCourseIds={state.completedCourseIds}
-              onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
-              onCompletedToggle={(course) =>
-                dispatch({ type: "course_completion_toggled", course })
-              }
-            />
-            ) : (
-              <DashboardSectionEmptyState
-                title="No assigned courses match"
-                description="Try a different search term to find assigned courses."
-              />
-            )
-          ) : (
-            <DashboardSectionErrorState
-              title="Assigned courses unavailable"
-              description="This section failed to load. The rest of the dashboard is still available."
-              action={
-                <Button size="sm" variant="outline" asChild>
-                  <Link href="/dashboard">Retry section</Link>
-                </Button>
-              }
-            />
-          )}
-        </DashboardSectionBody>
-      </DashboardSection>
+      <DashboardCourseSection
+        title="Assigned courses"
+        description="Repeatable compact cards with stable ids from the mock data file."
+        courses={filteredAssignedCourses}
+        emptyTitle="No assigned courses match"
+        emptyDescription="Try a different search term to find assigned courses."
+        errorTitle="Assigned courses unavailable"
+        errorDescription="This section failed to load. The rest of the dashboard is still available."
+        bookmarkedCourseIds={state.bookmarkedCourseIds}
+        completedCourseIds={state.completedCourseIds}
+        onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
+        onCompletedToggle={(course) => dispatch({ type: "course_completion_toggled", course })}
+        action={
+          <Button size="sm" variant="subtle">
+            View all
+          </Button>
+        }
+        progress={assignedProgress}
+      />
 
-      <DashboardSection>
-        <DashboardSectionHeader
-          title={
-            <div className="flex items-center gap-sm">
-              <span>Recommended courses</span>
-              <span className="text-sm font-medium text-text-soft">
-                {recommendedCompletedCount}/{recommendedTotalCount}
-              </span>
-            </div>
-          }
-          description="Same card system, different collection."
-        />
-        <DashboardSectionBody>
-          {filteredRecommendedCourses ? (
-            filteredRecommendedCourses.length > 0 ? (
-            <CourseList
-              courses={filteredRecommendedCourses}
-              bookmarkedCourseIds={state.bookmarkedCourseIds}
-              completedCourseIds={state.completedCourseIds}
-              onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
-              onCompletedToggle={(course) =>
-                dispatch({ type: "course_completion_toggled", course })
-              }
-            />
-            ) : (
-              <DashboardSectionEmptyState
-                title="No recommended courses match"
-                description="Try a different search term to find recommendations."
-              />
-            )
-          ) : (
-            <DashboardSectionErrorState
-              title="Recommended courses unavailable"
-              description="Recommendations could not be loaded right now."
-              action={
-                <Button size="sm" variant="outline" asChild>
-                  <Link href="/dashboard">Retry section</Link>
-                </Button>
-              }
-            />
-          )}
-        </DashboardSectionBody>
-      </DashboardSection>
+      <DashboardCourseSection
+        title="Recommended courses"
+        description="Same card system, different collection."
+        courses={filteredRecommendedCourses}
+        emptyTitle="No recommended courses match"
+        emptyDescription="Try a different search term to find recommendations."
+        errorTitle="Recommended courses unavailable"
+        errorDescription="Recommendations could not be loaded right now."
+        bookmarkedCourseIds={state.bookmarkedCourseIds}
+        completedCourseIds={state.completedCourseIds}
+        onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
+        onCompletedToggle={(course) => dispatch({ type: "course_completion_toggled", course })}
+        progress={recommendedProgress}
+      />
 
       <DashboardSection>
         <DashboardSectionHeader
@@ -261,33 +182,11 @@ export function DashboardPreview({
         </DashboardSectionBody>
       </DashboardSection>
 
-      {state.pendingBookmarkRemoval ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-strong/20 p-md">
-          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-lg shadow-card">
-            <div className="space-y-xs">
-              <h2 className="font-heading text-xl text-text-strong">Remove bookmarked course?</h2>
-              <p className="text-sm text-text-soft">
-                Remove{" "}
-                <span className="font-medium text-text-strong">
-                  {state.pendingBookmarkRemoval.title}
-                </span>{" "}
-                from your bookmarked courses?
-              </p>
-            </div>
-            <div className="mt-lg flex justify-end gap-sm">
-              <Button
-                variant="outline"
-                onClick={() => dispatch({ type: "bookmark_removal_cancelled" })}
-              >
-                Cancel
-              </Button>
-              <Button onClick={() => dispatch({ type: "bookmark_removal_confirmed" })}>
-                Ok
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <DashboardBookmarkDialog
+        course={state.pendingBookmarkRemoval}
+        onCancel={() => dispatch({ type: "bookmark_removal_cancelled" })}
+        onConfirm={() => dispatch({ type: "bookmark_removal_confirmed" })}
+      />
     </>
   );
 }
