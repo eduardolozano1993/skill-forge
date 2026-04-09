@@ -1,11 +1,10 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-type DashboardItemShellProps = {
+type DashboardItemShellProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
-  className?: string;
 };
 
 type DashboardItemHeaderProps = {
@@ -18,8 +17,12 @@ type DashboardItemBodyProps = {
   className?: string;
 };
 
-export function DashboardItemShell({ children, className }: DashboardItemShellProps) {
-  return <Card className={cn("h-full", className)}>{children}</Card>;
+export function DashboardItemShell({ children, className, ...props }: DashboardItemShellProps) {
+  return (
+    <Card className={cn("h-full", className)} {...props}>
+      {children}
+    </Card>
+  );
 }
 
 export function DashboardItemHeader({ children, className }: DashboardItemHeaderProps) {

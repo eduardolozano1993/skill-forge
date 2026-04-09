@@ -8,6 +8,11 @@ export type MockCourse = {
   overview: [string, string];
 };
 
+export type MockCourseContentOverride = {
+  courseId: number;
+  content: string;
+};
+
 export const mockCourses: MockCourse[] = [
   {
     id: 101,
@@ -299,4 +304,37 @@ export async function getBookmarkedCourses(): Promise<MockCourse[]> {
   await delayMockCourses();
 
   return [];
+}
+
+export async function getCourseById(id: number) {
+  await delayMockCourses();
+
+  return mockCourses.find((course) => course.id === id) ?? null;
+}
+
+export function normalizeCourseSearchQuery(query: string) {
+  return query.trim().toLowerCase();
+}
+
+export function filterCoursesByQuery(courses: MockCourse[], query: string) {
+  const normalizedQuery = normalizeCourseSearchQuery(query);
+
+  if (!normalizedQuery) {
+    return courses;
+  }
+
+  return courses.filter((course) =>
+    `${course.title} ${course.summary}`.toLowerCase().includes(normalizedQuery),
+  );
+}
+
+export function getCourseContentText(course: MockCourse) {
+  return course.overview.join("\n\n");
+}
+
+export function getCourseContentParagraphs(content: string) {
+  return content
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 }

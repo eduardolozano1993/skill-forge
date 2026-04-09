@@ -1,3 +1,7 @@
+"use client";
+
+import type { KeyboardEvent, MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Bookmark, CheckCircle2, Clock3, PlayCircle } from "lucide-react";
 
 import {
@@ -11,6 +15,7 @@ type CourseCardProps = {
   title: string;
   summary: string;
   dueDateLabel: string;
+  href?: string;
   isBookmarked?: boolean;
   isCompleted?: boolean;
   onBookmarkToggle?: () => void;
@@ -21,14 +26,50 @@ export function CourseCard({
   title,
   summary,
   dueDateLabel,
+  href,
   isBookmarked = false,
   isCompleted = false,
   onBookmarkToggle,
   onCompletedToggle,
 }: CourseCardProps) {
+  const router = useRouter();
+  const isClickable = Boolean(href);
+
+  function handleCardActivate() {
+    if (!href) {
+      return;
+    }
+
+    router.push(href);
+  }
+
+  function handleActionClick(event: MouseEvent<HTMLButtonElement>, action?: () => void) {
+    event.stopPropagation();
+    action?.();
+  }
+
   return (
-    <DashboardItemShell className="min-w-0">
-      <DashboardItemHeader>
+    <DashboardItemShell
+      className={
+        isClickable
+          ? "min-w-0 cursor-pointer transition-transform duration-150 hover:-translate-y-0.5 hover:border-[hsl(var(--brand)/0.4)] hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)] active:translate-y-0 active:scale-[0.99]"
+          : "min-w-0"
+      }
+      role={isClickable ? "link" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onClick={isClickable ? handleCardActivate : undefined}
+      onKeyDown={
+        isClickable
+          ? (event: KeyboardEvent<HTMLDivElement>) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleCardActivate();
+              }
+            }
+          : undefined
+      }
+    >
+      <DashboardItemHeader className={isClickable ? "relative" : undefined}>
         <div className="min-w-0 space-y-sm">
           <div className="flex items-center justify-between gap-sm">
             <div className="flex min-w-0 items-center gap-xs text-xs font-medium uppercase tracking-[0.12em] text-brand">
@@ -40,7 +81,7 @@ export function CourseCard({
                 <button
                   type="button"
                   aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
-                  onClick={onBookmarkToggle}
+                  onClick={(event) => handleActionClick(event, onBookmarkToggle)}
                   className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft"
                 >
                   <Bookmark className="size-4" fill={isBookmarked ? "currentColor" : "none"} />
@@ -50,7 +91,7 @@ export function CourseCard({
                 <button
                   type="button"
                   aria-label={isCompleted ? "Mark course as incomplete" : "Mark course as complete"}
-                  onClick={onCompletedToggle}
+                  onClick={(event) => handleActionClick(event, onCompletedToggle)}
                   className="rounded-full p-1 transition-colors hover:bg-brand-soft"
                 >
                   <CheckCircle2

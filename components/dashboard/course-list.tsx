@@ -35,6 +35,7 @@ export function CourseList({
         <CourseCard
           key={course.id}
           {...course}
+          href={`/courses/${course.id}`}
           isBookmarked={bookmarkedCourseIds?.has(course.id)}
           isCompleted={completedCourseIds?.has(course.id)}
           onBookmarkToggle={onBookmarkToggle ? () => onBookmarkToggle(course) : undefined}

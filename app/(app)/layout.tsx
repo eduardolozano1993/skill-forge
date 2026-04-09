@@ -5,7 +5,13 @@ import { AppPreferencesActions } from "@/components/layouts/app-preferences-acti
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { ProfileMenu } from "@/components/layouts/profile-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardEyebrow, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardEyebrow,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type NavItem = {
   href: string;
@@ -27,7 +33,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
       header={
         <div className="flex w-full flex-col gap-sm md:flex-row md:items-center md:justify-between">
           <div>
-            <Link href="/" className="font-heading text-lg font-semibold text-text-strong">
+            <Link
+              href="/"
+              className="font-heading text-lg font-semibold text-text-strong"
+            >
               Skill Forge
             </Link>
             <p className="mt-2xs text-sm text-text-soft">Learner dashboard</p>
@@ -44,17 +53,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
       }
       sidebar={
         <div className="space-y-md">
-          <Card variant="muted">
-            <CardHeader className="pb-sm">
-              <CardEyebrow>Workspace</CardEyebrow>
-              <CardTitle className="text-lg">Q2 Growth Plan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-text-soft">
-                Focused on architecture, delivery, and mentorship.
-              </p>
-            </CardContent>
-          </Card>
           <Card>
             <CardHeader className="pb-sm">
               <CardEyebrow>Navigation</CardEyebrow>

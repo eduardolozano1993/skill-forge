@@ -6,6 +6,7 @@ import { useDeferredValue, useReducer } from "react";
 import { type DashboardActivity } from "@/app/(app)/dashboard/mock-data";
 import { ActivityList } from "@/components/dashboard/activity-list";
 import { CourseList } from "@/components/dashboard/course-list";
+import { CourseSearchInput } from "@/components/dashboard/course-search-input";
 import {
   createDashboardPreviewInitialState,
   dashboardPreviewReducer,
@@ -18,7 +19,7 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { Button } from "@/components/ui/button";
-import { type MockCourse } from "@/lib/mock-courses";
+import { filterCoursesByQuery, type MockCourse } from "@/lib/mock-courses";
 
 type DashboardPreviewProps = {
   assignedCourses: MockCourse[] | null;
@@ -43,21 +44,14 @@ export function DashboardPreview({
     createDashboardPreviewInitialState,
   );
   const deferredSearchQuery = useDeferredValue(state.searchQuery);
-  const normalizedSearch = deferredSearchQuery.trim().toLowerCase();
 
   const filteredAssignedCourses =
-    !state.assignedCourses || !normalizedSearch
-      ? state.assignedCourses
-      : state.assignedCourses.filter((course) =>
-          `${course.title} ${course.summary}`.toLowerCase().includes(normalizedSearch),
-        );
+    !state.assignedCourses ? state.assignedCourses : filterCoursesByQuery(state.assignedCourses, deferredSearchQuery);
 
   const filteredRecommendedCourses =
-    !state.recommendedCourses || !normalizedSearch
+    !state.recommendedCourses
       ? state.recommendedCourses
-      : state.recommendedCourses.filter((course) =>
-          `${course.title} ${course.summary}`.toLowerCase().includes(normalizedSearch),
-        );
+      : filterCoursesByQuery(state.recommendedCourses, deferredSearchQuery);
 
   const allVisibleCourses = [
     ...(state.assignedCourses ?? []),
@@ -95,18 +89,12 @@ export function DashboardPreview({
           description="Filter assigned and recommended courses by title or summary."
         />
         <DashboardSectionBody>
-          <label className="block">
-            <span className="sr-only">Search courses</span>
-            <input
-              type="search"
-              value={state.searchQuery}
-              onChange={(event) =>
-                dispatch({ type: "search_changed", value: event.target.value })
-              }
-              placeholder="Search assigned and recommended courses"
-              className="w-full rounded-full border border-input bg-background px-md py-sm text-sm text-text-strong outline-none transition focus:border-brand focus:ring-2 focus:ring-[hsl(var(--brand)/0.2)]"
-            />
-          </label>
+          <CourseSearchInput
+            label="Search assigned and recommended courses"
+            placeholder="Search assigned and recommended courses"
+            value={state.searchQuery}
+            onChange={(value) => dispatch({ type: "search_changed", value })}
+          />
         </DashboardSectionBody>
       </DashboardSection>
 
