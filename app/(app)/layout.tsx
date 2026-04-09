@@ -14,8 +14,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/sign-in", label: "Calendar" },
-  { href: "/admin", label: "Resources" },
+  { href: "/courses", label: "Courses" },
 ];
 
 type AppLayoutProps = Readonly<{

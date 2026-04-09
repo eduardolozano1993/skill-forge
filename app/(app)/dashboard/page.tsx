@@ -1,10 +1,12 @@
 import {
-  getAssignedCourses,
-  getBookmarkedCourses,
-  getRecommendedCourses,
   getRecentActivity,
 } from "@/app/(app)/dashboard/mock-data";
 import { DashboardPreview } from "@/components/dashboard/dashboard-preview";
+import {
+  getAssignedCourses,
+  getBookmarkedCourses,
+  getRecommendedCourses,
+} from "@/lib/mock-courses";
 
 export default async function DashboardPage() {
   const [

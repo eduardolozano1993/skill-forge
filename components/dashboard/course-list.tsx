@@ -1,14 +1,14 @@
 import { CourseCard, CourseCardSkeleton } from "@/components/dashboard/course-card";
 import { DashboardListLayout } from "@/components/dashboard/dashboard-list-layout";
-import type { DashboardCourse } from "@/app/(app)/dashboard/mock-data";
+import type { MockCourse } from "@/lib/mock-courses";
 
 type CourseListProps = {
-  courses: DashboardCourse[];
+  courses: MockCourse[];
   isLoading?: boolean;
-  bookmarkedCourseIds?: Set<string>;
-  completedCourseIds?: Set<string>;
-  onBookmarkToggle?: (course: DashboardCourse) => void;
-  onCompletedToggle?: (course: DashboardCourse) => void;
+  bookmarkedCourseIds?: Set<number>;
+  completedCourseIds?: Set<number>;
+  onBookmarkToggle?: (course: MockCourse) => void;
+  onCompletedToggle?: (course: MockCourse) => void;
 };
 
 export function CourseList({

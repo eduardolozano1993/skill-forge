@@ -1,29 +1,27 @@
-import type { DashboardCourse } from "@/app/(app)/dashboard/mock-data";
+import type { MockCourse } from "@/lib/mock-courses";
 
 type DashboardPreviewStateInput = {
-  assignedCourses: DashboardCourse[] | null;
-  recommendedCourses: DashboardCourse[] | null;
-  bookmarkedCourses: DashboardCourse[] | null;
+  assignedCourses: MockCourse[] | null;
+  recommendedCourses: MockCourse[] | null;
+  bookmarkedCourses: MockCourse[] | null;
 };
 
 export type DashboardPreviewState = {
   searchQuery: string;
-  debouncedSearchQuery: string;
-  assignedCourses: DashboardCourse[] | null;
-  recommendedCourses: DashboardCourse[] | null;
-  bookmarkedCourseIds: Set<string>;
-  completedCourseIds: Set<string>;
-  pendingBookmarkRemoval: DashboardCourse | null;
+  assignedCourses: MockCourse[] | null;
+  recommendedCourses: MockCourse[] | null;
+  bookmarkedCourseIds: Set<number>;
+  completedCourseIds: Set<number>;
+  pendingBookmarkRemoval: MockCourse | null;
 };
 
 export type DashboardPreviewAction =
   | { type: "search_changed"; value: string }
-  | { type: "search_debounced" }
-  | { type: "bookmark_added"; course: DashboardCourse }
-  | { type: "bookmark_removal_requested"; course: DashboardCourse }
+  | { type: "bookmark_added"; course: MockCourse }
+  | { type: "bookmark_removal_requested"; course: MockCourse }
   | { type: "bookmark_removal_confirmed" }
   | { type: "bookmark_removal_cancelled" }
-  | { type: "course_completion_toggled"; course: DashboardCourse };
+  | { type: "course_completion_toggled"; course: MockCourse };
 
 export function createDashboardPreviewInitialState({
   assignedCourses,
@@ -32,11 +30,10 @@ export function createDashboardPreviewInitialState({
 }: DashboardPreviewStateInput): DashboardPreviewState {
   return {
     searchQuery: "",
-    debouncedSearchQuery: "",
     assignedCourses,
     recommendedCourses,
     bookmarkedCourseIds: new Set((bookmarkedCourses ?? []).map((course) => course.id)),
-    completedCourseIds: new Set<string>(),
+    completedCourseIds: new Set<number>(),
     pendingBookmarkRemoval: null,
   };
 }
@@ -50,11 +47,6 @@ export function dashboardPreviewReducer(
       return {
         ...state,
         searchQuery: action.value,
-      };
-    case "search_debounced":
-      return {
-        ...state,
-        debouncedSearchQuery: state.searchQuery,
       };
     case "bookmark_added": {
       const nextBookmarkedCourseIds = new Set(state.bookmarkedCourseIds);

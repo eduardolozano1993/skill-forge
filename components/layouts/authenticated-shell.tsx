@@ -21,7 +21,8 @@ export function AuthenticatedShell({
 }: AuthenticatedShellProps) {
   const { sidebarCollapsed } = useUiPreferences();
   const pathname = usePathname();
-  const showSidebar = Boolean(sidebar) && pathname.startsWith("/dashboard");
+  const showSidebar =
+    Boolean(sidebar) && (pathname.startsWith("/dashboard") || pathname.startsWith("/courses"));
 
   return (
     <div className="min-h-screen bg-surface-muted">

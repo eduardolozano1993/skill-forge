@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useReducer } from "react";
+import { useDeferredValue, useReducer } from "react";
 
-import {
-  type DashboardActivity,
-  type DashboardCourse,
-} from "@/app/(app)/dashboard/mock-data";
+import { type DashboardActivity } from "@/app/(app)/dashboard/mock-data";
 import { ActivityList } from "@/components/dashboard/activity-list";
 import { CourseList } from "@/components/dashboard/course-list";
 import {
@@ -21,11 +18,12 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { Button } from "@/components/ui/button";
+import { type MockCourse } from "@/lib/mock-courses";
 
 type DashboardPreviewProps = {
-  assignedCourses: DashboardCourse[] | null;
-  recommendedCourses: DashboardCourse[] | null;
-  bookmarkedCourses: DashboardCourse[] | null;
+  assignedCourses: MockCourse[] | null;
+  recommendedCourses: MockCourse[] | null;
+  bookmarkedCourses: MockCourse[] | null;
   recentActivity: DashboardActivity[] | null;
 };
 
@@ -44,18 +42,8 @@ export function DashboardPreview({
     },
     createDashboardPreviewInitialState,
   );
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      dispatch({ type: "search_debounced" });
-    }, 250);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [state.searchQuery]);
-
-  const normalizedSearch = state.debouncedSearchQuery.trim().toLowerCase();
+  const deferredSearchQuery = useDeferredValue(state.searchQuery);
+  const normalizedSearch = deferredSearchQuery.trim().toLowerCase();
 
   const filteredAssignedCourses =
     !state.assignedCourses || !normalizedSearch
