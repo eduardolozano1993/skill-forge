@@ -1,6 +1,11 @@
+import { Suspense } from "react";
+
 import { CourseList } from "@/components/dashboard/course-list";
 import { CoursesUrlSearch } from "@/components/dashboard/courses-url-search";
 import {
+  DashboardSection,
+  DashboardSectionBody,
+  DashboardSectionHeader,
   DashboardSectionEmptyState,
 } from "@/components/dashboard/dashboard-section";
 import { filterCoursesByQuery, getCourses } from "@/lib/mock-courses";
@@ -13,8 +18,6 @@ type CoursesPageProps = {
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const { q = "" } = await searchParams;
-  const courses = await getCourses();
-  const filteredCourses = filterCoursesByQuery(courses, q);
 
   return (
     <section className="space-y-lg">
@@ -31,19 +34,52 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
         </div>
       </header>
       <CoursesUrlSearch query={q} />
-      {courses.length === 0 ? (
-        <DashboardSectionEmptyState
-          title="No courses available"
-          description="The course catalog is empty right now. Add mock courses to populate this page."
-        />
-      ) : filteredCourses.length > 0 ? (
-        <CourseList courses={filteredCourses} />
-      ) : (
-        <DashboardSectionEmptyState
-          title="No courses match"
-          description="Try a different search term to find courses in the catalog."
-        />
-      )}
+      <Suspense key={q} fallback={<CoursesListFallback />}>
+        <CoursesListSection query={q} />
+      </Suspense>
     </section>
+  );
+}
+
+type CoursesListSectionProps = {
+  query: string;
+};
+
+async function CoursesListSection({ query }: CoursesListSectionProps) {
+  const courses = await getCourses();
+  const filteredCourses = filterCoursesByQuery(courses, query);
+
+  if (courses.length === 0) {
+    return (
+      <DashboardSectionEmptyState
+        title="No courses available"
+        description="The course catalog is empty right now. Add mock courses to populate this page."
+      />
+    );
+  }
+
+  if (filteredCourses.length === 0) {
+    return (
+      <DashboardSectionEmptyState
+        title="No courses match"
+        description="Try a different search term to find courses in the catalog."
+      />
+    );
+  }
+
+  return <CourseList courses={filteredCourses} />;
+}
+
+function CoursesListFallback() {
+  return (
+    <DashboardSection>
+      <DashboardSectionHeader
+        title="All courses"
+        description="Shared mock course cards for the catalog route."
+      />
+      <DashboardSectionBody>
+        <CourseList courses={[]} isLoading />
+      </DashboardSectionBody>
+    </DashboardSection>
   );
 }
