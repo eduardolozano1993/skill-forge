@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+model User {
+  id                 Int           @id @default(autoincrement())
+  organizationId     Int?          @map("organization_id")
+  name               String
+  displayName        String
+  email              String        @unique
+  password           String
+  phone              String
+  userType           UserType
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  organization       Organization? @relation("OrganizationMembers", fields: [organizationId], references: [id])
+  ownedOrganizations Organization[] @relation("OrganizationOwner")
+
+  @@map("users")
+}
+
+model Organization {
+  id         Int                  @id @default(autoincrement())
+  employeeId Int                  @map("employee_id")
+  name       String
+  createdAt  DateTime             @default(now()) @map("created_at")
+  updatedAt  DateTime             @updatedAt @map("updated_at")
+  owner      User                 @relation("OrganizationOwner", fields: [employeeId], references: [id])
+  users      User[]               @relation("OrganizationMembers")
+  courses    OrganizationCourse[]
+
+  @@map("organizations")
+}
+
+model Course {
+  id            Int                  @id @default(autoincrement())
+  name          String
+  summary       String
+  content       Json
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+  organizations OrganizationCourse[]
+
+  @@map("courses")
+}
+
+model OrganizationCourse {
+  organizationId Int          @map("organization_id")
+  courseId       Int          @map("course_id")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  course         Course       @relation(fields: [courseId], references: [id])
+
+  @@id([organizationId, courseId])
+  @@map("organization_courses")
+}
