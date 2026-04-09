@@ -14,18 +14,20 @@ enum UserType {
 }
 
 model User {
-  id                 Int           @id @default(autoincrement())
-  organizationId     Int?          @map("organization_id")
+  id                 Int               @id @default(autoincrement())
+  organizationId     Int?              @map("organization_id")
   name               String
   displayName        String
-  email              String        @unique
+  email              String            @unique
   password           String
   phone              String
   userType           UserType
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  organization       Organization? @relation("OrganizationMembers", fields: [organizationId], references: [id])
-  ownedOrganizations Organization[] @relation("OrganizationOwner")
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  organization       Organization?     @relation("OrganizationMembers", fields: [organizationId], references: [id])
+  ownedOrganizations Organization[]    @relation("OrganizationOwner")
+  bookmarks          Bookmark[]
+  completedCourses   CompletedCourse[]
 
   @@map("users")
 }
@@ -44,13 +46,15 @@ model Organization {
 }
 
 model Course {
-  id            Int                  @id @default(autoincrement())
-  name          String
-  summary       String
-  content       Json
-  createdAt     DateTime             @default(now()) @map("created_at")
-  updatedAt     DateTime             @updatedAt @map("updated_at")
-  organizations OrganizationCourse[]
+  id               Int                  @id @default(autoincrement())
+  name             String
+  summary          String
+  content          Json
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+  organizations    OrganizationCourse[]
+  bookmarks        Bookmark[]
+  completedByUsers CompletedCourse[]
 
   @@map("courses")
 }
@@ -63,4 +67,26 @@ model OrganizationCourse {
 
   @@id([organizationId, courseId])
   @@map("organization_courses")
+}
+
+model Bookmark {
+  userId    Int      @map("user_id")
+  courseId  Int      @map("course_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  @@id([userId, courseId])
+  @@map("bookmarks")
+}
+
+model CompletedCourse {
+  userId      Int      @map("user_id")
+  courseId    Int      @map("course_id")
+  completedAt DateTime @default(now()) @map("completed_at")
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  @@id([userId, courseId])
+  @@map("completed_courses")
 }
