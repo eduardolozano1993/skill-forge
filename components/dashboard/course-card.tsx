@@ -17,6 +17,7 @@ type CourseCardProps = {
   href?: string;
   isBookmarked?: boolean;
   isCompleted?: boolean;
+  actionsDisabled?: boolean;
   onBookmarkToggle?: () => void;
   onCompletedToggle?: () => void;
 };
@@ -27,6 +28,7 @@ export function CourseCard({
   href,
   isBookmarked = false,
   isCompleted = false,
+  actionsDisabled = false,
   onBookmarkToggle,
   onCompletedToggle,
 }: CourseCardProps) {
@@ -81,11 +83,12 @@ export function CourseCard({
               {onBookmarkToggle ? (
                 <button
                   type="button"
+                  disabled={actionsDisabled}
                   aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
                   onClick={(event) =>
                     handleActionClick(event, onBookmarkToggle)
                   }
-                  className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft"
+                  className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Bookmark
                     className="size-4"
@@ -96,6 +99,7 @@ export function CourseCard({
               {onCompletedToggle ? (
                 <button
                   type="button"
+                  disabled={actionsDisabled}
                   aria-label={
                     isCompleted
                       ? "Mark course as incomplete"
@@ -104,7 +108,7 @@ export function CourseCard({
                   onClick={(event) =>
                     handleActionClick(event, onCompletedToggle)
                   }
-                  className="rounded-full p-1 transition-colors hover:bg-brand-soft"
+                  className="rounded-full p-1 transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <CheckCircle2
                     className={

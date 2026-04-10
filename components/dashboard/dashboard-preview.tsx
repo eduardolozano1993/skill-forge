@@ -1,6 +1,7 @@
 "use client";
 
-import { useReducer } from "react";
+import { startTransition, useMemo, useReducer, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { DashboardBookmarkDialog } from "@/components/dashboard/dashboard-bookmark-dialog";
 import { DashboardCourseSection } from "@/components/dashboard/dashboard-course-section";
@@ -16,6 +17,10 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { getDashboardPreviewCollections } from "@/components/dashboard/dashboard-preview-selectors";
+import {
+  toggleCourseBookmarkAction,
+  toggleCourseCompletionAction,
+} from "@/lib/courses/actions";
 import type { AppCourse } from "@/lib/courses/types";
 
 type DashboardPreviewProps = {
@@ -31,6 +36,7 @@ export function DashboardPreview({
   bookmarkedCourses,
   completedCourses,
 }: DashboardPreviewProps) {
+  const router = useRouter();
   const [state, dispatch] = useReducer(
     dashboardPreviewReducer,
     {
@@ -40,15 +46,113 @@ export function DashboardPreview({
     },
     createDashboardPreviewInitialState,
   );
+  const [pendingCourseIds, setPendingCourseIds] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const {
     filteredAssignedCourses,
     bookmarkedCourses: bookmarkedCourseList,
     completedCourses: completedCourseList,
     assignedProgress,
   } = getDashboardPreviewCollections(state, bookmarkedCourses, query);
+  const pendingBookmarkRemovalId = state.pendingBookmarkRemoval?.id ?? null;
+  const pendingRemovalConfirm = useMemo(() => {
+    if (!pendingBookmarkRemovalId) {
+      return false;
+    }
+
+    return pendingCourseIds.has(pendingBookmarkRemovalId);
+  }, [pendingBookmarkRemovalId, pendingCourseIds]);
+
+  function updatePendingCourse(courseId: number, isPending: boolean) {
+    setPendingCourseIds((current) => {
+      const next = new Set(current);
+
+      if (isPending) {
+        next.add(courseId);
+      } else {
+        next.delete(courseId);
+      }
+
+      return next;
+    });
+  }
+
+  function refreshDashboard() {
+    startTransition(() => {
+      router.refresh();
+    });
+  }
+
+  async function handleBookmarkAdd(course: AppCourse) {
+    setMutationError(null);
+    dispatch({ type: "bookmark_added", course });
+    updatePendingCourse(course.id, true);
+
+    const result = await toggleCourseBookmarkAction(course.id);
+
+    updatePendingCourse(course.id, false);
+
+    if (result?.error) {
+      dispatch({ type: "bookmark_removed", course });
+      setMutationError(result.error);
+      return;
+    }
+
+    refreshDashboard();
+  }
+
+  async function handleBookmarkRemovalConfirmed() {
+    const course = state.pendingBookmarkRemoval;
+
+    if (!course) {
+      return;
+    }
+
+    setMutationError(null);
+    dispatch({ type: "bookmark_removed", course });
+    updatePendingCourse(course.id, true);
+
+    const result = await toggleCourseBookmarkAction(course.id);
+
+    updatePendingCourse(course.id, false);
+
+    if (result?.error) {
+      dispatch({ type: "bookmark_added", course });
+      setMutationError(result.error);
+      return;
+    }
+
+    refreshDashboard();
+  }
+
+  async function handleCompletionToggle(course: AppCourse) {
+    setMutationError(null);
+    dispatch({ type: "course_completion_toggled", course });
+    updatePendingCourse(course.id, true);
+
+    const result = await toggleCourseCompletionAction(course.id);
+
+    updatePendingCourse(course.id, false);
+
+    if (result?.error) {
+      dispatch({ type: "course_completion_toggled", course });
+      setMutationError(result.error);
+      return;
+    }
+
+    refreshDashboard();
+  }
 
   return (
     <>
+      {mutationError ? (
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/10 px-md py-sm text-sm text-destructive">
+          {mutationError}
+        </div>
+      ) : null}
+
       <DashboardCourseSection
         title="Assigned courses"
         description="Courses assigned to your organization."
@@ -59,8 +163,9 @@ export function DashboardPreview({
         errorDescription="This section failed to load. The rest of the dashboard is still available."
         bookmarkedCourseIds={state.bookmarkedCourseIds}
         completedCourseIds={state.completedCourseIds}
-        onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
-        onCompletedToggle={(course) => dispatch({ type: "course_completion_toggled", course })}
+        pendingCourseIds={pendingCourseIds}
+        onBookmarkToggle={handleBookmarkAdd}
+        onCompletedToggle={handleCompletionToggle}
         progress={assignedProgress}
       />
 
@@ -75,12 +180,11 @@ export function DashboardPreview({
               courses={bookmarkedCourseList}
               bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
+              pendingCourseIds={pendingCourseIds}
               onBookmarkToggle={(course) =>
                 dispatch({ type: "bookmark_removal_requested", course })
               }
-              onCompletedToggle={(course) =>
-                dispatch({ type: "course_completion_toggled", course })
-              }
+              onCompletedToggle={handleCompletionToggle}
             />
           ) : (
             <DashboardSectionEmptyState
@@ -102,10 +206,9 @@ export function DashboardPreview({
               courses={completedCourseList}
               bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
-              onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
-              onCompletedToggle={(course) =>
-                dispatch({ type: "course_completion_toggled", course })
-              }
+              pendingCourseIds={pendingCourseIds}
+              onBookmarkToggle={handleBookmarkAdd}
+              onCompletedToggle={handleCompletionToggle}
             />
           ) : (
             <DashboardSectionEmptyState
@@ -118,8 +221,9 @@ export function DashboardPreview({
 
       <DashboardBookmarkDialog
         course={state.pendingBookmarkRemoval}
+        isSubmitting={pendingRemovalConfirm}
         onCancel={() => dispatch({ type: "bookmark_removal_cancelled" })}
-        onConfirm={() => dispatch({ type: "bookmark_removal_confirmed" })}
+        onConfirm={handleBookmarkRemovalConfirmed}
       />
     </>
   );

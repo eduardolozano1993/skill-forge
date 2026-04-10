@@ -15,8 +15,8 @@ export type DashboardPreviewState = {
 
 export type DashboardPreviewAction =
   | { type: "bookmark_added"; course: AppCourse }
+  | { type: "bookmark_removed"; course: AppCourse }
   | { type: "bookmark_removal_requested"; course: AppCourse }
-  | { type: "bookmark_removal_confirmed" }
   | { type: "bookmark_removal_cancelled" }
   | { type: "course_completion_toggled"; course: AppCourse };
 
@@ -51,13 +51,9 @@ export function dashboardPreviewReducer(
         ...state,
         pendingBookmarkRemoval: action.course,
       };
-    case "bookmark_removal_confirmed": {
-      if (!state.pendingBookmarkRemoval) {
-        return state;
-      }
-
+    case "bookmark_removed": {
       const nextBookmarkedCourseIds = new Set(state.bookmarkedCourseIds);
-      nextBookmarkedCourseIds.delete(state.pendingBookmarkRemoval.id);
+      nextBookmarkedCourseIds.delete(action.course.id);
 
       return {
         ...state,

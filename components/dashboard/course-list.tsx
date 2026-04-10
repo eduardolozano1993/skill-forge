@@ -7,6 +7,7 @@ type CourseListProps = {
   isLoading?: boolean;
   bookmarkedCourseIds?: Set<number>;
   completedCourseIds?: Set<number>;
+  pendingCourseIds?: Set<number>;
   onBookmarkToggle?: (course: AppCourse) => void;
   onCompletedToggle?: (course: AppCourse) => void;
 };
@@ -16,6 +17,7 @@ export function CourseList({
   isLoading = false,
   bookmarkedCourseIds,
   completedCourseIds,
+  pendingCourseIds,
   onBookmarkToggle,
   onCompletedToggle,
 }: CourseListProps) {
@@ -38,6 +40,7 @@ export function CourseList({
           href={`/courses/${course.id}`}
           isBookmarked={bookmarkedCourseIds?.has(course.id)}
           isCompleted={completedCourseIds?.has(course.id)}
+          actionsDisabled={pendingCourseIds?.has(course.id)}
           onBookmarkToggle={onBookmarkToggle ? () => onBookmarkToggle(course) : undefined}
           onCompletedToggle={onCompletedToggle ? () => onCompletedToggle(course) : undefined}
         />

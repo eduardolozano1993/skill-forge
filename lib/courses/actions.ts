@@ -5,12 +5,16 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma/prisma";
-import { requireAdmin, requireAuth } from "@/lib/auth/auth";
+import { requireAdmin, requireAuth, requireEmployee } from "@/lib/auth/auth";
 import type { AppCourse, DashboardCourses } from "@/lib/courses/types";
 
 const updateCourseContentSchema = z.object({
   courseId: z.coerce.number().int().positive(),
   content: z.string().trim().min(1, "Course content is required."),
+});
+
+const toggleCourseSelectionSchema = z.object({
+  courseId: z.number().int().positive(),
 });
 
 function getCourseContentText(content: unknown) {
@@ -112,6 +116,63 @@ async function getVisibleCoursesForUser() {
   };
 }
 
+async function requireEmployeeCourseSelection(courseId: number) {
+  const session = await requireEmployee();
+  const userId = Number(session.user.id);
+  const organizationId = session.user.organizationId;
+
+  if (!organizationId) {
+    return null;
+  }
+
+  const [assignedCourse, existingBookmark, existingCompletion] = await Promise.all([
+    prisma.organizationCourse.findUnique({
+      where: {
+        organizationId_courseId: {
+          organizationId,
+          courseId,
+        },
+      },
+      select: {
+        courseId: true,
+      },
+    }),
+    prisma.bookmark.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+      select: {
+        courseId: true,
+      },
+    }),
+    prisma.completedCourse.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+      select: {
+        courseId: true,
+      },
+    }),
+  ]);
+
+  if (!assignedCourse && !existingBookmark && !existingCompletion) {
+    return null;
+  }
+
+  return {
+    userId,
+    courseId,
+    isBookmarked: Boolean(existingBookmark),
+    isCompleted: Boolean(existingCompletion),
+  };
+}
+
 export async function getCoursesAction() {
   const { courses } = await getVisibleCoursesForUser();
 
@@ -137,6 +198,98 @@ export async function getCourseByIdAction(courseId: number) {
   const { courses } = await getVisibleCoursesForUser();
 
   return courses.find((course) => course.id === courseId) ?? null;
+}
+
+export async function toggleCourseBookmarkAction(courseId: number) {
+  const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
+
+  if (!parsedPayload.success) {
+    return {
+      error: "Invalid course selection.",
+    };
+  }
+
+  const courseSelection = await requireEmployeeCourseSelection(
+    parsedPayload.data.courseId,
+  );
+
+  if (!courseSelection) {
+    return {
+      error: "Course access is no longer available.",
+    };
+  }
+
+  if (courseSelection.isBookmarked) {
+    await prisma.bookmark.delete({
+      where: {
+        userId_courseId: {
+          userId: courseSelection.userId,
+          courseId: courseSelection.courseId,
+        },
+      },
+    });
+  } else {
+    await prisma.bookmark.create({
+      data: {
+        userId: courseSelection.userId,
+        courseId: courseSelection.courseId,
+      },
+    });
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/courses");
+
+  return {
+    success: true,
+    isBookmarked: !courseSelection.isBookmarked,
+  };
+}
+
+export async function toggleCourseCompletionAction(courseId: number) {
+  const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
+
+  if (!parsedPayload.success) {
+    return {
+      error: "Invalid course selection.",
+    };
+  }
+
+  const courseSelection = await requireEmployeeCourseSelection(
+    parsedPayload.data.courseId,
+  );
+
+  if (!courseSelection) {
+    return {
+      error: "Course access is no longer available.",
+    };
+  }
+
+  if (courseSelection.isCompleted) {
+    await prisma.completedCourse.delete({
+      where: {
+        userId_courseId: {
+          userId: courseSelection.userId,
+          courseId: courseSelection.courseId,
+        },
+      },
+    });
+  } else {
+    await prisma.completedCourse.create({
+      data: {
+        userId: courseSelection.userId,
+        courseId: courseSelection.courseId,
+      },
+    });
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/courses");
+
+  return {
+    success: true,
+    isCompleted: !courseSelection.isCompleted,
+  };
 }
 
 export async function updateCourseContentAction(formData: FormData) {

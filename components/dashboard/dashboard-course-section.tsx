@@ -22,6 +22,7 @@ type DashboardCourseSectionProps = {
   errorDescription: string;
   bookmarkedCourseIds: Set<number>;
   completedCourseIds: Set<number>;
+  pendingCourseIds?: Set<number>;
   onBookmarkToggle: (course: AppCourse) => void;
   onCompletedToggle: (course: AppCourse) => void;
   action?: ReactNode;
@@ -41,6 +42,7 @@ export function DashboardCourseSection({
   errorDescription,
   bookmarkedCourseIds,
   completedCourseIds,
+  pendingCourseIds,
   onBookmarkToggle,
   onCompletedToggle,
   action,
@@ -71,6 +73,7 @@ export function DashboardCourseSection({
               courses={courses}
               bookmarkedCourseIds={bookmarkedCourseIds}
               completedCourseIds={completedCourseIds}
+              pendingCourseIds={pendingCourseIds}
               onBookmarkToggle={onBookmarkToggle}
               onCompletedToggle={onCompletedToggle}
             />

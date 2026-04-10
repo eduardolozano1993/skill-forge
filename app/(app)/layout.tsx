@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { requireAuth } from "@/lib/auth/auth";
 import { AppPreferencesActions } from "@/components/layouts/app-preferences-actions";
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
+import { EmployeeSidebarNav } from "@/components/layouts/employee-sidebar-nav";
 import { ProfileMenu } from "@/components/layouts/profile-menu";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,20 +59,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
               <CardEyebrow>Navigation</CardEyebrow>
             </CardHeader>
             <CardContent className="pt-0">
-              <nav aria-label="Learner dashboard navigation">
-                <ul className="space-y-xs text-sm">
-                  {navItems.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className="block rounded-md px-sm py-sm text-text-soft transition-colors hover:bg-surface-muted hover:text-text-strong"
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
+              <EmployeeSidebarNav items={navItems} />
             </CardContent>
           </Card>
         </div>
