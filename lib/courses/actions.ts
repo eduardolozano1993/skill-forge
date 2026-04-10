@@ -173,6 +173,43 @@ async function requireEmployeeCourseSelection(courseId: number) {
   };
 }
 
+async function requireEmployeeCourseBookmarkSelection(courseId: number) {
+  const session = await requireEmployee();
+  const userId = Number(session.user.id);
+
+  const [course, existingBookmark] = await Promise.all([
+    prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      select: {
+        id: true,
+      },
+    }),
+    prisma.bookmark.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+      select: {
+        courseId: true,
+      },
+    }),
+  ]);
+
+  if (!course) {
+    return null;
+  }
+
+  return {
+    userId,
+    courseId,
+    isBookmarked: Boolean(existingBookmark),
+  };
+}
+
 export async function getCoursesAction() {
   const { courses } = await getVisibleCoursesForUser();
 
@@ -209,7 +246,7 @@ export async function toggleCourseBookmarkAction(courseId: number) {
     };
   }
 
-  const courseSelection = await requireEmployeeCourseSelection(
+  const courseSelection = await requireEmployeeCourseBookmarkSelection(
     parsedPayload.data.courseId,
   );
 
@@ -239,6 +276,7 @@ export async function toggleCourseBookmarkAction(courseId: number) {
 
   revalidatePath("/dashboard");
   revalidatePath("/courses");
+  revalidatePath(`/courses/${parsedPayload.data.courseId}`);
 
   return {
     success: true,

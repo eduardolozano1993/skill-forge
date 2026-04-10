@@ -8,6 +8,8 @@ type CourseListProps = {
   bookmarkedCourseIds?: Set<number>;
   completedCourseIds?: Set<number>;
   pendingCourseIds?: Set<number>;
+  showBookmarkAction?: boolean;
+  showCompletedAction?: boolean;
   onBookmarkToggle?: (course: AppCourse) => void;
   onCompletedToggle?: (course: AppCourse) => void;
 };
@@ -18,6 +20,8 @@ export function CourseList({
   bookmarkedCourseIds,
   completedCourseIds,
   pendingCourseIds,
+  showBookmarkAction,
+  showCompletedAction,
   onBookmarkToggle,
   onCompletedToggle,
 }: CourseListProps) {
@@ -41,6 +45,8 @@ export function CourseList({
           isBookmarked={bookmarkedCourseIds?.has(course.id)}
           isCompleted={completedCourseIds?.has(course.id)}
           actionsDisabled={pendingCourseIds?.has(course.id)}
+          showBookmarkAction={showBookmarkAction}
+          showCompletedAction={showCompletedAction}
           onBookmarkToggle={onBookmarkToggle ? () => onBookmarkToggle(course) : undefined}
           onCompletedToggle={onCompletedToggle ? () => onCompletedToggle(course) : undefined}
         />

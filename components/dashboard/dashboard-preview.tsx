@@ -55,7 +55,12 @@ export function DashboardPreview({
     bookmarkedCourses: bookmarkedCourseList,
     completedCourses: completedCourseList,
     assignedProgress,
-  } = getDashboardPreviewCollections(state, bookmarkedCourses, query);
+  } = getDashboardPreviewCollections(
+    state,
+    bookmarkedCourses,
+    completedCourses,
+    query,
+  );
   const pendingBookmarkRemovalId = state.pendingBookmarkRemoval?.id ?? null;
   const pendingRemovalConfirm = useMemo(() => {
     if (!pendingBookmarkRemovalId) {
@@ -181,6 +186,8 @@ export function DashboardPreview({
               bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
               pendingCourseIds={pendingCourseIds}
+              showBookmarkAction
+              showCompletedAction={false}
               onBookmarkToggle={(course) =>
                 dispatch({ type: "bookmark_removal_requested", course })
               }

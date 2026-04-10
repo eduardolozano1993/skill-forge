@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import { Pencil } from "lucide-react";
 
 import { CourseContentView } from "@/components/courses/course-content-view";
+import { EmployeeCourseBookmarkButton } from "@/components/employee/employee-course-bookmark-button";
 import { ManagerCourseAssignButton } from "@/components/manager/manager-course-assign-button";
 import { getCourseByIdAction } from "@/lib/courses/actions";
-import { prisma } from "@/lib/prisma/prisma";
 import { requireAuth } from "@/lib/auth/auth";
+import { getCourseDetailActionState } from "@/lib/courses/queries";
 
 type CourseDetailPageProps = {
   params: Promise<{
@@ -14,7 +15,9 @@ type CourseDetailPageProps = {
   }>;
 };
 
-export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
+export default async function CourseDetailPage({
+  params,
+}: CourseDetailPageProps) {
   const session = await requireAuth();
   const { id } = await params;
   const courseId = Number(id);
@@ -25,48 +28,48 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 
   const course = await getCourseByIdAction(courseId);
   const canEditCourse = session.user.userType === "ADMIN";
+  const isEmployee = session.user.userType === "EMPLOYEE";
   const isManager = session.user.userType === "MANAGER";
 
   if (!course) {
     notFound();
   }
 
-  const managerOrganization =
-    isManager && session.user.organizationId
-      ? await prisma.organization.findUnique({
-          where: {
-            id: session.user.organizationId,
-          },
-          select: {
-            name: true,
-            courses: {
-              where: {
-                courseId,
-              },
-              select: {
-                courseId: true,
-              },
-            },
-          },
-        })
-      : null;
-
-  const managerHasAssignedCourse = Boolean(
-    managerOrganization?.courses.some((assignedCourse) => assignedCourse.courseId === courseId),
-  );
+  const courseDetailActionState = await getCourseDetailActionState({
+    courseId,
+    userId: Number(session.user.id),
+    userType: session.user.userType,
+    organizationId: session.user.organizationId,
+  });
 
   return (
     <article className="space-y-lg">
       <header className="space-y-sm">
         <div className="flex items-center justify-between gap-md">
-          <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">Course</p>
+          <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">
+            Course
+          </p>
           <div className="flex items-center gap-xs">
-            {isManager && managerOrganization ? (
+            {isEmployee ? (
+              <EmployeeCourseBookmarkButton
+                courseId={course.id}
+                courseTitle={course.title}
+                isBookmarked={
+                  courseDetailActionState.employeeBookmark?.isBookmarked ??
+                  false
+                }
+              />
+            ) : null}
+            {isManager && courseDetailActionState.managerOrganization ? (
               <ManagerCourseAssignButton
                 courseId={course.id}
                 courseTitle={course.title}
-                organizationName={managerOrganization.name}
-                isAssigned={managerHasAssignedCourse}
+                organizationName={
+                  courseDetailActionState.managerOrganization.name
+                }
+                isAssigned={
+                  courseDetailActionState.managerOrganization.isAssigned
+                }
               />
             ) : null}
             {canEditCourse ? (
@@ -86,7 +89,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
               {course.title}
             </h1>
           </div>
-          <p className="mt-xs max-w-3xl text-base text-text-soft">{course.summary}</p>
+          <p className="mt-xs max-w-3xl text-base text-text-soft">
+            {course.summary}
+          </p>
         </div>
       </header>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bookmark, Building2, CheckCircle2, PlayCircle } from "lucide-react";
 
 import {
@@ -19,6 +19,8 @@ type CourseCardProps = {
   isCompleted?: boolean;
   isAssigned?: boolean;
   actionsDisabled?: boolean;
+  showBookmarkAction?: boolean;
+  showCompletedAction?: boolean;
   onBookmarkToggle?: () => void;
   onCompletedToggle?: () => void;
 };
@@ -31,11 +33,19 @@ export function CourseCard({
   isCompleted = false,
   isAssigned = false,
   actionsDisabled = false,
+  showBookmarkAction,
+  showCompletedAction,
   onBookmarkToggle,
   onCompletedToggle,
 }: CourseCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const isClickable = Boolean(href);
+  const showCourseActions = pathname.startsWith("/courses");
+  const showOrganizationIcon = isAssigned && showCourseActions;
+  const shouldShowBookmarkAction =
+    showBookmarkAction ?? showCourseActions;
+  const shouldShowCompletedAction = showCompletedAction ?? true;
 
   function handleCardActivate() {
     if (!href) {
@@ -82,7 +92,7 @@ export function CourseCard({
               <span>Course</span>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              {isAssigned ? (
+              {showOrganizationIcon ? (
                 <span
                   aria-label="Assigned to your organization"
                   title="Assigned to your organization"
@@ -91,7 +101,7 @@ export function CourseCard({
                   <Building2 className="size-4" />
                 </span>
               ) : null}
-              {onBookmarkToggle ? (
+              {shouldShowBookmarkAction && onBookmarkToggle ? (
                 <button
                   type="button"
                   disabled={actionsDisabled}
@@ -107,7 +117,7 @@ export function CourseCard({
                   />
                 </button>
               ) : null}
-              {onCompletedToggle ? (
+              {shouldShowCompletedAction && onCompletedToggle ? (
                 <button
                   type="button"
                   disabled={actionsDisabled}

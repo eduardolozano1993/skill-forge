@@ -37,17 +37,25 @@ export function getCourseProgressCount(
 export function getDashboardPreviewCollections(
   state: DashboardPreviewState,
   bookmarkedCourses: AppCourse[] | null,
+  completedCourses: AppCourse[] | null,
   query: string,
 ) {
+  const incompleteAssignedCourses =
+    state.assignedCourses?.filter(
+      (course) => !state.completedCourseIds.has(course.id),
+    ) ?? null;
   const allVisibleCourses = [
-    ...(state.assignedCourses ?? []),
+    ...(incompleteAssignedCourses ?? []),
     ...(bookmarkedCourses ?? []),
   ];
 
   return {
-    filteredAssignedCourses: getFilteredCourses(state.assignedCourses, query),
+    filteredAssignedCourses: getFilteredCourses(incompleteAssignedCourses, query),
     bookmarkedCourses: getUniqueMatchingCourses(allVisibleCourses, state.bookmarkedCourseIds),
-    completedCourses: getUniqueMatchingCourses(allVisibleCourses, state.completedCourseIds),
+    completedCourses: getUniqueMatchingCourses(
+      completedCourses ?? [],
+      state.completedCourseIds,
+    ),
     assignedProgress: getCourseProgressCount(
       state.assignedCourses,
       state.completedCourseIds,
