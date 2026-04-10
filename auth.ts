@@ -2,8 +2,8 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { object, string } from "zod";
 
-import { prisma } from "@/lib/prisma";
-import { comparePassword } from "@/lib/password";
+import { prisma } from "@/lib/prisma/prisma";
+import { comparePassword } from "@/lib/auth/password";
 
 const credentialsSchema = object({
   email: string({ error: "Email is required" })

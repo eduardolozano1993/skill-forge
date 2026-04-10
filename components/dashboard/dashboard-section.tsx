@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind/utils";
 
 type DashboardSectionProps = ComponentProps<"section"> & {
   children: ReactNode;
@@ -57,17 +57,24 @@ export function DashboardSectionHeader({
   className,
 }: DashboardSectionHeaderProps) {
   return (
-    <div className={cn("mb-md flex items-start justify-between gap-md", className)}>
+    <div
+      className={cn("mb-md flex items-start justify-between gap-md", className)}
+    >
       <div className="space-y-1">
         <h2 className="font-heading text-xl text-text-strong">{title}</h2>
-        {description ? <p className="text-sm text-text-soft">{description}</p> : null}
+        {description ? (
+          <p className="text-sm text-text-soft">{description}</p>
+        ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }
 
-export function DashboardSectionBody({ children, className }: DashboardSectionBodyProps) {
+export function DashboardSectionBody({
+  children,
+  className,
+}: DashboardSectionBodyProps) {
   return <div className={cn("min-w-0", className)}>{children}</div>;
 }
 

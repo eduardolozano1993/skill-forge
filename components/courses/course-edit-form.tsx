@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMockCourseOverrides } from "@/components/providers/mock-course-overrides-provider";
 import { Button } from "@/components/ui/button";
 import { getCourseContentText, type MockCourse } from "@/lib/mock-courses";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind/utils";
 
 type CourseEditFormProps = {
   course: MockCourse;
@@ -38,12 +38,18 @@ export function CourseEditForm({ course }: CourseEditFormProps) {
     <section className="mx-auto max-w-4xl px-lg py-3xl">
       <div className="space-y-lg rounded-lg border border-border bg-surface p-xl shadow-card">
         <div className="space-y-xs">
-          <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">Admin</p>
-          <h1 className="font-heading text-3xl font-semibold text-text-strong">{course.title}</h1>
+          <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">
+            Admin
+          </p>
+          <h1 className="font-heading text-3xl font-semibold text-text-strong">
+            {course.title}
+          </h1>
         </div>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium text-text-strong">Course content</span>
+          <span className="text-sm font-medium text-text-strong">
+            Course content
+          </span>
           <textarea
             value={content}
             onChange={(event) => setContent(event.target.value)}

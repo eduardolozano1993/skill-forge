@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useUiPreferences } from "@/components/providers/ui-preferences-provider";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind/utils";
 
 type AuthenticatedShellProps = {
   children: ReactNode;
@@ -22,7 +22,8 @@ export function AuthenticatedShell({
   const { sidebarCollapsed } = useUiPreferences();
   const pathname = usePathname();
   const showSidebar =
-    Boolean(sidebar) && (pathname.startsWith("/dashboard") || pathname.startsWith("/courses"));
+    Boolean(sidebar) &&
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/courses"));
 
   return (
     <div className="min-h-screen bg-surface-muted">

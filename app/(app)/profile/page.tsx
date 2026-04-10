@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth/auth";
 import { ProfileSettingsPage } from "@/components/profile/profile-settings-page";
 
 export default async function ProfilePage() {

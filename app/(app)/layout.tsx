@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { requireAuth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth/auth";
 import { AppPreferencesActions } from "@/components/layouts/app-preferences-actions";
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { ProfileMenu } from "@/components/layouts/profile-menu";
