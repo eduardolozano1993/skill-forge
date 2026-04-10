@@ -16,7 +16,6 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { getDashboardPreviewCollections } from "@/components/dashboard/dashboard-preview-selectors";
-import { Button } from "@/components/ui/button";
 import type { AppCourse } from "@/lib/courses/types";
 
 type DashboardPreviewProps = {
@@ -62,11 +61,6 @@ export function DashboardPreview({
         completedCourseIds={state.completedCourseIds}
         onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
         onCompletedToggle={(course) => dispatch({ type: "course_completion_toggled", course })}
-        action={
-          <Button size="sm" variant="subtle">
-            View all
-          </Button>
-        }
         progress={assignedProgress}
       />
 

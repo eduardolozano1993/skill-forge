@@ -13,7 +13,7 @@ type CourseDetailPageProps = {
 };
 
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
-  await requireAuth();
+  const session = await requireAuth();
   const { id } = await params;
   const courseId = Number(id);
 
@@ -22,6 +22,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   }
 
   const course = await getCourseByIdAction(courseId);
+  const canEditCourse = session.user.userType === "ADMIN";
 
   if (!course) {
     notFound();
@@ -32,13 +33,15 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
       <header className="space-y-sm">
         <div className="flex items-center justify-between gap-md">
           <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">Course</p>
-          <Link
-            href={`/admin/courses/${course.id}/edit`}
-            aria-label={`Edit ${course.title}`}
-            className="rounded-full p-2 text-brand transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)]"
-          >
-            <Pencil className="size-5" />
-          </Link>
+          {canEditCourse ? (
+            <Link
+              href={`/admin/courses/${course.id}/edit`}
+              aria-label={`Edit ${course.title}`}
+              className="rounded-full p-2 text-brand transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)]"
+            >
+              <Pencil className="size-5" />
+            </Link>
+          ) : null}
         </div>
         <div>
           <div>

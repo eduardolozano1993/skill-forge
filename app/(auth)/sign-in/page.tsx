@@ -1,4 +1,6 @@
+import { auth } from "@/auth";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { redirectToUserHome } from "@/lib/auth/auth";
 
 type SignInPageProps = {
   searchParams: Promise<{
@@ -7,6 +9,12 @@ type SignInPageProps = {
 };
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const session = await auth();
+
+  if (session?.user) {
+    redirectToUserHome(session.user.userType);
+  }
+
   const { callbackUrl = "/dashboard" } = await searchParams;
 
   return (

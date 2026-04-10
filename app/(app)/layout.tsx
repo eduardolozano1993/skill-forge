@@ -46,9 +46,6 @@ export default async function AppLayout({ children }: AppLayoutProps) {
           </div>
           <div className="flex items-center gap-sm">
             <AppPreferencesActions />
-            <Button variant="subtle" size="sm">
-              Review week
-            </Button>
             <Button size="sm">Resume course</Button>
             <ProfileMenu user={session.user} />
           </div>

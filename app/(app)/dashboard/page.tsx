@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { DashboardCourseCollectionsFallback } from "@/components/dashboard/dashboard-course-collections-fallback";
 import { DashboardUrlSearch } from "@/components/dashboard/dashboard-url-search";
 import { DashboardPreview } from "@/components/dashboard/dashboard-preview";
+import { requireEmployee } from "@/lib/auth/auth";
 import { getDashboardCoursesAction } from "@/lib/courses/actions";
-import { requireAuth } from "@/lib/auth/auth";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -13,7 +13,7 @@ type DashboardPageProps = {
 };
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  await requireAuth();
+  await requireEmployee();
   const { q = "" } = await searchParams;
 
   return (

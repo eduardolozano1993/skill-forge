@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 
 import { signIn, signOut } from "@/auth";
+import { getPostSignInRedirect } from "@/lib/auth/auth";
 import { logSignInLockout } from "@/lib/auth/sign-in-log";
 import {
   getClientIp,
@@ -12,6 +13,7 @@ import {
   registerFailedSignInAttempt,
   resetFailedSignInAttempts,
 } from "@/lib/auth/sign-in-rate-limit";
+import { prisma } from "@/lib/prisma/prisma";
 
 export type SignInFormState = {
   error?: string;
@@ -30,6 +32,10 @@ export async function authenticate(
   const clientIp = getClientIp(requestHeaders);
   const rateLimitKey = getSignInRateLimitKey(email, clientIp);
   const retryAfterSeconds = getRemainingBlockSeconds(rateLimitKey);
+  const matchedUser = await prisma.user.findUnique({
+    where: { email },
+    select: { userType: true },
+  });
 
   if (retryAfterSeconds > 0) {
     const retryAfterMinutes = Math.ceil(retryAfterSeconds / 60);
@@ -43,7 +49,12 @@ export async function authenticate(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: callbackUrl || "/dashboard",
+      redirectTo: matchedUser
+        ? getPostSignInRedirect({
+            userType: matchedUser.userType,
+            callbackUrl,
+          })
+        : callbackUrl || "/dashboard",
     });
 
     resetFailedSignInAttempts(rateLimitKey);
