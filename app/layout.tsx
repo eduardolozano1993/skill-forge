@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Manrope } from "next/font/google";
 
-import { MockCourseOverridesProvider } from "@/components/providers/mock-course-overrides-provider";
 import { UiPreferencesProvider } from "@/components/providers/ui-preferences-provider";
 
 import "./globals.css";
@@ -34,7 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${sans.variable} ${mono.variable} bg-background font-sans text-foreground`}>
         <UiPreferencesProvider>
-          <MockCourseOverridesProvider>{children}</MockCourseOverridesProvider>
+          {children}
         </UiPreferencesProvider>
       </body>
     </html>

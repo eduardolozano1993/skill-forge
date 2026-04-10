@@ -1,15 +1,12 @@
 "use client";
 
-import { getCourseContentParagraphs, getCourseContentText, type MockCourse } from "@/lib/mock-courses";
-import { useMockCourseOverrides } from "@/components/providers/mock-course-overrides-provider";
+import { getCourseContentParagraphs } from "@/lib/courses/utils";
 
 type CourseContentViewProps = {
-  course: MockCourse;
+  content: string;
 };
 
-export function CourseContentView({ course }: CourseContentViewProps) {
-  const { overrides } = useMockCourseOverrides();
-  const content = overrides.get(course.id) ?? getCourseContentText(course);
+export function CourseContentView({ content }: CourseContentViewProps) {
   const paragraphs = getCourseContentParagraphs(content);
 
   return (

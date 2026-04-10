@@ -48,12 +48,12 @@ export function DashboardUrlSearch({ query }: DashboardUrlSearchProps) {
     <DashboardSection aria-busy={isPending}>
       <DashboardSectionHeader
         title="Course search"
-        description="Filter assigned and recommended courses by title or summary."
+        description="Filter assigned courses by title or summary."
       />
       <DashboardSectionBody>
         <CourseSearchInput
-          label="Search assigned and recommended courses"
-          placeholder="Search assigned and recommended courses"
+          label="Search assigned courses"
+          placeholder="Search assigned courses"
           value={value}
           onChange={handleChange}
         />

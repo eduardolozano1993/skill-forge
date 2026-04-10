@@ -1,7 +1,8 @@
 import type { DashboardPreviewState } from "@/components/dashboard/dashboard-preview-state";
-import { filterCoursesByQuery, type MockCourse } from "@/lib/mock-courses";
+import type { AppCourse } from "@/lib/courses/types";
+import { filterCoursesByQuery } from "@/lib/courses/utils";
 
-export function getFilteredCourses(courses: MockCourse[] | null, query: string) {
+export function getFilteredCourses(courses: AppCourse[] | null, query: string) {
   if (!courses) {
     return null;
   }
@@ -10,7 +11,7 @@ export function getFilteredCourses(courses: MockCourse[] | null, query: string) 
 }
 
 export function getUniqueMatchingCourses(
-  courses: MockCourse[],
+  courses: AppCourse[],
   selectedCourseIds: Set<number>,
 ) {
   return courses.filter(
@@ -21,7 +22,7 @@ export function getUniqueMatchingCourses(
 }
 
 export function getCourseProgressCount(
-  courses: MockCourse[] | null,
+  courses: AppCourse[] | null,
   completedCourseIds: Set<number>,
 ) {
   const total = courses?.length ?? 0;
@@ -35,26 +36,20 @@ export function getCourseProgressCount(
 
 export function getDashboardPreviewCollections(
   state: DashboardPreviewState,
-  bookmarkedCourses: MockCourse[] | null,
+  bookmarkedCourses: AppCourse[] | null,
   query: string,
 ) {
   const allVisibleCourses = [
     ...(state.assignedCourses ?? []),
-    ...(state.recommendedCourses ?? []),
     ...(bookmarkedCourses ?? []),
   ];
 
   return {
     filteredAssignedCourses: getFilteredCourses(state.assignedCourses, query),
-    filteredRecommendedCourses: getFilteredCourses(state.recommendedCourses, query),
     bookmarkedCourses: getUniqueMatchingCourses(allVisibleCourses, state.bookmarkedCourseIds),
     completedCourses: getUniqueMatchingCourses(allVisibleCourses, state.completedCourseIds),
     assignedProgress: getCourseProgressCount(
       state.assignedCourses,
-      state.completedCourseIds,
-    ),
-    recommendedProgress: getCourseProgressCount(
-      state.recommendedCourses,
       state.completedCourseIds,
     ),
   };

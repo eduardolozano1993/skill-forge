@@ -8,7 +8,9 @@ import {
   DashboardSectionHeader,
   DashboardSectionEmptyState,
 } from "@/components/dashboard/dashboard-section";
-import { filterCoursesByQuery, getCourses } from "@/lib/mock-courses";
+import { requireAuth } from "@/lib/auth/auth";
+import { getCoursesAction } from "@/lib/courses/actions";
+import { filterCoursesByQuery } from "@/lib/courses/utils";
 
 type CoursesPageProps = {
   searchParams: Promise<{
@@ -17,6 +19,7 @@ type CoursesPageProps = {
 };
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
+  await requireAuth();
   const { q = "" } = await searchParams;
 
   return (
@@ -28,8 +31,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             Course library
           </h1>
           <p className="mt-xs max-w-3xl text-base text-text-soft">
-            Browse the full mock catalog that powers assigned and recommended learning on the
-            dashboard.
+            Browse the full course catalog available in the application.
           </p>
         </div>
       </header>
@@ -46,14 +48,14 @@ type CoursesListSectionProps = {
 };
 
 async function CoursesListSection({ query }: CoursesListSectionProps) {
-  const courses = await getCourses();
+  const courses = await getCoursesAction();
   const filteredCourses = filterCoursesByQuery(courses, query);
 
   if (courses.length === 0) {
     return (
       <DashboardSectionEmptyState
         title="No courses available"
-        description="The course catalog is empty right now. Add mock courses to populate this page."
+        description="The course catalog is empty right now."
       />
     );
   }
@@ -75,7 +77,7 @@ function CoursesListFallback() {
     <DashboardSection>
       <DashboardSectionHeader
         title="All courses"
-        description="Shared mock course cards for the catalog route."
+        description="Organization course catalog loaded from the database."
       />
       <DashboardSectionBody>
         <CourseList courses={[]} isLoading />

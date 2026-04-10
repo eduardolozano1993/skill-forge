@@ -1,36 +1,34 @@
-import type { MockCourse } from "@/lib/mock-courses";
+import type { AppCourse } from "@/lib/courses/types";
 
 type DashboardPreviewStateInput = {
-  assignedCourses: MockCourse[] | null;
-  recommendedCourses: MockCourse[] | null;
-  bookmarkedCourses: MockCourse[] | null;
+  assignedCourses: AppCourse[] | null;
+  bookmarkedCourses: AppCourse[] | null;
+  completedCourses: AppCourse[] | null;
 };
 
 export type DashboardPreviewState = {
-  assignedCourses: MockCourse[] | null;
-  recommendedCourses: MockCourse[] | null;
+  assignedCourses: AppCourse[] | null;
   bookmarkedCourseIds: Set<number>;
   completedCourseIds: Set<number>;
-  pendingBookmarkRemoval: MockCourse | null;
+  pendingBookmarkRemoval: AppCourse | null;
 };
 
 export type DashboardPreviewAction =
-  | { type: "bookmark_added"; course: MockCourse }
-  | { type: "bookmark_removal_requested"; course: MockCourse }
+  | { type: "bookmark_added"; course: AppCourse }
+  | { type: "bookmark_removal_requested"; course: AppCourse }
   | { type: "bookmark_removal_confirmed" }
   | { type: "bookmark_removal_cancelled" }
-  | { type: "course_completion_toggled"; course: MockCourse };
+  | { type: "course_completion_toggled"; course: AppCourse };
 
 export function createDashboardPreviewInitialState({
   assignedCourses,
-  recommendedCourses,
   bookmarkedCourses,
+  completedCourses,
 }: DashboardPreviewStateInput): DashboardPreviewState {
   return {
     assignedCourses,
-    recommendedCourses,
     bookmarkedCourseIds: new Set((bookmarkedCourses ?? []).map((course) => course.id)),
-    completedCourseIds: new Set<number>(),
+    completedCourseIds: new Set((completedCourses ?? []).map((course) => course.id)),
     pendingBookmarkRemoval: null,
   };
 }

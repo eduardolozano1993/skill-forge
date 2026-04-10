@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Pencil } from "lucide-react";
 
 import { CourseContentView } from "@/components/courses/course-content-view";
-import { getCourseById, mockCourses } from "@/lib/mock-courses";
+import { getCourseByIdAction } from "@/lib/courses/actions";
+import { requireAuth } from "@/lib/auth/auth";
 
 type CourseDetailPageProps = {
   params: Promise<{
@@ -10,24 +12,19 @@ type CourseDetailPageProps = {
   }>;
 };
 
-export async function generateStaticParams() {
-  return mockCourses.map((course) => ({
-    id: course.id.toString(),
-  }));
-}
-
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
+  await requireAuth();
   const { id } = await params;
   const courseId = Number(id);
 
   if (!Number.isInteger(courseId)) {
-    throw new Error(`Invalid course id: ${id}`);
+    notFound();
   }
 
-  const course = await getCourseById(courseId);
+  const course = await getCourseByIdAction(courseId);
 
   if (!course) {
-    throw new Error(`Course not found for id: ${courseId}`);
+    notFound();
   }
 
   return (
@@ -53,7 +50,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
         </div>
       </header>
 
-      <CourseContentView course={course} />
+      <CourseContentView content={course.content} />
     </article>
   );
 }

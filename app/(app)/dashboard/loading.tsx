@@ -21,17 +21,7 @@ export default function DashboardLoading() {
       <DashboardSection>
         <DashboardSectionHeader
           title="Assigned courses"
-          description="Compact list layout with repeatable course cards."
-        />
-        <DashboardSectionBody>
-          <CourseList courses={[]} isLoading />
-        </DashboardSectionBody>
-      </DashboardSection>
-
-      <DashboardSection>
-        <DashboardSectionHeader
-          title="Recommended courses"
-          description="Same list UI, separate data source."
+          description="Courses assigned to your organization."
         />
         <DashboardSectionBody>
           <CourseList courses={[]} isLoading />

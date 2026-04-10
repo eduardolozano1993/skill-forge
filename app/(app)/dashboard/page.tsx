@@ -3,11 +3,8 @@ import { Suspense } from "react";
 import { DashboardCourseCollectionsFallback } from "@/components/dashboard/dashboard-course-collections-fallback";
 import { DashboardUrlSearch } from "@/components/dashboard/dashboard-url-search";
 import { DashboardPreview } from "@/components/dashboard/dashboard-preview";
-import {
-  getAssignedCourses,
-  getBookmarkedCourses,
-  getRecommendedCourses,
-} from "@/lib/mock-courses";
+import { getDashboardCoursesAction } from "@/lib/courses/actions";
+import { requireAuth } from "@/lib/auth/auth";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -16,6 +13,7 @@ type DashboardPageProps = {
 };
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  await requireAuth();
   const { q = "" } = await searchParams;
 
   return (
@@ -27,8 +25,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             Collection preview
           </h1>
           <p className="mt-xs max-w-2xl text-base text-text-soft">
-            All dashboard sample content is sourced from a separate mock file so this page can stay
-            free of hardcoded data when you swap in the real database.
+            Assigned, bookmarked, and completed courses are loaded from the database for the
+            signed-in user.
           </p>
         </div>
       </header>
@@ -41,29 +39,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 }
 
 async function DashboardCourseCollections({ query }: { query: string }) {
-  const [
-    assignedCoursesResult,
-    recommendedCoursesResult,
-    bookmarkedCoursesResult,
-  ] = await Promise.allSettled([
-    getAssignedCourses(),
-    getRecommendedCourses(),
-    getBookmarkedCourses(),
-  ]);
-
-  const assignedCourses =
-    assignedCoursesResult.status === "fulfilled" ? assignedCoursesResult.value : null;
-  const recommendedCourses =
-    recommendedCoursesResult.status === "fulfilled" ? recommendedCoursesResult.value : null;
-  const bookmarkedCourses =
-    bookmarkedCoursesResult.status === "fulfilled" ? bookmarkedCoursesResult.value : null;
+  const dashboardCoursesResult = await Promise.allSettled([getDashboardCoursesAction()]);
+  const dashboardCourses =
+    dashboardCoursesResult[0]?.status === "fulfilled" ? dashboardCoursesResult[0].value : null;
 
   return (
     <DashboardPreview
       query={query}
-      assignedCourses={assignedCourses}
-      recommendedCourses={recommendedCourses}
-      bookmarkedCourses={bookmarkedCourses}
+      assignedCourses={dashboardCourses?.assignedCourses ?? null}
+      bookmarkedCourses={dashboardCourses?.bookmarkedCourses ?? null}
+      completedCourses={dashboardCourses?.completedCourses ?? null}
     />
   );
 }

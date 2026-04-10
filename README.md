@@ -8,6 +8,78 @@ Next.js App Router project for a learning platform with a static marketing site,
 npm.cmd run dev
 ```
 
+## Auth And Security
+
+### Authentication model
+
+This application uses Auth.js with a Credentials provider.
+
+- Users sign in with email and password through `app/(auth)/sign-in`.
+- Credentials are validated against the Prisma `User` record.
+- Passwords are compared against the stored bcrypt hash.
+- Sessions use the `jwt` strategy.
+- Session lifetime is explicitly set to 8 hours.
+- Authenticated users are redirected into the app, and sign-out redirects to `/`.
+
+### Route protection
+
+Auth is enforced in two layers.
+
+- `auth.ts` defines the Auth.js `authorized` callback for broad route gating.
+- `proxy.ts` runs on matched routes and participates in request protection.
+- Public routes are limited to `/`, `/sign-in`, and `/api/auth/*`.
+- Protected product and admin routes require an authenticated session.
+
+This keeps access control out of client-only code and prevents protected pages from relying only on UI hiding.
+
+### Sign-in protections
+
+The sign-in flow includes server-side abuse controls.
+
+- Email input is normalized before lookup.
+- Failed sign-ins are rate limited per `email + IP`.
+- The current policy is 5 failed attempts within 15 minutes.
+- On the 5th failed attempt, the key is blocked for 15 minutes.
+- A successful sign-in clears the failed-attempt counter.
+
+When the lockout threshold is reached, the application writes a log entry to `logs/sign_in/lockouts.log`.
+New entries are prepended so the most recent lockout appears first.
+
+### Security headers
+
+Security headers are applied in `proxy.ts` on each request.
+
+- `Content-Security-Policy`
+  Restricts where scripts, styles, images, fonts, forms, and connections can come from.
+- `Referrer-Policy: strict-origin-when-cross-origin`
+  Limits referrer leakage on cross-origin requests.
+- `X-Content-Type-Options: nosniff`
+  Prevents MIME-type sniffing.
+- `X-Frame-Options: DENY`
+  Prevents the app from being embedded in frames.
+- `Permissions-Policy`
+  Disables browser capabilities the app does not need, such as camera, microphone, and geolocation.
+- `Strict-Transport-Security`
+  Is applied in production only to force HTTPS on repeat visits.
+
+### Nonce-based CSP
+
+The application uses a nonce-based Content Security Policy instead of allowing general inline scripts.
+
+- `proxy.ts` generates a fresh nonce for each request.
+- That nonce is inserted into the CSP header.
+- Next.js reads the nonce from the request CSP and attaches it to framework script tags.
+- This allows required framework inline scripts to run while blocking arbitrary inline script execution.
+
+`script-src 'unsafe-inline'` is intentionally not used anymore.
+In development, `unsafe-eval` remains allowed because Next.js dev tooling requires it.
+
+### Current limitations
+
+- The sign-in rate limiter is in-memory for the current app instance.
+- In a multi-instance deployment, the limiter should move to a shared store such as Redis.
+- `style-src 'unsafe-inline'` is still allowed because tightening CSS execution safely requires more UI-specific verification.
+
 ## Folder Conventions
 
 ### `app/`

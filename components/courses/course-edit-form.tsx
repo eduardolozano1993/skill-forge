@@ -1,24 +1,20 @@
 "use client";
 
-import { startTransition, useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useMockCourseOverrides } from "@/components/providers/mock-course-overrides-provider";
 import { Button } from "@/components/ui/button";
-import { getCourseContentText, type MockCourse } from "@/lib/mock-courses";
+import { updateCourseContentAction } from "@/lib/courses/actions";
+import type { AppCourse } from "@/lib/courses/types";
 import { cn } from "@/lib/tailwind/utils";
 
 type CourseEditFormProps = {
-  course: MockCourse;
+  course: AppCourse;
 };
 
 export function CourseEditForm({ course }: CourseEditFormProps) {
   const router = useRouter();
-  const { overrides, setCourseContent } = useMockCourseOverrides();
-  const initialContent = useMemo(
-    () => overrides.get(course.id) ?? getCourseContentText(course),
-    [course, overrides],
-  );
+  const initialContent = course.content;
   const [content, setContent] = useState(initialContent);
 
   const isDirty = content.trim() !== initialContent.trim();
@@ -27,16 +23,12 @@ export function CourseEditForm({ course }: CourseEditFormProps) {
     router.back();
   }
 
-  function handleSave() {
-    startTransition(() => {
-      setCourseContent(course.id, content);
-      router.back();
-    });
-  }
-
   return (
     <section className="mx-auto max-w-4xl px-lg py-3xl">
-      <div className="space-y-lg rounded-lg border border-border bg-surface p-xl shadow-card">
+      <form
+        action={updateCourseContentAction}
+        className="space-y-lg rounded-lg border border-border bg-surface p-xl shadow-card"
+      >
         <div className="space-y-xs">
           <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">
             Admin
@@ -45,12 +37,14 @@ export function CourseEditForm({ course }: CourseEditFormProps) {
             {course.title}
           </h1>
         </div>
+        <input type="hidden" name="courseId" value={course.id} />
 
         <label className="block space-y-2">
           <span className="text-sm font-medium text-text-strong">
             Course content
           </span>
           <textarea
+            name="content"
             value={content}
             onChange={(event) => setContent(event.target.value)}
             rows={14}
@@ -65,11 +59,11 @@ export function CourseEditForm({ course }: CourseEditFormProps) {
           <Button type="button" variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button type="button" onClick={handleSave} disabled={!isDirty}>
+          <Button type="submit" disabled={!isDirty}>
             Save
           </Button>
         </div>
-      </div>
+      </form>
     </section>
   );
 }

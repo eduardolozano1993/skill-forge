@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import type { MockCourse } from "@/lib/mock-courses";
+import type { AppCourse } from "@/lib/courses/types";
 
 type DashboardBookmarkDialogProps = {
-  course: MockCourse | null;
+  course: AppCourse | null;
   onCancel: () => void;
   onConfirm: () => void;
 };

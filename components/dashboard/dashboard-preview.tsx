@@ -17,44 +17,42 @@ import {
 } from "@/components/dashboard/dashboard-section";
 import { getDashboardPreviewCollections } from "@/components/dashboard/dashboard-preview-selectors";
 import { Button } from "@/components/ui/button";
-import { type MockCourse } from "@/lib/mock-courses";
+import type { AppCourse } from "@/lib/courses/types";
 
 type DashboardPreviewProps = {
   query: string;
-  assignedCourses: MockCourse[] | null;
-  recommendedCourses: MockCourse[] | null;
-  bookmarkedCourses: MockCourse[] | null;
+  assignedCourses: AppCourse[] | null;
+  bookmarkedCourses: AppCourse[] | null;
+  completedCourses: AppCourse[] | null;
 };
 
 export function DashboardPreview({
   query,
   assignedCourses,
-  recommendedCourses,
   bookmarkedCourses,
+  completedCourses,
 }: DashboardPreviewProps) {
   const [state, dispatch] = useReducer(
     dashboardPreviewReducer,
     {
       assignedCourses,
-      recommendedCourses,
       bookmarkedCourses,
+      completedCourses,
     },
     createDashboardPreviewInitialState,
   );
   const {
     filteredAssignedCourses,
-    filteredRecommendedCourses,
     bookmarkedCourses: bookmarkedCourseList,
-    completedCourses,
+    completedCourses: completedCourseList,
     assignedProgress,
-    recommendedProgress,
   } = getDashboardPreviewCollections(state, bookmarkedCourses, query);
 
   return (
     <>
       <DashboardCourseSection
         title="Assigned courses"
-        description="Repeatable compact cards with stable ids from the mock data file."
+        description="Courses assigned to your organization."
         courses={filteredAssignedCourses}
         emptyTitle="No assigned courses match"
         emptyDescription="Try a different search term to find assigned courses."
@@ -70,21 +68,6 @@ export function DashboardPreview({
           </Button>
         }
         progress={assignedProgress}
-      />
-
-      <DashboardCourseSection
-        title="Recommended courses"
-        description="Same card system, different collection."
-        courses={filteredRecommendedCourses}
-        emptyTitle="No recommended courses match"
-        emptyDescription="Try a different search term to find recommendations."
-        errorTitle="Recommended courses unavailable"
-        errorDescription="Recommendations could not be loaded right now."
-        bookmarkedCourseIds={state.bookmarkedCourseIds}
-        completedCourseIds={state.completedCourseIds}
-        onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}
-        onCompletedToggle={(course) => dispatch({ type: "course_completion_toggled", course })}
-        progress={recommendedProgress}
       />
 
       <DashboardSection>
@@ -120,9 +103,9 @@ export function DashboardPreview({
           description="Courses you have marked as completed across your dashboard."
         />
         <DashboardSectionBody>
-          {completedCourses.length > 0 ? (
+          {completedCourseList.length > 0 ? (
             <CourseList
-              courses={completedCourses}
+              courses={completedCourseList}
               bookmarkedCourseIds={state.bookmarkedCourseIds}
               completedCourseIds={state.completedCourseIds}
               onBookmarkToggle={(course) => dispatch({ type: "bookmark_added", course })}

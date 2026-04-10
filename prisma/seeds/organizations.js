@@ -1,21 +1,7 @@
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
 const { PrismaClient } = require("@prisma/client");
+const courseCatalog = require("./course-catalog");
 
 const prisma = new PrismaClient();
-
-function loadMockCourses() {
-  const filePath = path.join(__dirname, "..", "..", "lib", "mock-courses.ts");
-  const source = fs.readFileSync(filePath, "utf8");
-  const match = source.match(/export const mockCourses: MockCourse\[] = (\[[\s\S]*?\n\]);/);
-
-  if (!match) {
-    throw new Error("Could not load mockCourses from lib/mock-courses.ts");
-  }
-
-  return vm.runInNewContext(match[1]);
-}
 
 async function main() {
   const manager = await prisma.user.findUnique({
@@ -52,32 +38,30 @@ async function main() {
     },
   });
 
-  const mockCourses = loadMockCourses();
-
-  for (const mockCourse of mockCourses) {
+  for (const courseSeed of courseCatalog) {
     let course = await prisma.course.findFirst({
-      where: { name: mockCourse.title },
+      where: { name: courseSeed.title },
     });
 
     if (course) {
       course = await prisma.course.update({
         where: { id: course.id },
         data: {
-          summary: mockCourse.summary,
-          content: mockCourse.overview,
+          summary: courseSeed.summary,
+          content: courseSeed.content,
         },
       });
     } else {
       course = await prisma.course.create({
         data: {
-          name: mockCourse.title,
-          summary: mockCourse.summary,
-          content: mockCourse.overview,
+          name: courseSeed.title,
+          summary: courseSeed.summary,
+          content: courseSeed.content,
         },
       });
     }
 
-    if (mockCourse.isAssigned) {
+    if (courseSeed.assignedToOrganization) {
       await prisma.organizationCourse.upsert({
         where: {
           organizationId_courseId: {

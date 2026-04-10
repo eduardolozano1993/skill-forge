@@ -27,11 +27,7 @@ export function DashboardCourseCollectionsFallback() {
     <>
       <DashboardCourseSectionSkeleton
         title="Assigned courses"
-        description="Repeatable compact cards with stable ids from the mock data file."
-      />
-      <DashboardCourseSectionSkeleton
-        title="Recommended courses"
-        description="Same card system, different collection."
+        description="Courses assigned to your organization."
       />
       <DashboardCourseSectionSkeleton
         title="Bookmarked courses"
