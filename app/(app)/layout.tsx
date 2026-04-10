@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { requireAuth } from "@/lib/auth";
 import { AppPreferencesActions } from "@/components/layouts/app-preferences-actions";
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { ProfileMenu } from "@/components/layouts/profile-menu";
@@ -27,7 +28,9 @@ type AppLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-export default function AppLayout({ children }: AppLayoutProps) {
+export default async function AppLayout({ children }: AppLayoutProps) {
+  const session = await requireAuth();
+
   return (
     <AuthenticatedShell
       header={
@@ -47,7 +50,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               Review week
             </Button>
             <Button size="sm">Resume course</Button>
-            <ProfileMenu />
+            <ProfileMenu user={session.user} />
           </div>
         </div>
       }

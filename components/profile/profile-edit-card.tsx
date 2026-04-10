@@ -41,8 +41,8 @@ export function ProfileEditCard({
         <CardEyebrow>Edit form</CardEyebrow>
         <CardTitle>Profile details</CardTitle>
         <CardDescription>
-          Validation is handled with React Hook Form and Zod. Try one of the reserved emails to see
-          the uniqueness rule.
+          Validation is handled with React Hook Form and Zod. This screen currently edits a local
+          draft only.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -79,7 +79,7 @@ export function ProfileEditCard({
               />
             </div>
             <div className="rounded-2xl bg-surface-muted px-md py-sm text-sm text-text-soft">
-              Reserved mock emails: {reservedEmails.join(", ")}
+              Reserved emails: {reservedEmails.join(", ")}
             </div>
             <div className="flex flex-wrap justify-end gap-sm">
               <Button type="button" variant="outline" onClick={onCancel}>
@@ -94,7 +94,7 @@ export function ProfileEditCard({
           <div className="rounded-2xl border border-dashed border-border bg-surface-muted px-lg py-xl">
             <p className="text-sm text-text-soft">
               Editing is off. Use <span className="font-medium text-text-strong">Edit profile</span>{" "}
-              to reveal the form and update the local mock data.
+              to reveal the form and update the local draft.
             </p>
           </div>
         )}

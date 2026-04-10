@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
 
-export default function AdminLayout({
+import { requireAdmin } from "@/lib/auth";
+
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  await requireAdmin();
+
   return <div className="min-h-screen bg-surface-muted">{children}</div>;
 }

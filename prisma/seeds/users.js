@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const { hash } = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
@@ -47,16 +48,21 @@ const users = [
 
 async function main() {
   for (const user of users) {
+    const hashedPassword = await hash(user.password, 12);
+
     await prisma.user.upsert({
       where: { email: user.email },
       update: {
         name: user.name,
         displayName: user.displayName,
-        password: user.password,
+        password: hashedPassword,
         phone: user.phone,
         userType: user.userType,
       },
-      create: user,
+      create: {
+        ...user,
+        password: hashedPassword,
+      },
     });
   }
 }

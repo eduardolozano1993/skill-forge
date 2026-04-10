@@ -6,17 +6,35 @@ import { useForm } from "react-hook-form";
 
 import { ProfileEditCard } from "@/components/profile/profile-edit-card";
 import { ProfileSummaryCard } from "@/components/profile/profile-summary-card";
-import { initialProfile } from "@/components/profile/profile-settings.constants";
 import {
   createProfileSchema,
   type ProfileFormValues,
 } from "@/components/profile/profile-settings.schema";
+import type { Profile } from "@/components/profile/profile-settings.types";
 import { ThemePreferencesSection } from "@/components/profile/theme-preferences-section";
 import { useUiPreferences } from "@/components/providers/ui-preferences-provider";
 import { Button } from "@/components/ui/button";
 
-export function ProfileSettingsPage() {
-  const [profile, setProfile] = useState(initialProfile);
+type ProfileSettingsPageProps = {
+  user: {
+    name?: string | null;
+    displayName: string;
+    email: string;
+    phone: string;
+  };
+};
+
+function createInitialProfile(user: ProfileSettingsPageProps["user"]): Profile {
+  return {
+    fullName: user.name || user.displayName,
+    displayName: user.displayName,
+    email: user.email,
+    phone: user.phone,
+  };
+}
+
+export function ProfileSettingsPage({ user }: ProfileSettingsPageProps) {
+  const [profile, setProfile] = useState(() => createInitialProfile(user));
   const [isEditing, setIsEditing] = useState(false);
   const { theme, toggleTheme } = useUiPreferences();
 
@@ -64,8 +82,8 @@ export function ProfileSettingsPage() {
               Profile settings
             </h1>
             <p className="max-w-2xl text-sm text-text-soft">
-              Review your profile details and update the mock account information stored in local
-              component state.
+              Review the account details loaded from your authenticated session. Edits here are
+              still a local draft until profile persistence is implemented.
             </p>
           </div>
           <Button

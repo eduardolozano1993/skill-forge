@@ -20,7 +20,7 @@ export function ProfileSummaryCard({ profile }: ProfileSummaryCardProps) {
       <CardHeader>
         <CardEyebrow>Current data</CardEyebrow>
         <CardTitle>{profile.fullName}</CardTitle>
-        <CardDescription>Public-facing account details shown with seeded mock data.</CardDescription>
+        <CardDescription>Profile details loaded from your current authenticated session.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-md">
         <div className="flex items-center gap-sm rounded-2xl bg-surface px-md py-md">

@@ -4,9 +4,17 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, CircleUserRound, LogOut, Settings } from "lucide-react";
 
+import { signOutAction } from "@/app/(auth)/sign-in/actions";
 import { Button } from "@/components/ui/button";
 
-export function ProfileMenu() {
+type ProfileMenuProps = {
+  user: {
+    displayName: string;
+    email: string;
+  };
+};
+
+export function ProfileMenu({ user }: ProfileMenuProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -47,7 +55,7 @@ export function ProfileMenu() {
         <span className="flex size-8 items-center justify-center rounded-full bg-surface-strong text-text-inverse">
           <CircleUserRound className="size-4" />
         </span>
-        <span className="hidden text-sm md:inline">Profile</span>
+        <span className="hidden text-sm md:inline">{user.displayName}</span>
         <ChevronDown className="size-4 text-text-soft" />
       </Button>
 
@@ -57,6 +65,10 @@ export function ProfileMenu() {
           aria-label="Profile actions"
           className="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-52 rounded-2xl border border-border bg-surface p-2 shadow-card"
         >
+          <div className="rounded-xl px-4 py-3">
+            <p className="text-sm font-medium text-text-strong">{user.displayName}</p>
+            <p className="text-xs text-text-soft">{user.email}</p>
+          </div>
           <Link
             href="/profile"
             role="menuitem"
@@ -66,15 +78,17 @@ export function ProfileMenu() {
             <Settings className="size-4 text-brand" />
             Settings
           </Link>
-          <button
-            type="button"
-            role="menuitem"
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-text-strong transition hover:bg-surface-muted"
-            onClick={() => setOpen(false)}
-          >
-            <LogOut className="size-4 text-text-soft" />
-            Logout
-          </button>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              role="menuitem"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-text-strong transition hover:bg-surface-muted"
+              onClick={() => setOpen(false)}
+            >
+              <LogOut className="size-4 text-text-soft" />
+              Logout
+            </button>
+          </form>
         </div>
       ) : null}
     </div>

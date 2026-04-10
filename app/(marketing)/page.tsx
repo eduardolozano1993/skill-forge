@@ -49,7 +49,7 @@ export default function Home() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/sign-in">Request access</Link>
+                <Link href="/sign-in">Sign in</Link>
               </Button>
             </div>
             <div className="grid gap-md sm:grid-cols-3">
