@@ -23,31 +23,23 @@ type ManagerLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-export default async function ManagerLayout({
-  children,
-}: ManagerLayoutProps) {
+export default async function ManagerLayout({ children }: ManagerLayoutProps) {
   const session = await requireManager();
 
   return (
     <AuthenticatedShell
       header={
-        <div className="flex w-full flex-col gap-sm md:flex-row md:items-center md:justify-between">
-          <div>
+        <div className="flex w-full items-center justify-between gap-md">
+          <div className="min-w-0">
             <Link
               href="/manager"
-              className="font-heading text-lg font-semibold text-text-strong"
+              className="block truncate font-heading text-lg font-semibold text-text-strong"
             >
               Skill Forge
             </Link>
-            <p className="mt-2xs text-sm text-text-soft">
-              Manager dashboard
-            </p>
           </div>
-          <div className="flex items-center gap-sm">
+          <div className="ml-auto flex shrink-0 items-center gap-sm">
             <AppPreferencesActions />
-            <Button variant="subtle" size="sm" asChild>
-              <Link href="/manager">Organization overview</Link>
-            </Button>
             <ProfileMenu user={session.user} />
           </div>
         </div>

@@ -29,7 +29,7 @@ export function AuthenticatedShell({
 
   return (
     <div className="min-h-screen bg-surface-muted">
-      <header className="border-b border-border bg-surface/95 backdrop-blur">
+      <header className="border-b border-border bg-surface">
         <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-md px-md py-sm lg:px-lg">
           {header}
         </div>

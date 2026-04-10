@@ -17,17 +17,16 @@ export default async function AdminLayout({
   return (
     <AuthenticatedShell
       header={
-        <div className="flex w-full flex-col gap-sm md:flex-row md:items-center md:justify-between">
-          <div>
+        <div className="flex w-full items-center justify-between gap-md">
+          <div className="min-w-0">
             <Link
               href="/admin"
-              className="font-heading text-lg font-semibold text-text-strong"
+              className="block truncate font-heading text-lg font-semibold text-text-strong"
             >
               Skill Forge
             </Link>
-            <p className="mt-2xs text-sm text-text-soft">Admin dashboard</p>
           </div>
-          <div className="flex items-center gap-sm">
+          <div className="ml-auto flex shrink-0 items-center gap-sm">
             <AppPreferencesActions />
             <ProfileMenu user={session.user} />
           </div>

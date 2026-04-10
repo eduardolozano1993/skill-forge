@@ -63,16 +63,16 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
         <div
           role="menu"
           aria-label="Profile actions"
-          className="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-52 rounded-2xl border border-border bg-surface p-2 shadow-card"
+          className="absolute right-0 top-[calc(100%+0.75rem)] z-50 isolate w-52 rounded-2xl border border-border bg-[#1b2230] p-2 shadow-card backdrop-blur-none"
         >
-          <div className="rounded-xl px-4 py-3">
+          <div className="rounded-xl bg-[#1b2230] px-4 py-3">
             <p className="text-sm font-medium text-text-strong">{user.displayName}</p>
             <p className="text-xs text-text-soft">{user.email}</p>
           </div>
           <Link
             href="/profile"
             role="menuitem"
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-text-strong transition hover:bg-surface-muted"
+            className="flex w-full items-center gap-3 rounded-xl bg-[#1b2230] px-4 py-3 text-sm font-medium text-text-strong transition hover:bg-[#222b3a]"
             onClick={() => setOpen(false)}
           >
             <Settings className="size-4 text-brand" />
@@ -82,7 +82,7 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
             <button
               type="submit"
               role="menuitem"
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-text-strong transition hover:bg-surface-muted"
+              className="flex w-full items-center gap-3 rounded-xl bg-[#1b2230] px-4 py-3 text-left text-sm font-medium text-text-strong transition hover:bg-[#222b3a]"
             >
               <LogOut className="size-4 text-text-soft" />
               Logout
