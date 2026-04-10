@@ -24,6 +24,7 @@ export function AuthenticatedShell({
   const showSidebar =
     Boolean(sidebar) &&
     (pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/admin") ||
       pathname.startsWith("/manager") ||
       pathname.startsWith("/courses"));
 
