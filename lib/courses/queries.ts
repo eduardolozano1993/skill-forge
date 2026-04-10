@@ -10,6 +10,7 @@ type CourseDetailActionStateParams = {
 export type CourseDetailActionState = {
   employeeBookmark: {
     isBookmarked: boolean;
+    isAssigned: boolean;
   } | null;
   managerOrganization: {
     name: string;
@@ -24,21 +25,37 @@ export async function getCourseDetailActionState({
   organizationId,
 }: CourseDetailActionStateParams): Promise<CourseDetailActionState> {
   if (userType === "EMPLOYEE") {
-    const employeeBookmark = await prisma.bookmark.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
+    const [employeeBookmark, employeeAssignment] = await Promise.all([
+      prisma.bookmark.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId,
+          },
         },
-      },
-      select: {
-        courseId: true,
-      },
-    });
+        select: {
+          courseId: true,
+        },
+      }),
+      organizationId
+        ? prisma.organizationCourse.findUnique({
+            where: {
+              organizationId_courseId: {
+                organizationId,
+                courseId,
+              },
+            },
+            select: {
+              courseId: true,
+            },
+          })
+        : Promise.resolve(null),
+    ]);
 
     return {
       employeeBookmark: {
         isBookmarked: Boolean(employeeBookmark),
+        isAssigned: Boolean(employeeAssignment),
       },
       managerOrganization: null,
     };

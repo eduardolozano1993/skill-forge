@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 
 import { CourseContentView } from "@/components/courses/course-content-view";
 import { EmployeeCourseBookmarkButton } from "@/components/employee/employee-course-bookmark-button";
+import { EmployeeCourseOrgIndicator } from "@/components/employee/employee-course-org-indicator";
 import { ManagerCourseAssignButton } from "@/components/manager/manager-course-assign-button";
 import { getCourseByIdAction } from "@/lib/courses/actions";
 import { requireAuth } from "@/lib/auth/auth";
@@ -51,14 +52,18 @@ export default async function CourseDetailPage({
           </p>
           <div className="flex items-center gap-xs">
             {isEmployee ? (
-              <EmployeeCourseBookmarkButton
-                courseId={course.id}
-                courseTitle={course.title}
-                isBookmarked={
-                  courseDetailActionState.employeeBookmark?.isBookmarked ??
-                  false
-                }
-              />
+              courseDetailActionState.employeeBookmark?.isAssigned ? (
+                <EmployeeCourseOrgIndicator courseTitle={course.title} />
+              ) : (
+                <EmployeeCourseBookmarkButton
+                  courseId={course.id}
+                  courseTitle={course.title}
+                  isBookmarked={
+                    courseDetailActionState.employeeBookmark?.isBookmarked ??
+                    false
+                  }
+                />
+              )
             ) : null}
             {isManager && courseDetailActionState.managerOrganization ? (
               <ManagerCourseAssignButton

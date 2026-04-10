@@ -58,7 +58,11 @@ export function ManagerCourseAssignButton({
           setError(null);
           setOpen(true);
         }}
-        className="rounded-full p-2 text-brand transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+        className={`rounded-full p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)] ${
+          isAssigned
+            ? "cursor-not-allowed text-brand"
+            : "text-text-soft hover:bg-brand-soft hover:text-brand"
+        }`}
       >
         <Building2 className="size-5" />
       </button>

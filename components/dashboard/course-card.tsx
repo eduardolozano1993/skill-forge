@@ -46,6 +46,8 @@ export function CourseCard({
   const shouldShowBookmarkAction =
     showBookmarkAction ?? showCourseActions;
   const shouldShowCompletedAction = showCompletedAction ?? true;
+  const showBookmarkIcon =
+    shouldShowBookmarkAction && !showOrganizationIcon && isBookmarked;
 
   function handleCardActivate() {
     if (!href) {
@@ -101,11 +103,11 @@ export function CourseCard({
                   <Building2 className="size-4" />
                 </span>
               ) : null}
-              {shouldShowBookmarkAction && onBookmarkToggle ? (
+              {showBookmarkIcon && onBookmarkToggle ? (
                 <button
                   type="button"
                   disabled={actionsDisabled}
-                  aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                  aria-label="Remove bookmark"
                   onClick={(event) =>
                     handleActionClick(event, onBookmarkToggle)
                   }
@@ -113,7 +115,7 @@ export function CourseCard({
                 >
                   <Bookmark
                     className="size-4"
-                    fill={isBookmarked ? "currentColor" : "none"}
+                    fill="currentColor"
                   />
                 </button>
               ) : null}

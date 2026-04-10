@@ -216,6 +216,19 @@ export async function getCoursesAction() {
   return courses;
 }
 
+export async function getCoursesPageDataAction() {
+  const session = await requireAuth();
+  const { courses, bookmarkedCourseIds, completedCourseIds } =
+    await getVisibleCoursesForUser();
+
+  return {
+    courses,
+    bookmarkedCourseIds: Array.from(bookmarkedCourseIds),
+    completedCourseIds: Array.from(completedCourseIds),
+    userType: session.user.userType,
+  };
+}
+
 export async function getDashboardCoursesAction(): Promise<DashboardCourses> {
   const { courses, bookmarkedCourseIds, completedCourseIds } =
     await getVisibleCoursesForUser();

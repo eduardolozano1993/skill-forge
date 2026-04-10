@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { CoursesLibraryList } from "@/components/courses/courses-library-list";
 import { CourseList } from "@/components/dashboard/course-list";
 import { CoursesUrlSearch } from "@/components/dashboard/courses-url-search";
 import {
@@ -9,7 +10,7 @@ import {
   DashboardSectionEmptyState,
 } from "@/components/dashboard/dashboard-section";
 import { requireAuth } from "@/lib/auth/auth";
-import { getCoursesAction } from "@/lib/courses/actions";
+import { getCoursesPageDataAction } from "@/lib/courses/actions";
 import { filterCoursesByQuery } from "@/lib/courses/utils";
 
 type CoursesPageProps = {
@@ -48,10 +49,10 @@ type CoursesListSectionProps = {
 };
 
 async function CoursesListSection({ query }: CoursesListSectionProps) {
-  const courses = await getCoursesAction();
-  const filteredCourses = filterCoursesByQuery(courses, query);
+  const coursesPageData = await getCoursesPageDataAction();
+  const filteredCourses = filterCoursesByQuery(coursesPageData.courses, query);
 
-  if (courses.length === 0) {
+  if (coursesPageData.courses.length === 0) {
     return (
       <DashboardSectionEmptyState
         title="No courses available"
@@ -69,7 +70,14 @@ async function CoursesListSection({ query }: CoursesListSectionProps) {
     );
   }
 
-  return <CourseList courses={filteredCourses} />;
+  return (
+    <CoursesLibraryList
+      courses={filteredCourses}
+      bookmarkedCourseIds={coursesPageData.bookmarkedCourseIds}
+      completedCourseIds={coursesPageData.completedCourseIds}
+      userType={coursesPageData.userType}
+    />
+  );
 }
 
 function CoursesListFallback() {
