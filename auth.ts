@@ -6,10 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { comparePassword } from "@/lib/password";
 
 const credentialsSchema = object({
-  email: string({ error: "Email is required" }).min(1, "Email is required"),
+  email: string({ error: "Email is required" })
+    .trim()
+    .min(1, "Email is required")
+    .transform((value) => value.toLowerCase()),
   password: string({ error: "Password is required" })
     .min(1, "Password is required")
-    .min(8, "Password must be more than 8 characters")
     .max(32, "Password must be less than 32 characters"),
 });
 

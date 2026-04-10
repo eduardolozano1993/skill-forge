@@ -83,7 +83,6 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
               type="submit"
               role="menuitem"
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-text-strong transition hover:bg-surface-muted"
-              onClick={() => setOpen(false)}
             >
               <LogOut className="size-4 text-text-soft" />
               Logout
