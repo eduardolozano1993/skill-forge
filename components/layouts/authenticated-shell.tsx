@@ -23,7 +23,9 @@ export function AuthenticatedShell({
   const pathname = usePathname();
   const showSidebar =
     Boolean(sidebar) &&
-    (pathname.startsWith("/dashboard") || pathname.startsWith("/courses"));
+    (pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/manager") ||
+      pathname.startsWith("/courses"));
 
   return (
     <div className="min-h-screen bg-surface-muted">

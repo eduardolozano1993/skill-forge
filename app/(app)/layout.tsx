@@ -1,7 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { requireAuth } from "@/lib/auth/auth";
+import {
+  getDefaultRouteForUserType,
+  requireAuth,
+} from "@/lib/auth/auth";
 import { AppPreferencesActions } from "@/components/layouts/app-preferences-actions";
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { EmployeeSidebarNav } from "@/components/layouts/employee-sidebar-nav";
@@ -31,6 +34,17 @@ type AppLayoutProps = Readonly<{
 
 export default async function AppLayout({ children }: AppLayoutProps) {
   const session = await requireAuth();
+  const homeHref = getDefaultRouteForUserType(session.user.userType);
+  const roleLabel =
+    session.user.userType === "MANAGER"
+      ? "Manager dashboard"
+      : session.user.userType === "ADMIN"
+        ? "Admin dashboard"
+        : "Learner dashboard";
+  const roleNavItems: NavItem[] = [
+    { href: homeHref, label: "Dashboard" },
+    { href: "/courses", label: "Courses" },
+  ];
 
   return (
     <AuthenticatedShell
@@ -38,12 +52,12 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         <div className="flex w-full flex-col gap-sm md:flex-row md:items-center md:justify-between">
           <div>
             <Link
-              href="/"
+              href={homeHref}
               className="font-heading text-lg font-semibold text-text-strong"
             >
               Skill Forge
             </Link>
-            <p className="mt-2xs text-sm text-text-soft">Learner dashboard</p>
+            <p className="mt-2xs text-sm text-text-soft">{roleLabel}</p>
           </div>
           <div className="flex items-center gap-sm">
             <AppPreferencesActions />
@@ -59,7 +73,10 @@ export default async function AppLayout({ children }: AppLayoutProps) {
               <CardEyebrow>Navigation</CardEyebrow>
             </CardHeader>
             <CardContent className="pt-0">
-              <EmployeeSidebarNav items={navItems} />
+              <EmployeeSidebarNav
+                items={roleNavItems}
+                ariaLabel={`${roleLabel} navigation`}
+              />
             </CardContent>
           </Card>
         </div>

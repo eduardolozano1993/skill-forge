@@ -2,7 +2,7 @@
 
 import type { KeyboardEvent, MouseEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, CheckCircle2, Clock3, PlayCircle } from "lucide-react";
+import { Bookmark, Building2, CheckCircle2, PlayCircle } from "lucide-react";
 
 import {
   DashboardItemBody,
@@ -17,6 +17,7 @@ type CourseCardProps = {
   href?: string;
   isBookmarked?: boolean;
   isCompleted?: boolean;
+  isAssigned?: boolean;
   actionsDisabled?: boolean;
   onBookmarkToggle?: () => void;
   onCompletedToggle?: () => void;
@@ -28,6 +29,7 @@ export function CourseCard({
   href,
   isBookmarked = false,
   isCompleted = false,
+  isAssigned = false,
   actionsDisabled = false,
   onBookmarkToggle,
   onCompletedToggle,
@@ -80,6 +82,15 @@ export function CourseCard({
               <span>Course</span>
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              {isAssigned ? (
+                <span
+                  aria-label="Assigned to your organization"
+                  title="Assigned to your organization"
+                  className="rounded-full p-1 text-brand"
+                >
+                  <Building2 className="size-4" />
+                </span>
+              ) : null}
               {onBookmarkToggle ? (
                 <button
                   type="button"

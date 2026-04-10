@@ -12,17 +12,21 @@ type NavItem = {
 
 type EmployeeSidebarNavProps = {
   items: NavItem[];
+  ariaLabel?: string;
 };
 
 function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function EmployeeSidebarNav({ items }: EmployeeSidebarNavProps) {
+export function EmployeeSidebarNav({
+  items,
+  ariaLabel = "Dashboard navigation",
+}: EmployeeSidebarNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Learner dashboard navigation">
+    <nav aria-label={ariaLabel}>
       <ul className="space-y-xs text-sm">
         {items.map((item) => {
           const isActive = isActivePath(pathname, item.href);
