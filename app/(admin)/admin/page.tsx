@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
-import { getAdminDashboardData } from "@/lib/admin/data";
+import { getAdminDashboardData, getAdminSignInLogData } from "@/lib/admin/data";
 
 type AdminPageProps = {
   searchParams?: Promise<{
@@ -33,6 +33,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     usersSearch,
     organizationsSearch,
   });
+  const logData = await getAdminSignInLogData();
 
   return (
     <section className="space-y-lg">
@@ -45,7 +46,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             Platform dashboard
           </h1>
           <p className="mt-xs max-w-3xl text-base text-text-soft">
-            Platform-wide visibility into users, organizations, and course activity.
+            Platform-wide visibility into users, organizations, and sign-in lockout activity.
           </p>
         </div>
       </header>
@@ -117,6 +118,35 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 data.organizations.search
                   ? "Try a different organizations search term."
                   : "Organizations will appear here once they are created."
+              }
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardEyebrow>Logs</CardEyebrow>
+          <CardTitle>Recent sign-in lockouts</CardTitle>
+          <CardDescription>
+            Last {logData.lines.length} entries from{" "}
+            <span className="font-mono text-xs">logs/sign_in/lockouts.log</span>.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {logData.lines.length > 0 ? (
+            <div className="overflow-hidden rounded-lg border border-border bg-surface-muted/60">
+              <pre className="max-h-[32rem] overflow-auto p-md text-xs leading-6 text-text-soft">
+                {logData.lines.join("\n")}
+              </pre>
+            </div>
+          ) : (
+            <TableEmptyState
+              title="No sign-in logs available"
+              description={
+                logData.exists
+                  ? "The sign-in lockout log exists but does not contain any entries yet."
+                  : "The sign-in lockout log file has not been created yet."
               }
             />
           )}
