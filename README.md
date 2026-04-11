@@ -1,12 +1,66 @@
 # Skill Forge
 
-Next.js App Router project for a learning platform with a static marketing site, a learner dashboard mock, shared UI primitives, and route-group-based structure.
+Next.js App Router project for a learning platform with role-based dashboards, shared course browsing, admin operations screens, and route-group-based structure.
 
 ## Run
 
 ```bash
 npm.cmd run dev
 ```
+
+## Role-Based Experience
+
+Users are redirected after sign-in based on `userType`.
+
+- Employees land on `/dashboard`
+- Managers land on `/manager`
+- Admins land on `/admin`
+
+All authenticated roles can also access the shared `/courses` catalog.
+
+### Employee actions
+
+Employees use the learner dashboard and shared course catalog.
+
+- View assigned courses on `/dashboard`
+- View bookmarked courses on `/dashboard`
+- View completed courses on `/dashboard`
+- Search dashboard course collections
+- Browse the shared `/courses` catalog
+- Bookmark courses from the catalog or course detail pages
+- Remove bookmarks from the catalog or course detail pages
+- Mark accessible courses as completed
+- Unmark completed courses
+- Open course detail pages
+- Update their profile from `/profile`
+
+### Manager actions
+
+Managers use the organization dashboard on `/manager` plus the shared `/courses` catalog.
+
+- View organization summary metrics:
+  total employees, assigned courses, completed courses
+- View the assigned courses table for their organization
+- Remove an assigned course from their organization
+- View bookmarked-course totals scoped to employees in their organization
+- Assign a bookmarked course to their organization
+- Browse the shared `/courses` catalog
+- Open course detail pages
+- Update their profile from `/profile`
+
+### Admin actions
+
+Admins use the platform dashboard on `/admin` plus the shared `/courses` catalog.
+
+- View platform summary metrics:
+  total users, total courses, total organizations, total completed courses
+- Search the users table by user fields, role, and organization reference
+- Search the organizations table by organization name or owner reference
+- View the recent sign-in lockout log from `logs/sign_in/lockouts.log`
+- Open the shared `/courses` catalog
+- Open admin course edit pages from course detail routes
+- Edit course content from `/admin/courses/[id]/edit`
+- Update their profile from `/profile`
 
 ## Auth And Security
 
@@ -29,6 +83,7 @@ Auth is enforced in two layers.
 - `proxy.ts` runs on matched routes and participates in request protection.
 - Public routes are limited to `/`, `/sign-in`, and `/api/auth/*`.
 - Protected product and admin routes require an authenticated session.
+- Server-side role guards redirect authenticated users away from pages that do not match their role.
 
 This keeps access control out of client-only code and prevents protected pages from relying only on UI hiding.
 
@@ -95,7 +150,9 @@ App Router entrypoint. Keep route files close to the URLs they serve.
 - `app/(auth)/`
   Authentication pages such as sign-in, sign-up, reset-password.
 - `app/(app)/`
-  Authenticated product area for learners. Use this for user-facing in-app screens.
+  Shared authenticated product area for employee-facing screens and shared authenticated routes like `/courses` and `/profile`.
+- `app/(manager)/`
+  Manager-only dashboard surface.
 - `app/(admin)/`
   Admin and operational surfaces. Keep this separate from the learner product area.
 
@@ -131,7 +188,8 @@ Use route groups to separate concerns without affecting the URL.
 
 - `(marketing)` for public pages
 - `(auth)` for identity flows
-- `(app)` for authenticated learner screens
+- `(app)` for authenticated shared product screens
+- `(manager)` for manager-only workflows
 - `(admin)` for admin-only workflows
 
 If a page belongs to a URL area and a product context, choose the route group based on the product context first.
@@ -225,7 +283,7 @@ These patterns are now established in the dashboard and are worth preserving as 
 - Put feature-specific composition primitives near the feature, for example in `components/dashboard/`.
 - Put sample data, helpers, and pure utilities in `lib/`.
 - Keep marketing copy and dashboard mock content static unless there is a real need for fetching.
-- Reuse the authenticated shell for learner-facing app pages instead of rebuilding headers and sidebars per route.
+- Reuse the authenticated shell for authenticated app, manager, and admin pages instead of rebuilding headers and sidebars per route.
 - When adding a new area, prefer extending an existing route group before creating a new top-level concept.
 
 ## Current Structure
@@ -236,7 +294,12 @@ app/
     admin/page.tsx
     layout.tsx
   (app)/
+    courses/page.tsx
     dashboard/page.tsx
+    layout.tsx
+    profile/page.tsx
+  (manager)/
+    manager/page.tsx
     layout.tsx
   (auth)/
     sign-in/page.tsx
@@ -246,6 +309,9 @@ app/
   globals.css
   layout.tsx
 components/
+  admin/
+    admin-tables.tsx
+    admin-url-search.tsx
   dashboard/
     course-card.tsx
     course-list.tsx
@@ -257,6 +323,9 @@ components/
     dashboard-preview-selectors.ts
     dashboard-section.tsx
     notification-item.tsx
+  manager/
+    manager-assigned-courses-table.tsx
+    manager-bookmarks-table.tsx
   layouts/
     authenticated-shell.tsx
   profile/
