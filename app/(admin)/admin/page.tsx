@@ -1,4 +1,4 @@
-import { AdminOrganizationsTable, AdminUsersTable } from "@/components/admin/admin-tables";
+import { AdminOrganizationsTable } from "@/components/admin/admin-tables";
 import { AdminUrlSearch } from "@/components/admin/admin-url-search";
 import {
   Card,
@@ -9,11 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
-import { getAdminDashboardData, getAdminSignInLogData } from "@/lib/admin/data";
+import {
+  getAdminOrganizationsTableData,
+  getAdminPlatformSummary,
+  getAdminSignInLogData,
+} from "@/lib/admin/data";
 
 type AdminPageProps = {
   searchParams?: Promise<{
-    users?: string | string[];
     organizations?: string | string[];
   }>;
 };
@@ -24,16 +27,15 @@ function getSingleSearchParam(value?: string | string[]) {
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const usersSearch = getSingleSearchParam(resolvedSearchParams?.users);
   const organizationsSearch = getSingleSearchParam(
     resolvedSearchParams?.organizations,
   );
 
-  const data = await getAdminDashboardData({
-    usersSearch,
-    organizationsSearch,
-  });
-  const logData = await getAdminSignInLogData();
+  const [summary, organizations, logData] = await Promise.all([
+    getAdminPlatformSummary(),
+    getAdminOrganizationsTableData(organizationsSearch),
+    getAdminSignInLogData(),
+  ]);
 
   return (
     <section className="space-y-lg">
@@ -52,47 +54,17 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       </header>
 
       <div className="grid gap-md md:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Total users" value={data.summary.totalUsers} />
-        <SummaryCard label="Total courses" value={data.summary.totalCourses} />
+        <SummaryCard label="Total users" value={summary.totalUsers} />
+        <SummaryCard label="Total courses" value={summary.totalCourses} />
         <SummaryCard
           label="Total orgs"
-          value={data.summary.totalOrganizations}
+          value={summary.totalOrganizations}
         />
         <SummaryCard
           label="Completed courses"
-          value={data.summary.totalCompletedCourses}
+          value={summary.totalCompletedCourses}
         />
       </div>
-
-      <Card>
-        <CardHeader className="space-y-sm">
-          <CardEyebrow>Users</CardEyebrow>
-          <CardTitle>Platform users</CardTitle>
-          <CardDescription>
-            Search across users, roles, and organization references.
-          </CardDescription>
-          <AdminUrlSearch
-            label="Search users"
-            placeholder="Search users by name, email, role, or organization"
-            paramName="users"
-            query={data.users.search}
-          />
-        </CardHeader>
-        <CardContent>
-          {data.users.rows.length > 0 ? (
-            <AdminUsersTable rows={data.users.rows} />
-          ) : (
-            <TableEmptyState
-              title="No users found"
-              description={
-                data.users.search
-                  ? "Try a different users search term."
-                  : "Users will appear here once accounts exist."
-              }
-            />
-          )}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader className="space-y-sm">
@@ -105,17 +77,17 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             label="Search organizations"
             placeholder="Search organizations by name or owner"
             paramName="organizations"
-            query={data.organizations.search}
+            query={organizations.search}
           />
         </CardHeader>
         <CardContent>
-          {data.organizations.rows.length > 0 ? (
-            <AdminOrganizationsTable rows={data.organizations.rows} />
+          {organizations.rows.length > 0 ? (
+            <AdminOrganizationsTable rows={organizations.rows} />
           ) : (
             <TableEmptyState
               title="No organizations found"
               description={
-                data.organizations.search
+                organizations.search
                   ? "Try a different organizations search term."
                   : "Organizations will appear here once they are created."
               }
