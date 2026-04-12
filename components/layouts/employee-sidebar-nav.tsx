@@ -19,17 +19,32 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function getActiveHref(pathname: string, items: NavItem[]) {
+  return items.reduce<string | null>((activeHref, item) => {
+    if (!isActivePath(pathname, item.href)) {
+      return activeHref;
+    }
+
+    if (!activeHref || item.href.length > activeHref.length) {
+      return item.href;
+    }
+
+    return activeHref;
+  }, null);
+}
+
 export function EmployeeSidebarNav({
   items,
   ariaLabel = "Dashboard navigation",
 }: EmployeeSidebarNavProps) {
   const pathname = usePathname();
+  const activeHref = getActiveHref(pathname, items);
 
   return (
     <nav aria-label={ariaLabel}>
       <ul className="space-y-xs text-sm">
         {items.map((item) => {
-          const isActive = isActivePath(pathname, item.href);
+          const isActive = activeHref === item.href;
 
           return (
             <li key={item.href}>
