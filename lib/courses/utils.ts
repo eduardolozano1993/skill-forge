@@ -11,9 +11,15 @@ export function filterCoursesByQuery(courses: AppCourse[], query: string) {
     return courses;
   }
 
-  return courses.filter((course) =>
-    course.title.toLowerCase().includes(normalizedQuery),
-  );
+  return courses.filter((course) => {
+    const normalizedTitle = course.title.toLowerCase();
+    const normalizedSummary = course.summary.toLowerCase();
+
+    return (
+      normalizedTitle.includes(normalizedQuery) ||
+      normalizedSummary.includes(normalizedQuery)
+    );
+  });
 }
 
 export function getCourseContentParagraphs(content: string) {

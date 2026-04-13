@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -106,14 +114,19 @@ export function ManagerBookmarksTable({
         </TableBody>
       </Table>
 
-      {selectedCourse ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-strong/20 p-md">
-          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-lg shadow-card">
-            <div className="space-y-xs">
-              <h2 className="font-heading text-xl text-text-strong">
-                Assign course to organization?
-              </h2>
-              <p className="text-sm text-text-soft">
+      <Dialog
+        open={Boolean(selectedCourse)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedCourse(null);
+          }
+        }}
+      >
+        {selectedCourse ? (
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Assign course to organization?</DialogTitle>
+              <DialogDescription>
                 Are you sure you want to add{" "}
                 <span className="font-medium text-text-strong">
                   {selectedCourse.courseTitle}
@@ -123,19 +136,19 @@ export function ManagerBookmarksTable({
                   {organizationName}
                 </span>
                 ?
-              </p>
-              <br />
-              <p className="text-sm text-text-soft">
+              </DialogDescription>
+              <DialogDescription>
                 Confirming will delete this bookmark from all employees in the
                 organization.
-                <br />
-                <br />
-                {selectedCourseAlreadyAssigned
-                  ? "The course is already assigned, so this will only clear the bookmarks."
-                  : ""}
-              </p>
-            </div>
-            <div className="mt-lg flex justify-end gap-sm">
+              </DialogDescription>
+              {selectedCourseAlreadyAssigned ? (
+                <DialogDescription>
+                  The course is already assigned, so this will only clear the
+                  bookmarks.
+                </DialogDescription>
+              ) : null}
+            </DialogHeader>
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -151,10 +164,10 @@ export function ManagerBookmarksTable({
               >
                 {isSubmitting ? "Applying..." : "Accept"}
               </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            </DialogFooter>
+          </DialogContent>
+        ) : null}
+      </Dialog>
     </>
   );
 }

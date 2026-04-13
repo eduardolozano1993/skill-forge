@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -106,22 +114,27 @@ export function ManagerAssignedCoursesTable({
         </TableBody>
       </Table>
 
-      {selectedCourse ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-strong/20 p-md">
-          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-lg shadow-card">
-            <div className="space-y-xs">
-              <h2 className="font-heading text-xl text-text-strong">
-                Remove assigned course?
-              </h2>
-              <p className="text-sm text-text-soft">
+      <Dialog
+        open={Boolean(selectedCourse)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedCourse(null);
+          }
+        }}
+      >
+        {selectedCourse ? (
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Remove assigned course?</DialogTitle>
+              <DialogDescription>
                 Are you sure you want to remove{" "}
                 <span className="font-medium text-text-strong">
                   {selectedCourse.courseTitle}
                 </span>{" "}
                 from the organization?
-              </p>
-            </div>
-            <div className="mt-lg flex justify-end gap-sm">
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -138,10 +151,10 @@ export function ManagerAssignedCoursesTable({
               >
                 {isSubmitting ? "Removing..." : "Remove"}
               </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            </DialogFooter>
+          </DialogContent>
+        ) : null}
+      </Dialog>
     </>
   );
 }

@@ -1,4 +1,12 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { AppCourse } from "@/lib/courses/types";
 
 type DashboardBookmarkDialogProps = {
@@ -19,24 +27,24 @@ export function DashboardBookmarkDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-strong/20 p-md">
-      <div className="w-full max-w-md rounded-xl border border-border bg-surface p-lg shadow-card">
-        <div className="space-y-xs">
-          <h2 className="font-heading text-xl text-text-strong">Remove bookmarked course?</h2>
-          <p className="text-sm text-text-soft">
+    <Dialog open onOpenChange={(open) => (!open ? onCancel() : undefined)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Remove bookmarked course?</DialogTitle>
+          <DialogDescription>
             Remove <span className="font-medium text-text-strong">{course.title}</span> from your
             bookmarked courses?
-          </p>
-        </div>
-        <div className="mt-lg flex justify-end gap-sm">
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
           <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button onClick={onConfirm} disabled={isSubmitting}>
             {isSubmitting ? "Removing..." : "Ok"}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

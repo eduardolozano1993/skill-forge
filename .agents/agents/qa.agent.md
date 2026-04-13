@@ -150,6 +150,42 @@ Review at least these areas:
 - code changes did not silently expand scope
 - developer update and verification claims match the actual work
 
+### Frontend Structure (Next.js App Router)
+
+Review that the file and folder structure follows these conventions:
+
+**File responsibilities:**
+
+- `page.tsx` and `layout.tsx` must be thin orchestrators — they import and compose, they do not define inline types, queries, helpers, or business logic.
+- If a `.tsx` file mixes UI, types, queries, and helper functions, flag it as a structural defect unless it is genuinely small (under ~150 lines) and the route is unlikely to grow.
+
+**Colocation:**
+
+- Route-local files must use underscore-prefixed names or folders to signal they are not route segments: `_components/`, `_queries.ts`, `_actions.ts`, `_types.ts`.
+- Each file must have a single clear concern:
+  - `_queries.ts` — Prisma calls and server-side data access only, no UI or business logic
+  - `_actions.ts` — server actions and form mutations (`"use server"` at the top), no data access
+  - `_types.ts` — types used only within this route; promote to `types/` if used by two or more routes
+  - `_components/` — UI components used only by this route
+
+**Shared code:**
+
+- `components/` — reusable UI components (shadcn wrappers, shared widgets), no route-specific logic
+- `lib/` — shared infrastructure: Prisma client singleton (`db.ts`), Auth.js config (`auth.ts`), utilities (`utils.ts`)
+- `types/` — types shared across two or more routes, exported through `index.ts`
+
+**Route groups:**
+
+- Route groups (parenthesised folders such as `(auth)` or `(dashboard)`) are used for layout sharing and logical organisation, not for URL structure.
+
+**Findings to raise:**
+
+- `page.tsx` or `layout.tsx` containing inline type definitions, Prisma queries, or helper functions — blocking
+- Shared types or utilities defined inside a route-local file — non-blocking observation unless widely duplicated
+- Prisma client instantiated more than once (should be a singleton in `lib/db.ts`) — blocking
+- `"use server"` missing from server action files — blocking
+- `"use client"` applied to a server component unnecessarily — non-blocking observation
+
 ### Frontend Quality
 
 - component composition and cohesion
@@ -267,15 +303,19 @@ For findings, use this structure:
 ## QA Review
 
 ### Validations Performed
+
 - <PR review / issue review / checks run / sources consulted>
 
 ### Blocking Findings
+
 - <summary of each created sub-issue>
 
 ### Non-Blocking Observations
+
 - <optional notes>
 
 ### Recommendation
+
 - Return to `Developer`
 ```
 
@@ -285,15 +325,19 @@ For a pass, use this structure:
 ## QA Review
 
 ### Validations Performed
+
 - <PR review / issue review / checks run / sources consulted>
 
 ### Result
+
 - No blocking defects found based on the reviewed scope.
 
 ### Residual Notes
+
 - <optional known gaps, test limitations, or follow-ups>
 
 ### Recommendation
+
 - Ready for `Done` pending user approval
 ```
 
