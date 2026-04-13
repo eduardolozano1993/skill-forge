@@ -92,7 +92,6 @@ export function AdminUserStatusAction({
         ) : (
           <>
             <Ban className="size-4" />
-            <span>Deactivate</span>
           </>
         )}
       </button>
@@ -106,12 +105,18 @@ export function AdminUserStatusAction({
             {isDeactivated ? (
               <>
                 Are you sure you want to reactivate{" "}
-                <span className="font-medium text-text-strong">{displayName}</span>?
+                <span className="font-medium text-text-strong">
+                  {displayName}
+                </span>
+                ?
               </>
             ) : (
               <>
                 Are you sure you want to deactivate{" "}
-                <span className="font-medium text-text-strong">{displayName}</span>?
+                <span className="font-medium text-text-strong">
+                  {displayName}
+                </span>
+                ?
               </>
             )}
           </DialogDescription>
