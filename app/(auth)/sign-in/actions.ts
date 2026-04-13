@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 
 import { signIn, signOut } from "@/auth";
+import { getAuthenticatedUserByCredentials } from "@/lib/auth/credentials";
+import { getDeactivatedAccountDialogContent } from "@/lib/auth/deactivated-user";
 import { getPostSignInRedirect } from "@/lib/auth/auth";
 import { logSignInLockout } from "@/lib/auth/sign-in-log";
 import {
@@ -17,6 +19,10 @@ import { prisma } from "@/lib/prisma/prisma";
 
 export type SignInFormState = {
   error?: string;
+  deactivatedAccountDialog?: {
+    title: string;
+    description: string;
+  };
 };
 
 export async function authenticate(
@@ -42,6 +48,19 @@ export async function authenticate(
 
     return {
       error: `Too many sign-in attempts. Try again in ${retryAfterMinutes} minute${retryAfterMinutes === 1 ? "" : "s"}.`,
+    };
+  }
+
+  const authenticatedUser = await getAuthenticatedUserByCredentials({
+    email,
+    password,
+  });
+
+  if (authenticatedUser?.status === "DEACTIVATED") {
+    return {
+      deactivatedAccountDialog: getDeactivatedAccountDialogContent(
+        authenticatedUser.userType,
+      ),
     };
   }
 

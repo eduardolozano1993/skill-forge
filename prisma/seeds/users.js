@@ -58,10 +58,12 @@ async function main() {
         password: hashedPassword,
         phone: user.phone,
         userType: user.userType,
+        status: "ACTIVE",
       },
       create: {
         ...user,
         password: hashedPassword,
+        status: "ACTIVE",
       },
     });
   }

@@ -1,7 +1,9 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { requireAdmin } from "@/lib/auth/auth";
 import {
   getAdminCoursesTableData,
   getAdminDashboardData,
@@ -11,6 +13,7 @@ import {
   getAdminUsersTableData,
 } from "@/lib/admin/data";
 import type { AdminDashboardSearchFilters } from "@/lib/admin/types";
+import { prisma } from "@/lib/prisma/prisma";
 
 const adminSearchFiltersSchema = z.object({
   usersSearch: z.string().optional().nullable(),
@@ -24,6 +27,11 @@ const adminTableSearchSchema = z.object({
 
 const adminLogLimitSchema = z.object({
   limit: z.number().int().min(0).max(500).default(500),
+});
+
+const updateUserStatusSchema = z.object({
+  userId: z.number().int().positive(),
+  status: z.enum(["ACTIVE", "DEACTIVATED"]),
 });
 
 function parseSearchFilters(
@@ -76,4 +84,71 @@ export async function getAdminSignInLogDataAction(limit?: number) {
   const parsedLimit = adminLogLimitSchema.safeParse({ limit });
 
   return getAdminSignInLogData(parsedLimit.success ? parsedLimit.data.limit : 500);
+}
+
+export async function updateAdminUserStatusAction(
+  userId: number,
+  status: "ACTIVE" | "DEACTIVATED",
+) {
+  const parsedPayload = updateUserStatusSchema.safeParse({ userId, status });
+
+  if (!parsedPayload.success) {
+    return {
+      error: "Invalid user status update.",
+    };
+  }
+
+  await requireAdmin();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: parsedPayload.data.userId,
+    },
+    select: {
+      id: true,
+      userType: true,
+      status: true,
+    },
+  });
+
+  if (!user) {
+    return {
+      error: "User not found.",
+    };
+  }
+
+  if (user.userType === "ADMIN") {
+    return {
+      error: "Admin accounts cannot be deactivated or activated from this table.",
+    };
+  }
+
+  if (user.status === parsedPayload.data.status) {
+    return {
+      success: true,
+      status: user.status,
+      changed: false,
+    };
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      status: parsedPayload.data.status,
+    },
+    select: {
+      status: true,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/users");
+
+  return {
+    success: true,
+    status: updatedUser.status,
+    changed: true,
+  };
 }

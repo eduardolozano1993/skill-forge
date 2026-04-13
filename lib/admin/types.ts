@@ -1,3 +1,5 @@
+export type AdminUserStatus = "ACTIVE" | "DEACTIVATED";
+
 export type AdminPlatformSummary = {
   totalUsers: number;
   totalCourses: number;
@@ -12,6 +14,7 @@ export type AdminUserRow = {
   email: string;
   phone: string;
   userType: "ADMIN" | "MANAGER" | "EMPLOYEE";
+  status: AdminUserStatus;
   organizationId: number | null;
   organizationName: string | null;
   createdAt: Date;

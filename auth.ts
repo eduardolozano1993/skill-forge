@@ -2,8 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { object, string } from "zod";
 
-import { prisma } from "@/lib/prisma/prisma";
-import { comparePassword } from "@/lib/auth/password";
+import { getAuthenticatedUserByCredentials } from "@/lib/auth/credentials";
 
 const credentialsSchema = object({
   email: string({ error: "Email is required" })
@@ -37,20 +36,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const { email, password } = parsedCredentials.data;
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (!user) {
-          return null;
-        }
-
-        const isPasswordValid = await comparePassword({
+        const user = await getAuthenticatedUserByCredentials({
+          email,
           password,
-          storedPassword: user.password,
         });
 
-        if (!isPasswordValid) {
+        if (!user || user.status === "DEACTIVATED") {
           return null;
         }
 
