@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AdminUserStatusAction } from "@/components/admin/admin-user-status-action";
 import type {
   AdminCourseRow,
   AdminOrganizationRow,
@@ -30,6 +31,16 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
+function getUserStatusPillClasses(status: AdminUserRow["status"]) {
+  return status === "ACTIVE"
+    ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+    : "border border-red-200 bg-red-50 text-red-700";
+}
+
+function getUserStatusLabel(status: AdminUserRow["status"]) {
+  return status === "ACTIVE" ? "Active" : "Deactivated";
+}
+
 export function AdminUsersTable({ rows }: AdminUsersTableProps) {
   return (
     <Table>
@@ -38,7 +49,9 @@ export function AdminUsersTable({ rows }: AdminUsersTableProps) {
           <TableHead>User</TableHead>
           <TableHead>Role</TableHead>
           <TableHead>Organization</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead>Created</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -54,8 +67,23 @@ export function AdminUsersTable({ rows }: AdminUsersTableProps) {
             <TableCell className="text-text-soft">
               {user.organizationName ?? "Unassigned"}
             </TableCell>
+            <TableCell>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getUserStatusPillClasses(user.status)}`}
+              >
+                {getUserStatusLabel(user.status)}
+              </span>
+            </TableCell>
             <TableCell className="text-text-soft">
               {formatDate(user.createdAt)}
+            </TableCell>
+            <TableCell>
+              <AdminUserStatusAction
+                userId={user.id}
+                displayName={user.displayName}
+                status={user.status}
+                userType={user.userType}
+              />
             </TableCell>
           </TableRow>
         ))}

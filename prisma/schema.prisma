@@ -13,6 +13,11 @@ enum UserType {
   EMPLOYEE
 }
 
+enum UserStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
 model User {
   id                 Int               @id @default(autoincrement())
   organizationId     Int?              @map("organization_id")
@@ -22,6 +27,7 @@ model User {
   password           String
   phone              String
   userType           UserType
+  status             UserStatus        @default(ACTIVE)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   organization       Organization?     @relation("OrganizationMembers", fields: [organizationId], references: [id])

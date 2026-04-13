@@ -87,6 +87,7 @@ async function fetchAdminUsersTableData(
       email: true,
       phone: true,
       userType: true,
+      status: true,
       createdAt: true,
       organization: {
         select: {
@@ -105,6 +106,7 @@ async function fetchAdminUsersTableData(
       email: user.email,
       phone: user.phone,
       userType: user.userType,
+      status: user.status,
       organizationId: user.organization?.id ?? null,
       organizationName: user.organization?.name ?? null,
       createdAt: user.createdAt,
@@ -117,6 +119,7 @@ async function fetchAdminUsersTableData(
         user.email,
         user.phone,
         user.userType,
+        user.status,
         user.organizationName,
       ]),
     )
