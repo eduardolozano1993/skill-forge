@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AdminOrganizationStatusAction } from "@/components/admin/admin-organization-status-action";
+import { AdminCourseActions } from "@/components/admin/admin-course-actions";
 import { AdminUserStatusAction } from "@/components/admin/admin-user-status-action";
 import type {
   AdminCourseRow,
@@ -42,13 +43,25 @@ function getUserStatusLabel(status: AdminUserRow["status"]) {
   return status === "ACTIVE" ? "Active" : "Deactivated";
 }
 
-function getOrganizationStatusPillClasses(status: AdminOrganizationRow["status"]) {
+function getOrganizationStatusPillClasses(
+  status: AdminOrganizationRow["status"],
+) {
+  return status === "ACTIVE"
+    ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+    : "border border-red-200 bg-red-50 text-red-700";
+}
+
+function getCourseStatusPillClasses(status: AdminCourseRow["status"]) {
   return status === "ACTIVE"
     ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border border-red-200 bg-red-50 text-red-700";
 }
 
 function getOrganizationStatusLabel(status: AdminOrganizationRow["status"]) {
+  return status === "ACTIVE" ? "Active" : "Deactivated";
+}
+
+function getCourseStatusLabel(status: AdminCourseRow["status"]) {
   return status === "ACTIVE" ? "Active" : "Deactivated";
 }
 
@@ -70,7 +83,9 @@ export function AdminUsersTable({ rows }: AdminUsersTableProps) {
           <TableRow key={user.id}>
             <TableCell>
               <div className="space-y-2xs">
-                <p className="font-medium text-text-strong">{user.displayName}</p>
+                <p className="font-medium text-text-strong">
+                  {user.displayName}
+                </p>
                 <p className="text-sm text-text-soft">{user.email}</p>
               </div>
             </TableCell>
@@ -123,7 +138,9 @@ export function AdminOrganizationsTable({
           <TableRow key={organization.id}>
             <TableCell>
               <div className="space-y-2xs">
-                <p className="font-medium text-text-strong">{organization.name}</p>
+                <p className="font-medium text-text-strong">
+                  {organization.name}
+                </p>
                 <p className="text-sm text-text-soft">
                   Created {formatDate(organization.createdAt)}
                 </p>
@@ -134,7 +151,9 @@ export function AdminOrganizationsTable({
                 <p className="font-medium text-text-strong">
                   {organization.ownerDisplayName}
                 </p>
-                <p className="text-sm text-text-soft">{organization.ownerEmail}</p>
+                <p className="text-sm text-text-soft">
+                  {organization.ownerEmail}
+                </p>
               </div>
             </TableCell>
             <TableCell>
@@ -170,9 +189,11 @@ export function AdminCoursesTable({ rows }: AdminCoursesTableProps) {
       <TableHeader>
         <TableRow>
           <TableHead>Course</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead>Assigned orgs</TableHead>
           <TableHead>Completions</TableHead>
           <TableHead>Bookmarks</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -184,13 +205,29 @@ export function AdminCoursesTable({ rows }: AdminCoursesTableProps) {
                 <p className="text-sm text-text-soft">{course.summary}</p>
               </div>
             </TableCell>
+            <TableCell>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getCourseStatusPillClasses(course.status)}`}
+              >
+                {getCourseStatusLabel(course.status)}
+              </span>
+            </TableCell>
             <TableCell className="text-text-soft">
               {course.assignedOrganizationCount}
             </TableCell>
             <TableCell className="text-text-soft">
               {course.completedUserCount}
             </TableCell>
-            <TableCell className="text-text-soft">{course.bookmarkCount}</TableCell>
+            <TableCell className="text-text-soft">
+              {course.bookmarkCount}
+            </TableCell>
+            <TableCell>
+              <AdminCourseActions
+                courseId={course.id}
+                title={course.title}
+                status={course.status}
+              />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

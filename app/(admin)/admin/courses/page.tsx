@@ -1,13 +1,5 @@
 import { AdminCoursesTable } from "@/components/admin/admin-tables";
 import { AdminUrlSearch } from "@/components/admin/admin-url-search";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardEyebrow,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
 import { getAdminCoursesTableData } from "@/lib/admin/data";
 
@@ -43,6 +35,13 @@ export default async function AdminCoursesPage({
           </p>
         </div>
       </header>
+
+      <AdminUrlSearch
+        label="Search courses"
+        placeholder="Search courses by title, summary, or status"
+        paramName="courses"
+        query={data.search}
+      />
 
       {data.rows.length > 0 ? (
         <AdminCoursesTable rows={data.rows} />

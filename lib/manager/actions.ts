@@ -35,6 +35,7 @@ export async function assignCourseToOrganizationAction(courseId: number) {
       },
       select: {
         id: true,
+        status: true,
       },
     }),
     prisma.organizationCourse.findUnique({
@@ -50,7 +51,7 @@ export async function assignCourseToOrganizationAction(courseId: number) {
     }),
   ]);
 
-  if (!course) {
+  if (!course || course.status !== "ACTIVE") {
     return {
       error: "Course not found.",
     };
@@ -109,6 +110,7 @@ export async function assignBookmarkedCourseToOrganizationAction(
       },
       select: {
         id: true,
+        status: true,
       },
     }),
     prisma.user.findMany({
@@ -133,7 +135,7 @@ export async function assignBookmarkedCourseToOrganizationAction(
     }),
   ]);
 
-  if (!course) {
+  if (!course || course.status !== "ACTIVE") {
     return {
       error: "Course not found.",
     };

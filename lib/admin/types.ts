@@ -1,5 +1,6 @@
 export type AdminUserStatus = "ACTIVE" | "DEACTIVATED";
 export type AdminOrganizationStatus = "ACTIVE" | "DEACTIVATED";
+export type AdminCourseStatus = "ACTIVE" | "DEACTIVATED";
 
 export type AdminPlatformSummary = {
   totalUsers: number;
@@ -37,6 +38,7 @@ export type AdminCourseRow = {
   id: number;
   title: string;
   summary: string;
+  status: AdminCourseStatus;
   assignedOrganizationCount: number;
   completedUserCount: number;
   bookmarkCount: number;

@@ -23,6 +23,11 @@ enum OrganizationStatus {
   DEACTIVATED
 }
 
+enum CourseStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
 model User {
   id                 Int               @id @default(autoincrement())
   organizationId     Int?              @map("organization_id")
@@ -62,6 +67,7 @@ model Course {
   name             String
   summary          String
   content          Json
+  status           CourseStatus         @default(ACTIVE)
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
   organizations    OrganizationCourse[]

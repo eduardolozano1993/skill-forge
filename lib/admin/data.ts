@@ -62,7 +62,11 @@ async function fetchAdminPlatformSummary(): Promise<AdminPlatformSummary> {
     totalCompletedCourses,
   ] = await Promise.all([
     prisma.user.count(),
-    prisma.course.count(),
+    prisma.course.count({
+      where: {
+        status: "ACTIVE",
+      },
+    }),
     prisma.organization.count(),
     prisma.completedCourse.count(),
   ]);
@@ -198,6 +202,7 @@ async function fetchAdminCoursesTableData(
       id: true,
       name: true,
       summary: true,
+      status: true,
       createdAt: true,
       _count: {
         select: {
@@ -214,13 +219,19 @@ async function fetchAdminCoursesTableData(
       id: course.id,
       title: course.name,
       summary: course.summary,
+      status: course.status,
       assignedOrganizationCount: course._count.organizations,
       completedUserCount: course._count.completedByUsers,
       bookmarkCount: course._count.bookmarks,
       createdAt: course.createdAt,
     }))
     .filter((course) =>
-      matchesSearch(normalizedSearch, [course.id, course.title, course.summary]),
+      matchesSearch(normalizedSearch, [
+        course.id,
+        course.title,
+        course.summary,
+        course.status,
+      ]),
     )
     .sort((left, right) => sortByTextAndId(left.title, right.title, left, right));
 

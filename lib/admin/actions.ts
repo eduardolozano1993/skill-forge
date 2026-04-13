@@ -39,6 +39,11 @@ const updateOrganizationStatusSchema = z.object({
   status: z.enum(["ACTIVE", "DEACTIVATED"]),
 });
 
+const updateCourseStatusSchema = z.object({
+  courseId: z.number().int().positive(),
+  status: z.enum(["ACTIVE", "DEACTIVATED"]),
+});
+
 function parseSearchFilters(
   filters: AdminDashboardSearchFilters = {},
 ): AdminDashboardSearchFilters {
@@ -240,5 +245,68 @@ export async function updateAdminOrganizationStatusAction(
     status: result.status,
     changed: true,
     affectedUsers: result.affectedUsers,
+  };
+}
+
+export async function updateAdminCourseStatusAction(
+  courseId: number,
+  status: "ACTIVE" | "DEACTIVATED",
+) {
+  const parsedPayload = updateCourseStatusSchema.safeParse({ courseId, status });
+
+  if (!parsedPayload.success) {
+    return {
+      error: "Invalid course status update.",
+    };
+  }
+
+  await requireAdmin();
+
+  const course = await prisma.course.findUnique({
+    where: {
+      id: parsedPayload.data.courseId,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!course) {
+    return {
+      error: "Course not found.",
+    };
+  }
+
+  if (course.status === parsedPayload.data.status) {
+    return {
+      success: true,
+      status: course.status,
+      changed: false,
+    };
+  }
+
+  const updatedCourse = await prisma.course.update({
+    where: {
+      id: course.id,
+    },
+    data: {
+      status: parsedPayload.data.status,
+    },
+    select: {
+      status: true,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/courses");
+  revalidatePath("/courses");
+  revalidatePath(`/courses/${course.id}`);
+  revalidatePath(`/admin/courses/${course.id}/edit`);
+
+  return {
+    success: true,
+    status: updatedCourse.status,
+    changed: true,
   };
 }

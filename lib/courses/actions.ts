@@ -62,6 +62,9 @@ async function getVisibleCoursesForUser() {
   const [courses, organizationCourses, bookmarks, completedCourses] =
     await Promise.all([
       prisma.course.findMany({
+        where: {
+          status: "ACTIVE",
+        },
         orderBy: {
           name: "asc",
         },
@@ -125,41 +128,55 @@ async function requireEmployeeCourseSelection(courseId: number) {
     return null;
   }
 
-  const [assignedCourse, existingBookmark, existingCompletion] = await Promise.all([
-    prisma.organizationCourse.findUnique({
-      where: {
-        organizationId_courseId: {
-          organizationId,
-          courseId,
+  const [course, assignedCourse, existingBookmark, existingCompletion] =
+    await Promise.all([
+      prisma.course.findUnique({
+        where: {
+          id: courseId,
         },
-      },
-      select: {
-        courseId: true,
-      },
-    }),
-    prisma.bookmark.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
+        select: {
+          id: true,
+          status: true,
         },
-      },
-      select: {
-        courseId: true,
-      },
-    }),
-    prisma.completedCourse.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
+      }),
+      prisma.organizationCourse.findUnique({
+        where: {
+          organizationId_courseId: {
+            organizationId,
+            courseId,
+          },
         },
-      },
-      select: {
-        courseId: true,
-      },
-    }),
-  ]);
+        select: {
+          courseId: true,
+        },
+      }),
+      prisma.bookmark.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId,
+          },
+        },
+        select: {
+          courseId: true,
+        },
+      }),
+      prisma.completedCourse.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId,
+          },
+        },
+        select: {
+          courseId: true,
+        },
+      }),
+    ]);
+
+  if (!course || course.status !== "ACTIVE") {
+    return null;
+  }
 
   if (!assignedCourse && !existingBookmark && !existingCompletion) {
     return null;
@@ -184,6 +201,7 @@ async function requireEmployeeCourseBookmarkSelection(courseId: number) {
       },
       select: {
         id: true,
+        status: true,
       },
     }),
     prisma.bookmark.findUnique({
@@ -199,7 +217,7 @@ async function requireEmployeeCourseBookmarkSelection(courseId: number) {
     }),
   ]);
 
-  if (!course) {
+  if (!course || course.status !== "ACTIVE") {
     return null;
   }
 
@@ -245,6 +263,34 @@ export async function getDashboardCoursesAction(): Promise<DashboardCourses> {
 }
 
 export async function getCourseByIdAction(courseId: number) {
+  const session = await requireAuth();
+
+  if (session.user.userType === "ADMIN") {
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      select: {
+        id: true,
+        name: true,
+        summary: true,
+        content: true,
+      },
+    });
+
+    if (!course) {
+      return null;
+    }
+
+    return {
+      id: course.id,
+      title: course.name,
+      summary: course.summary,
+      content: getCourseContentText(course.content),
+      isAssigned: false,
+    };
+  }
+
   const { courses } = await getVisibleCoursesForUser();
 
   return courses.find((course) => course.id === courseId) ?? null;
