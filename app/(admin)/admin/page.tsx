@@ -1,5 +1,3 @@
-import { AdminOrganizationsTable } from "@/components/admin/admin-tables";
-import { AdminUrlSearch } from "@/components/admin/admin-url-search";
 import {
   Card,
   CardContent,
@@ -10,30 +8,13 @@ import {
 } from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
 import {
-  getAdminOrganizationsTableData,
   getAdminPlatformSummary,
   getAdminSignInLogData,
 } from "@/lib/admin/data";
 
-type AdminPageProps = {
-  searchParams?: Promise<{
-    organizations?: string | string[];
-  }>;
-};
-
-function getSingleSearchParam(value?: string | string[]) {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
-}
-
-export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const organizationsSearch = getSingleSearchParam(
-    resolvedSearchParams?.organizations,
-  );
-
-  const [summary, organizations, logData] = await Promise.all([
+export default async function AdminPage() {
+  const [summary, logData] = await Promise.all([
     getAdminPlatformSummary(),
-    getAdminOrganizationsTableData(organizationsSearch),
     getAdminSignInLogData(),
   ]);
 
@@ -56,45 +37,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <div className="grid gap-md md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard label="Total users" value={summary.totalUsers} />
         <SummaryCard label="Total courses" value={summary.totalCourses} />
-        <SummaryCard
-          label="Total orgs"
-          value={summary.totalOrganizations}
-        />
+        <SummaryCard label="Total orgs" value={summary.totalOrganizations} />
         <SummaryCard
           label="Completed courses"
           value={summary.totalCompletedCourses}
         />
       </div>
-
-      <Card>
-        <CardHeader className="space-y-sm">
-          <CardEyebrow>Organizations</CardEyebrow>
-          <CardTitle>Organization directory</CardTitle>
-          <CardDescription>
-            Inspect organization ownership, membership, and assigned course totals.
-          </CardDescription>
-          <AdminUrlSearch
-            label="Search organizations"
-            placeholder="Search organizations by name or owner"
-            paramName="organizations"
-            query={organizations.search}
-          />
-        </CardHeader>
-        <CardContent>
-          {organizations.rows.length > 0 ? (
-            <AdminOrganizationsTable rows={organizations.rows} />
-          ) : (
-            <TableEmptyState
-              title="No organizations found"
-              description={
-                organizations.search
-                  ? "Try a different organizations search term."
-                  : "Organizations will appear here once they are created."
-              }
-            />
-          )}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
