@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AdminOrganizationStatusAction } from "@/components/admin/admin-organization-status-action";
 import { AdminUserStatusAction } from "@/components/admin/admin-user-status-action";
 import type {
   AdminCourseRow,
@@ -38,6 +39,16 @@ function getUserStatusPillClasses(status: AdminUserRow["status"]) {
 }
 
 function getUserStatusLabel(status: AdminUserRow["status"]) {
+  return status === "ACTIVE" ? "Active" : "Deactivated";
+}
+
+function getOrganizationStatusPillClasses(status: AdminOrganizationRow["status"]) {
+  return status === "ACTIVE"
+    ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+    : "border border-red-200 bg-red-50 text-red-700";
+}
+
+function getOrganizationStatusLabel(status: AdminOrganizationRow["status"]) {
   return status === "ACTIVE" ? "Active" : "Deactivated";
 }
 
@@ -101,8 +112,10 @@ export function AdminOrganizationsTable({
         <TableRow>
           <TableHead>Organization</TableHead>
           <TableHead>Owner</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead>Members</TableHead>
           <TableHead>Assigned courses</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -124,11 +137,25 @@ export function AdminOrganizationsTable({
                 <p className="text-sm text-text-soft">{organization.ownerEmail}</p>
               </div>
             </TableCell>
+            <TableCell>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getOrganizationStatusPillClasses(organization.status)}`}
+              >
+                {getOrganizationStatusLabel(organization.status)}
+              </span>
+            </TableCell>
             <TableCell className="text-text-soft">
               {organization.memberCount}
             </TableCell>
             <TableCell className="text-text-soft">
               {organization.assignedCourseCount}
+            </TableCell>
+            <TableCell>
+              <AdminOrganizationStatusAction
+                organizationId={organization.id}
+                name={organization.name}
+                status={organization.status}
+              />
             </TableCell>
           </TableRow>
         ))}

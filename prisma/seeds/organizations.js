@@ -17,10 +17,12 @@ async function main() {
     update: {
       name: "Skill Forge HQ",
       employeeId: manager.id,
+      status: "ACTIVE",
     },
     create: {
       name: "Skill Forge HQ",
       employeeId: manager.id,
+      status: "ACTIVE",
     },
   });
 

@@ -141,6 +141,7 @@ async function fetchAdminOrganizationsTableData(
     select: {
       id: true,
       name: true,
+      status: true,
       createdAt: true,
       owner: {
         select: {
@@ -162,6 +163,7 @@ async function fetchAdminOrganizationsTableData(
     .map<AdminOrganizationRow>((organization) => ({
       id: organization.id,
       name: organization.name,
+      status: organization.status,
       ownerUserId: organization.owner.id,
       ownerDisplayName: organization.owner.displayName,
       ownerEmail: organization.owner.email,
@@ -173,6 +175,7 @@ async function fetchAdminOrganizationsTableData(
       matchesSearch(normalizedSearch, [
         organization.id,
         organization.name,
+        organization.status,
         organization.ownerUserId,
         organization.ownerDisplayName,
         organization.ownerEmail,

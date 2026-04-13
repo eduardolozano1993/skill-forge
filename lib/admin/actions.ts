@@ -34,6 +34,11 @@ const updateUserStatusSchema = z.object({
   status: z.enum(["ACTIVE", "DEACTIVATED"]),
 });
 
+const updateOrganizationStatusSchema = z.object({
+  organizationId: z.number().int().positive(),
+  status: z.enum(["ACTIVE", "DEACTIVATED"]),
+});
+
 function parseSearchFilters(
   filters: AdminDashboardSearchFilters = {},
 ): AdminDashboardSearchFilters {
@@ -150,5 +155,90 @@ export async function updateAdminUserStatusAction(
     success: true,
     status: updatedUser.status,
     changed: true,
+  };
+}
+
+export async function updateAdminOrganizationStatusAction(
+  organizationId: number,
+  status: "ACTIVE" | "DEACTIVATED",
+) {
+  const parsedPayload = updateOrganizationStatusSchema.safeParse({
+    organizationId,
+    status,
+  });
+
+  if (!parsedPayload.success) {
+    return {
+      error: "Invalid organization status update.",
+    };
+  }
+
+  await requireAdmin();
+
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id: parsedPayload.data.organizationId,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!organization) {
+    return {
+      error: "Organization not found.",
+    };
+  }
+
+  if (organization.status === parsedPayload.data.status) {
+    return {
+      success: true,
+      status: organization.status,
+      changed: false,
+      affectedUsers: 0,
+    };
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const updatedOrganization = await tx.organization.update({
+      where: {
+        id: organization.id,
+      },
+      data: {
+        status: parsedPayload.data.status,
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    const updatedUsers = await tx.user.updateMany({
+      where: {
+        organizationId: organization.id,
+        userType: {
+          not: "ADMIN",
+        },
+      },
+      data: {
+        status: parsedPayload.data.status,
+      },
+    });
+
+    return {
+      status: updatedOrganization.status,
+      affectedUsers: updatedUsers.count,
+    };
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/organizations");
+  revalidatePath("/admin/users");
+
+  return {
+    success: true,
+    status: result.status,
+    changed: true,
+    affectedUsers: result.affectedUsers,
   };
 }

@@ -1,4 +1,5 @@
 export type AdminUserStatus = "ACTIVE" | "DEACTIVATED";
+export type AdminOrganizationStatus = "ACTIVE" | "DEACTIVATED";
 
 export type AdminPlatformSummary = {
   totalUsers: number;
@@ -23,6 +24,7 @@ export type AdminUserRow = {
 export type AdminOrganizationRow = {
   id: number;
   name: string;
+  status: AdminOrganizationStatus;
   ownerUserId: number;
   ownerDisplayName: string;
   ownerEmail: string;
