@@ -18,7 +18,7 @@ type AdminCoursesPageProps = {
 };
 
 function getSingleSearchParam(value?: string | string[]) {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
 export default async function AdminCoursesPage({
@@ -39,41 +39,23 @@ export default async function AdminCoursesPage({
             Course management
           </h1>
           <p className="mt-xs max-w-3xl text-base text-text-soft">
-            Search and review courses by catalog details, assignment totals, and
-            engagement signals.
+            Search across course names and summaries.
           </p>
         </div>
       </header>
 
-      <Card>
-        <CardHeader className="space-y-sm">
-          <CardEyebrow>Courses</CardEyebrow>
-          <CardTitle>Course directory</CardTitle>
-          <CardDescription>
-            Search across course names and summaries.
-          </CardDescription>
-          <AdminUrlSearch
-            label="Search courses"
-            placeholder="Search courses by name or summary"
-            paramName="courses"
-            query={data.search}
-          />
-        </CardHeader>
-        <CardContent>
-          {data.rows.length > 0 ? (
-            <AdminCoursesTable rows={data.rows} />
-          ) : (
-            <TableEmptyState
-              title="No courses found"
-              description={
-                data.search
-                  ? "Try a different courses search term."
-                  : "Courses will appear here once they are created."
-              }
-            />
-          )}
-        </CardContent>
-      </Card>
+      {data.rows.length > 0 ? (
+        <AdminCoursesTable rows={data.rows} />
+      ) : (
+        <TableEmptyState
+          title="No courses found"
+          description={
+            data.search
+              ? "Try a different courses search term."
+              : "Courses will appear here once they are created."
+          }
+        />
+      )}
     </section>
   );
 }
