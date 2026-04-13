@@ -1,0 +1,15 @@
+interface:
+  display_name: "Product Owner"
+  short_description: "Draft researched product-ready GitHub issues"
+  default_prompt: "Use $product-owner to analyze this idea, draft the GitHub issue, create it, place it in Product Owner, and wait for my approval before moving it to Architect: <idea>"
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "github"
+      description: "GitHub MCP server"
+      transport: "streamable_http"
+      url: "https://api.githubcopilot.com/mcp/"
+
+policy:
+  allow_implicit_invocation: true

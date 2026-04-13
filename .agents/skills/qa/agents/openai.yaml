@@ -1,0 +1,15 @@
+interface:
+  display_name: "QA"
+  short_description: "Review delivered work before Done"
+  default_prompt: "Use $qa to review the issues in the QA column, assess the PR and issue context, leave the QA summary, return blocking work to Developer, and wait for my approval before moving a passing issue to Done."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "github"
+      description: "GitHub MCP server"
+      transport: "streamable_http"
+      url: "https://api.githubcopilot.com/mcp/"
+
+policy:
+  allow_implicit_invocation: true

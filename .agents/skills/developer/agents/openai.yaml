@@ -1,0 +1,15 @@
+interface:
+  display_name: "Developer"
+  short_description: "Implement approved issues and prepare PRs"
+  default_prompt: "Use $developer to work the issues in the Developer column, implement the approved requirement, open a PR to develop, update the issue, and wait for my approval before moving it to QA."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "github"
+      description: "GitHub MCP server"
+      transport: "streamable_http"
+      url: "https://api.githubcopilot.com/mcp/"
+
+policy:
+  allow_implicit_invocation: true

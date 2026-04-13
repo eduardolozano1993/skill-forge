@@ -1,0 +1,15 @@
+interface:
+  display_name: "Architect"
+  short_description: "Append technical review to approved issues"
+  default_prompt: "Use $architect to review the issues in the Architect column, append Architect Review guidance, keep them in Architect until approval, and move approved ones to Task Writer."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "github"
+      description: "GitHub MCP server"
+      transport: "streamable_http"
+      url: "https://api.githubcopilot.com/mcp/"
+
+policy:
+  allow_implicit_invocation: true

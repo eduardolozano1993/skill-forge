@@ -1,0 +1,15 @@
+interface:
+  display_name: "Task Writer"
+  short_description: "Turn approved issues into dev-ready tickets"
+  default_prompt: "Use $task-writer to review the issues in the Task Writer column, append the Task Writer section, keep them in Task Writer until approval, and move approved ones to Developer."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "github"
+      description: "GitHub MCP server"
+      transport: "streamable_http"
+      url: "https://api.githubcopilot.com/mcp/"
+
+policy:
+  allow_implicit_invocation: true
