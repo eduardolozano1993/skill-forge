@@ -18,6 +18,11 @@ enum UserStatus {
   DEACTIVATED
 }
 
+enum OrganizationStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
 model User {
   id                 Int               @id @default(autoincrement())
   organizationId     Int?              @map("organization_id")
@@ -42,6 +47,7 @@ model Organization {
   id         Int                  @id @default(autoincrement())
   employeeId Int                  @map("employee_id")
   name       String
+  status     OrganizationStatus   @default(ACTIVE)
   createdAt  DateTime             @default(now()) @map("created_at")
   updatedAt  DateTime             @updatedAt @map("updated_at")
   owner      User                 @relation("OrganizationOwner", fields: [employeeId], references: [id])
