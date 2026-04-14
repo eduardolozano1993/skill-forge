@@ -1,0 +1,16 @@
+---
+
+- name: skillforge
+  description: project preset for PostgreSQL 17 without host-level helper functions
+  metrics:
+    backends: 30
+    db_stats: 60
+    db_size: 300
+    index_stats: 900
+    sequence_health: 3600
+    sproc_stats: 180
+    stat_statements: 30
+    stat_statements_calls: 30
+    table_bloat_approx_summary_sql: 7200
+    table_stats: 300
+    wal: 60

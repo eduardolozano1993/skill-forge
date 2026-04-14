@@ -4,21 +4,51 @@ services:
   postgres:
     image: postgres:17
     container_name: skillforge-postgres
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=all
     restart: unless-stopped
     environment:
-      POSTGRES_USER: skillforge
-      POSTGRES_PASSWORD: skillforge
-      POSTGRES_DB: skillforge
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U skillforge -d skillforge"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  pgwatch:
+    image: cybertec/pgwatch2-postgres:latest
+    container_name: skillforge-pgwatch
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PW2_ADHOC_CONN_STR: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PW2_ADHOC_NAME: ${POSTGRES_DB}
+      PW2_ADHOC_CONFIG: skillforge
+      PW2_DATASTORE: postgres
+      PW2_WEBNOANONYMOUS: "true"
+      PW2_WEBUSER: ${PGWATCH_WEB_USER}
+      PW2_WEBPASSWORD: ${PGWATCH_WEB_PASSWORD}
+      PW2_GRAFANAUSER: ${PGWATCH_GRAFANA_USER}
+      PW2_GRAFANAPASSWORD: ${PGWATCH_GRAFANA_PASSWORD}
+    volumes:
+      - ./docker/pgwatch/preset-configs.yaml:/pgwatch2/metrics/preset-configs.yaml:ro
+      - ./docker/pgwatch/stat_statements/17/metric.sql:/pgwatch2/metrics/stat_statements/17/metric.sql:ro
+    ports:
+      - "3001:3000"
+      - "8088:8080"
 
 volumes:
   postgres-data:
