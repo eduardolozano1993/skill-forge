@@ -40,7 +40,7 @@ Start from the existing repo conventions and current stack:
 - TypeScript
 - Auth.js
 - Prisma
-- SQLite
+- PostgreSQL
 - Tailwind CSS
 - shadcn/ui
 - react-hook-form

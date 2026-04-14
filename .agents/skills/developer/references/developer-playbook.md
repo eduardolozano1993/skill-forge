@@ -33,7 +33,7 @@ The current stack includes:
 - TypeScript
 - Auth.js
 - Prisma
-- SQLite
+- PostgreSQL
 - Tailwind CSS
 - shadcn/ui
 - react-hook-form
@@ -122,7 +122,7 @@ When implementing server-side logic:
 - keep authentication and authorization boundaries explicit
 - preserve role-aware behavior and server-side guards
 
-### Prisma And SQLite
+### Prisma And PostgreSQL
 
 - keep query logic understandable
 - prefer simple, explicit data access

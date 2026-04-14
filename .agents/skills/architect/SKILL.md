@@ -39,7 +39,7 @@ Start from the existing stack before recommending expansion:
 - TypeScript
 - Auth.js
 - Prisma
-- SQLite
+- PostgreSQL
 - Tailwind CSS
 - shadcn/ui
 

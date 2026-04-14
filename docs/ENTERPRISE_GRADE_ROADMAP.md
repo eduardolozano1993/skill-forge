@@ -7,7 +7,7 @@ From the codebase, Skill Forge is currently:
 - A `Next.js` App Router app with server actions
 - Using `Auth.js` credentials auth with JWT sessions
 - Using `Prisma`
-- Backed by `SQLite`
+- Backed by `PostgreSQL`
 - Split into `ADMIN`, `MANAGER`, and `EMPLOYEE` experiences
 - Doing most reads synchronously at request time
 - Logging sign-in lockouts to a local file
@@ -19,41 +19,39 @@ That is a strong learning-stage architecture. It is not enterprise-ready yet, bu
 
 These are the pressure points I see from the current code:
 
-1. `SQLite` becomes a bottleneck once you have multiple app instances, higher write volume, or need real backup and restore procedures.
-2. The sign-in rate limiter in `lib/auth/sign-in-rate-limit.ts` only works inside one process, so it stops being reliable the moment you scale horizontally.
-3. The sign-in log in `lib/auth/sign-in-log.ts` writes to local disk, which is fragile in containers and useless across multiple instances.
-4. Admin and manager dashboard aggregates in `lib/admin/data.ts` and `lib/manager/data.ts` will get slower as data grows because everything is recomputed on demand.
-5. Course search is still simple in-app filtering, which is fine now, but not enough once you want typo tolerance, filters, ranking, and fast global search.
-6. There is no background-job system yet, so every future "send email", "recompute analytics", "build report", or "sync search index" feature will either block requests or become messy.
-7. There is no audit trail or revision history for high-trust admin operations like course edits, status changes, and organization-wide actions.
-8. Auth is local-credentials only. That is fine for development, but enterprise buyers will eventually ask for SSO, stronger identity controls, and centralized user lifecycle management.
+1. The sign-in rate limiter in `lib/auth/sign-in-rate-limit.ts` only works inside one process, so it stops being reliable the moment you scale horizontally.
+2. The sign-in log in `lib/auth/sign-in-log.ts` writes to local disk, which is fragile in containers and useless across multiple instances.
+3. Admin and manager dashboard aggregates in `lib/admin/data.ts` and `lib/manager/data.ts` will get slower as data grows because everything is recomputed on demand.
+4. Course search is still simple in-app filtering, which is fine now, but not enough once you want typo tolerance, filters, ranking, and fast global search.
+5. There is no background-job system yet, so every future "send email", "recompute analytics", "build report", or "sync search index" feature will either block requests or become messy.
+6. There is no audit trail or revision history for high-trust admin operations like course edits, status changes, and organization-wide actions.
+7. Auth is local-credentials only. That is fine for development, but enterprise buyers will eventually ask for SSO, stronger identity controls, and centralized user lifecycle management.
 
 ## The Best Enterprise-Grade Additions For This App
 
 | Priority | Addition | Why it fits this app | Free / easy tool |
 | --- | --- | --- | --- |
-| 1 | Move from SQLite to PostgreSQL | Gives you concurrency, proper operations, backups, indexing, and a realistic production database | `postgres` Docker image |
-| 2 | Add Redis | Solves shared rate limits, caching, short-lived state, and distributed coordination | `redis` Docker image |
-| 3 | Add a job queue | Lets you move slow work out of requests | `BullMQ` + Redis |
-| 4 | Add audit logs and event outbox | Makes admin actions explainable, reviewable, and replayable | PostgreSQL tables, no paid tool |
-| 5 | Add object storage | Prepares for attachments, images, PDFs, videos, exports, backups | `MinIO` |
-| 6 | Add metrics, logs, and traces | Gives you operability instead of guessing | `OpenTelemetry`, `Prometheus`, `Grafana`, `Loki` |
-| 7 | Add real search | Makes course discovery fast and realistic | `Meilisearch` |
-| 8 | Add enterprise auth / SSO | Teaches real identity architecture | `Keycloak` |
+| 1 | Add Redis | Solves shared rate limits, caching, short-lived state, and distributed coordination | `redis` Docker image |
+| 2 | Add a job queue | Lets you move slow work out of requests | `BullMQ` + Redis |
+| 3 | Add audit logs and event outbox | Makes admin actions explainable, reviewable, and replayable | PostgreSQL tables, no paid tool |
+| 4 | Add object storage | Prepares for attachments, images, PDFs, videos, exports, backups | `MinIO` |
+| 5 | Add metrics, logs, and traces | Gives you operability instead of guessing | `OpenTelemetry`, `Prometheus`, `Grafana`, `Loki` |
+| 6 | Add real search | Makes course discovery fast and realistic | `Meilisearch` |
+| 7 | Add enterprise auth / SSO | Teaches real identity architecture | `Keycloak` |
 
 If you only do three things first, do these:
 
-1. PostgreSQL
-2. Redis
-3. BullMQ
+1. Redis
+2. BullMQ
+3. Audit logs and outbox events
 
 That trio will teach you more practical systems design than ten theoretical diagrams.
 
-## 1. Replace SQLite With PostgreSQL
+## 1. Harden PostgreSQL For Production-Like Workloads
 
 ### Why this matters here
 
-Your current Prisma datasource in `prisma/schema.prisma` points to `sqlite`. That is excellent for local development, but it is not the database shape you want if you want to learn enterprise patterns.
+The repo is already on PostgreSQL, which is the right baseline for learning production-shaped application design. The next step is to treat it like an operational datastore rather than just a development dependency.
 
 PostgreSQL gives you:
 
@@ -65,10 +63,10 @@ PostgreSQL gives you:
 
 ### What to change in this app
 
-- Change `prisma/schema.prisma` datasource from `sqlite` to `postgresql`
-- Replace `.env` `DATABASE_URL` with a Postgres connection string
-- Recreate migrations for Postgres
+- Keep `.env` `DATABASE_URL` pointed at Postgres
+- Keep Prisma migrations generated for the `postgresql` provider
 - Add indexes for the hot paths you already have
+- Add backup, restore, and seed workflows that assume Postgres from the start
 
 ### Concrete indexes I would add first
 
@@ -716,10 +714,9 @@ That gives you a very credible small-enterprise architecture without drifting in
 
 ### Phase 1: Make the current app production-shaped
 
-1. Move from SQLite to PostgreSQL
-2. Move sign-in rate limiting to Redis
-3. Replace local sign-in log file with structured logs and security events in Postgres
-4. Add request IDs and structured logging
+1. Move sign-in rate limiting to Redis
+2. Replace local sign-in log file with structured logs and security events in Postgres
+3. Add request IDs and structured logging
 
 ### Phase 2: Add async and consistency patterns
 

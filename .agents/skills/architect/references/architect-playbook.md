@@ -31,7 +31,7 @@ The current stack includes:
 - TypeScript
 - Auth.js
 - Prisma
-- SQLite
+- PostgreSQL
 - Tailwind CSS
 - shadcn/ui
 
