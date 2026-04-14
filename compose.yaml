@@ -26,6 +26,44 @@ services:
       retries: 5
       start_period: 10s
 
+  redis:
+    image: redis:7-alpine
+    container_name: skillforge-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: skillforge-redisinsight
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      RI_REDIS_HOST: redis
+      RI_REDIS_PORT: 6379
+      RI_REDIS_ALIAS: skillforge-local
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight-data:/data
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://127.0.0.1:5540/api/health/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
   pgwatch:
     image: cybertec/pgwatch2-postgres:latest
     container_name: skillforge-pgwatch
@@ -52,3 +90,5 @@ services:
 
 volumes:
   postgres-data:
+  redis-data:
+  redisinsight-data:

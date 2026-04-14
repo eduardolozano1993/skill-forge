@@ -1,54 +1,24 @@
+import { getRedisClient } from "@/lib/redis/redis";
+
 const MAX_FAILURES = 5;
-const WINDOW_MS = 15 * 60 * 1000;
-const BLOCK_MS = 5 * 60 * 1000;
-const MAX_RECORDS = 500;
+const WINDOW_SECONDS = 15 * 60;
+const BLOCK_SECONDS = 5 * 60;
 
-type RateLimitRecord = {
-  attempts: number;
-  firstFailureAt: number;
-  blockedUntil: number | null;
-  updatedAt: number;
-};
+function normalizeIpForRateLimit(ip: string) {
+  const normalizedIp = ip.trim().toLowerCase() || "unknown";
 
-type RateLimitStore = Map<string, RateLimitRecord>;
+  if (
+    normalizedIp === "::1" ||
+    normalizedIp === "127.0.0.1" ||
+    normalizedIp === "::ffff:127.0.0.1"
+  ) {
+    return "localhost";
+  }
 
-const globalForSignInRateLimit = globalThis as typeof globalThis & {
-  signInRateLimitStore?: RateLimitStore;
-};
-
-const signInRateLimitStore =
-  globalForSignInRateLimit.signInRateLimitStore ??
-  new Map<string, RateLimitRecord>();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForSignInRateLimit.signInRateLimitStore = signInRateLimitStore;
+  return normalizedIp;
 }
 
-function pruneExpiredEntries(now: number) {
-  for (const [key, record] of signInRateLimitStore.entries()) {
-    const isExpiredWindow =
-      now - record.updatedAt > WINDOW_MS && !record.blockedUntil;
-    const isExpiredBlock =
-      record.blockedUntil !== null && record.blockedUntil <= now;
-
-    if (isExpiredWindow || isExpiredBlock) {
-      signInRateLimitStore.delete(key);
-    }
-  }
-
-  if (signInRateLimitStore.size <= MAX_RECORDS) {
-    return;
-  }
-
-  const oldestEntries = [...signInRateLimitStore.entries()]
-    .sort((left, right) => left[1].updatedAt - right[1].updatedAt)
-    .slice(0, signInRateLimitStore.size - MAX_RECORDS);
-
-  for (const [key] of oldestEntries) {
-    signInRateLimitStore.delete(key);
-  }
-}
-
+// Extract client IP from headers, considering common proxy headers
 export function getClientIp(headers: Headers) {
   const forwardedFor = headers.get("x-forwarded-for");
 
@@ -61,72 +31,77 @@ export function getClientIp(headers: Headers) {
   );
 }
 
+// Generate a readable, Redis-safe key suffix from normalized email and IP.
 export function getSignInRateLimitKey(email: string, ip: string) {
-  return `${email.trim().toLowerCase()}::${ip}`;
+  const normalizedEmail = encodeURIComponent(email.trim().toLowerCase());
+  const normalizedIp = encodeURIComponent(normalizeIpForRateLimit(ip));
+
+  return `email:${normalizedEmail}:ip:${normalizedIp}`;
 }
 
-export function getRemainingBlockSeconds(key: string) {
-  const now = Date.now();
-
-  pruneExpiredEntries(now);
-
-  const record = signInRateLimitStore.get(key);
-
-  if (!record?.blockedUntil || record.blockedUntil <= now) {
-    return 0;
-  }
-
-  return Math.ceil((record.blockedUntil - now) / 1000);
-}
-
-export function registerFailedSignInAttempt(key: string) {
-  const now = Date.now();
-
-  pruneExpiredEntries(now);
-
-  const existingRecord = signInRateLimitStore.get(key);
-
-  if (
-    existingRecord &&
-    existingRecord.blockedUntil !== null &&
-    existingRecord.blockedUntil > now
-  ) {
-    return {
-      blocked: true,
-      thresholdReached: false,
-      retryAfterSeconds: Math.ceil((existingRecord.blockedUntil - now) / 1000),
-    };
-  }
-
-  const baseRecord =
-    existingRecord && now - existingRecord.firstFailureAt < WINDOW_MS
-      ? existingRecord
-      : {
-          attempts: 0,
-          firstFailureAt: now,
-          blockedUntil: null,
-          updatedAt: now,
-        };
-
-  const attempts = baseRecord.attempts + 1;
-  const blockedUntil = attempts >= MAX_FAILURES ? now + BLOCK_MS : null;
-
-  signInRateLimitStore.set(key, {
-    attempts,
-    firstFailureAt: baseRecord.firstFailureAt,
-    blockedUntil,
-    updatedAt: now,
-  });
-
+// Helper function to generate Redis keys for tracking attempts and blocks
+function getRateLimitRedisKeys(key: string) {
   return {
-    blocked: blockedUntil !== null,
-    thresholdReached: blockedUntil !== null,
-    retryAfterSeconds: blockedUntil
-      ? Math.ceil((blockedUntil - now) / 1000)
-      : 0,
+    attemptsKey: `auth-rate-limited:signin:${key}`,
+    blockKey: `auth-rate-limited:signin:block:${key}`,
   };
 }
 
-export function resetFailedSignInAttempts(key: string) {
-  signInRateLimitStore.delete(key);
+// Check if the user is currently blocked and return remaining block time in seconds
+export async function getRemainingBlockSeconds(key: string) {
+  const client = await getRedisClient();
+  const { blockKey } = getRateLimitRedisKeys(key);
+  const ttl = await client.ttl(blockKey);
+
+  if (ttl <= 0) {
+    return 0;
+  }
+
+  return ttl;
+}
+
+// Register a failed sign-in attempt, incrementing the count and blocking if threshold is reached
+export async function registerFailedSignInAttempt(key: string) {
+  const client = await getRedisClient();
+  const { attemptsKey, blockKey } = getRateLimitRedisKeys(key);
+  const retryAfterSeconds = await client.ttl(blockKey);
+
+  if (retryAfterSeconds > 0) {
+    return {
+      blocked: true,
+      thresholdReached: false,
+      retryAfterSeconds,
+    };
+  }
+
+  const attempts = await client.incr(attemptsKey);
+
+  // Set expiration for the attempts key if it's the first failure
+  await client.expire(attemptsKey, WINDOW_SECONDS, "NX");
+
+  if (attempts >= MAX_FAILURES) {
+    await client.set(blockKey, "1", {
+      EX: BLOCK_SECONDS,
+    });
+
+    return {
+      blocked: true,
+      thresholdReached: true,
+      retryAfterSeconds: BLOCK_SECONDS,
+    };
+  }
+
+  return {
+    blocked: false,
+    thresholdReached: false,
+    retryAfterSeconds: 0,
+  };
+}
+
+// Reset failed attempts and unblock the user after a successful sign-in
+export async function resetFailedSignInAttempts(key: string) {
+  const client = await getRedisClient();
+  const { attemptsKey, blockKey } = getRateLimitRedisKeys(key);
+
+  await client.del([attemptsKey, blockKey]);
 }

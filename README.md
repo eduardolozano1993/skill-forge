@@ -92,10 +92,11 @@ This keeps access control out of client-only code and prevents protected pages f
 The sign-in flow includes server-side abuse controls.
 
 - Email input is normalized before lookup.
-- Failed sign-ins are rate limited per `email + IP`.
+- Failed sign-ins are rate limited per `email + IP` in Redis.
 - The current policy is 5 failed attempts within 15 minutes.
-- On the 5th failed attempt, the key is blocked for 15 minutes.
+- On the 5th failed attempt, the pair is blocked for 5 minutes.
 - A successful sign-in clears the failed-attempt counter.
+- Redis uses `auth-rate-limited:signin:email:<encoded-email>:ip:<encoded-ip>` for the counter and `auth-rate-limited:signin:block:email:<encoded-email>:ip:<encoded-ip>` for the lockout.
 
 When the lockout threshold is reached, the application writes a log entry to `logs/sign_in/lockouts.log`.
 New entries are prepended so the most recent lockout appears first.
@@ -131,8 +132,7 @@ In development, `unsafe-eval` remains allowed because Next.js dev tooling requir
 
 ### Current limitations
 
-- The sign-in rate limiter is in-memory for the current app instance.
-- In a multi-instance deployment, the limiter should move to a shared store such as Redis.
+- Sign-in protection now depends on a reachable Redis instance configured through `REDIS_URL`.
 - `style-src 'unsafe-inline'` is still allowed because tightening CSS execution safely requires more UI-specific verification.
 
 ## Folder Conventions

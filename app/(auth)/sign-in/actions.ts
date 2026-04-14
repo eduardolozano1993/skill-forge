@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 
 import { signIn, signOut } from "@/auth";
@@ -15,7 +16,6 @@ import {
   registerFailedSignInAttempt,
   resetFailedSignInAttempts,
 } from "@/lib/auth/sign-in-rate-limit";
-import { prisma } from "@/lib/prisma/prisma";
 
 export type SignInFormState = {
   error?: string;
@@ -37,12 +37,7 @@ export async function authenticate(
   const requestHeaders = await headers();
   const clientIp = getClientIp(requestHeaders);
   const rateLimitKey = getSignInRateLimitKey(email, clientIp);
-  const retryAfterSeconds = getRemainingBlockSeconds(rateLimitKey);
-  const matchedUser = await prisma.user.findUnique({
-    where: { email },
-    select: { userType: true },
-  });
-
+  const retryAfterSeconds = await getRemainingBlockSeconds(rateLimitKey);
   if (retryAfterSeconds > 0) {
     const retryAfterMinutes = Math.ceil(retryAfterSeconds / 60);
 
@@ -64,25 +59,29 @@ export async function authenticate(
     };
   }
 
+  const redirectTo = authenticatedUser
+    ? getPostSignInRedirect({
+        userType: authenticatedUser.userType,
+        callbackUrl,
+      })
+    : callbackUrl || "/dashboard";
+
   try {
-    await signIn("credentials", {
+    const signInResult = await signIn("credentials", {
       email,
       password,
-      redirectTo: matchedUser
-        ? getPostSignInRedirect({
-            userType: matchedUser.userType,
-            callbackUrl,
-          })
-        : callbackUrl || "/dashboard",
+      redirect: false,
+      redirectTo,
     });
 
-    resetFailedSignInAttempts(rateLimitKey);
+    await resetFailedSignInAttempts(rateLimitKey);
+    redirect(signInResult?.url ?? redirectTo);
   } catch (error) {
     if (error instanceof AuthError) {
       const authError = error as AuthError;
 
       if (authError.type === "CredentialsSignin") {
-        const failedAttempt = registerFailedSignInAttempt(rateLimitKey);
+        const failedAttempt = await registerFailedSignInAttempt(rateLimitKey);
 
         if (failedAttempt.thresholdReached) {
           await logSignInLockout({
