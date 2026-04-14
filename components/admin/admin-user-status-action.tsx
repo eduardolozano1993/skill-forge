@@ -18,14 +18,14 @@ import type { AdminUserStatus } from "@/lib/admin/types";
 
 type AdminUserStatusActionProps = {
   userId: number;
-  displayName: string;
+  name: string;
   status: AdminUserStatus;
   userType: "ADMIN" | "MANAGER" | "EMPLOYEE";
 };
 
 export function AdminUserStatusAction({
   userId,
-  displayName,
+  name,
   status,
   userType,
 }: AdminUserStatusActionProps) {
@@ -81,11 +81,7 @@ export function AdminUserStatusAction({
             ? "size-10 text-emerald-700 hover:bg-emerald-50"
             : "gap-2 bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90"
         }`}
-        aria-label={
-          isDeactivated
-            ? `Reactivate ${displayName}`
-            : `Deactivate ${displayName}`
-        }
+        aria-label={isDeactivated ? `Reactivate ${name}` : `Deactivate ${name}`}
       >
         {isDeactivated ? (
           <LockOpen className="size-4" />
@@ -105,18 +101,12 @@ export function AdminUserStatusAction({
             {isDeactivated ? (
               <>
                 Are you sure you want to reactivate{" "}
-                <span className="font-medium text-text-strong">
-                  {displayName}
-                </span>
-                ?
+                <span className="font-medium text-text-strong">{name}</span>?
               </>
             ) : (
               <>
                 Are you sure you want to deactivate{" "}
-                <span className="font-medium text-text-strong">
-                  {displayName}
-                </span>
-                ?
+                <span className="font-medium text-text-strong">{name}</span>?
               </>
             )}
           </DialogDescription>

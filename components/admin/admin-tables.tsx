@@ -83,9 +83,7 @@ export function AdminUsersTable({ rows }: AdminUsersTableProps) {
           <TableRow key={user.id}>
             <TableCell>
               <div className="space-y-2xs">
-                <p className="font-medium text-text-strong">
-                  {user.displayName}
-                </p>
+                <p className="font-medium text-text-strong">{user.name}</p>
                 <p className="text-sm text-text-soft">{user.email}</p>
               </div>
             </TableCell>
@@ -106,7 +104,7 @@ export function AdminUsersTable({ rows }: AdminUsersTableProps) {
             <TableCell>
               <AdminUserStatusAction
                 userId={user.id}
-                displayName={user.displayName}
+                name={user.name}
                 status={user.status}
                 userType={user.userType}
               />
