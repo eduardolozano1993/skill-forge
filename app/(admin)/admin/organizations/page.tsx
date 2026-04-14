@@ -1,5 +1,4 @@
 import { AdminOrganizationsTable } from "@/components/admin/admin-tables";
-import { AdminUrlSearch } from "@/components/admin/admin-url-search";
 import {
   Card,
   CardContent,
@@ -9,7 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
+import { TableUrlSearch } from "@/components/ui/table-url-search";
 import { getAdminOrganizationsTableData } from "@/lib/admin/data";
+import { getSingleQueryParam } from "@/lib/table/utils";
 
 type AdminOrganizationsPageProps = {
   searchParams?: Promise<{
@@ -17,15 +18,11 @@ type AdminOrganizationsPageProps = {
   }>;
 };
 
-function getSingleSearchParam(value?: string | string[]) {
-  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
-}
-
 export default async function AdminOrganizationsPage({
   searchParams,
 }: AdminOrganizationsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const organizationsSearch = getSingleSearchParam(
+  const organizationsSearch = getSingleQueryParam(
     resolvedSearchParams?.organizations,
   );
   const data = await getAdminOrganizationsTableData(organizationsSearch);
@@ -45,6 +42,13 @@ export default async function AdminOrganizationsPage({
           </p>
         </div>
       </header>
+
+      <TableUrlSearch
+        label="Search organizations"
+        placeholder="Search organizations by name or owner references"
+        paramName="organizations"
+        query={data.search}
+      />
 
       {data.rows.length > 0 ? (
         <AdminOrganizationsTable rows={data.rows} />

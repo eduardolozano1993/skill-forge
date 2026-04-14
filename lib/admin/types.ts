@@ -1,3 +1,5 @@
+import type { TableResult } from "@/lib/table/types";
+
 export type AdminUserStatus = "ACTIVE" | "DEACTIVATED";
 export type AdminOrganizationStatus = "ACTIVE" | "DEACTIVATED";
 export type AdminCourseStatus = "ACTIVE" | "DEACTIVATED";
@@ -45,11 +47,6 @@ export type AdminCourseRow = {
   createdAt: Date;
 };
 
-export type AdminTableResult<Row> = {
-  search: string;
-  rows: Row[];
-};
-
 export type AdminDashboardSearchFilters = {
   usersSearch?: string | null;
   organizationsSearch?: string | null;
@@ -63,7 +60,7 @@ export type AdminSignInLogData = {
 
 export type AdminDashboardData = {
   summary: AdminPlatformSummary;
-  users: AdminTableResult<AdminUserRow>;
-  organizations: AdminTableResult<AdminOrganizationRow>;
-  courses: AdminTableResult<AdminCourseRow>;
+  users: TableResult<AdminUserRow>;
+  organizations: TableResult<AdminOrganizationRow>;
+  courses: TableResult<AdminCourseRow>;
 };

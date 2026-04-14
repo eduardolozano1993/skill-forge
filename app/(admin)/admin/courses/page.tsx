@@ -1,7 +1,8 @@
 import { AdminCoursesTable } from "@/components/admin/admin-tables";
-import { AdminUrlSearch } from "@/components/admin/admin-url-search";
 import { TableEmptyState } from "@/components/ui/table";
+import { TableUrlSearch } from "@/components/ui/table-url-search";
 import { getAdminCoursesTableData } from "@/lib/admin/data";
+import { getSingleQueryParam } from "@/lib/table/utils";
 
 type AdminCoursesPageProps = {
   searchParams?: Promise<{
@@ -9,15 +10,11 @@ type AdminCoursesPageProps = {
   }>;
 };
 
-function getSingleSearchParam(value?: string | string[]) {
-  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
-}
-
 export default async function AdminCoursesPage({
   searchParams,
 }: AdminCoursesPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const coursesSearch = getSingleSearchParam(resolvedSearchParams?.courses);
+  const coursesSearch = getSingleQueryParam(resolvedSearchParams?.courses);
   const data = await getAdminCoursesTableData(coursesSearch);
 
   return (
@@ -36,7 +33,7 @@ export default async function AdminCoursesPage({
         </div>
       </header>
 
-      <AdminUrlSearch
+      <TableUrlSearch
         label="Search courses"
         placeholder="Search courses by title, summary, or status"
         paramName="courses"

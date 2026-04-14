@@ -9,6 +9,8 @@ const COMPANY_COUNT = 100;
 const EMPLOYEE_COUNT = 100000;
 const COURSE_COUNT = 1000;
 const BATCH_SIZE = 1000;
+const ADMIN_EMAIL = "admin@skillforge.com";
+const ADMIN_PASSWORD = "admin";
 const DEFAULT_PASSWORD = "Password123!";
 
 faker.seed(20260414);
@@ -45,6 +47,20 @@ async function resetDatabase() {
   await prisma.organization.deleteMany();
   await prisma.course.deleteMany();
   await prisma.user.deleteMany();
+}
+
+async function createAdmin(hashedPassword) {
+  return prisma.user.create({
+    data: {
+      name: "Skill Forge Admin",
+      displayName: "Admin",
+      email: ADMIN_EMAIL,
+      password: hashedPassword,
+      phone: buildPhoneNumber(),
+      userType: "ADMIN",
+      status: "ACTIVE",
+    },
+  });
 }
 
 async function createManagers(hashedPassword) {
@@ -107,8 +123,8 @@ async function createOrganizations(managers) {
         data: {
           organizationId: organization.id,
         },
-      })
-    )
+      }),
+    ),
   );
 
   return createdOrganizations;
@@ -118,25 +134,31 @@ async function createEmployees(organizations, hashedPassword) {
   let createdEmployees = 0;
 
   while (createdEmployees < EMPLOYEE_COUNT) {
-    const currentBatchSize = Math.min(BATCH_SIZE, EMPLOYEE_COUNT - createdEmployees);
+    const currentBatchSize = Math.min(
+      BATCH_SIZE,
+      EMPLOYEE_COUNT - createdEmployees,
+    );
 
-    const employees = Array.from({ length: currentBatchSize }, (_, batchIndex) => {
-      const employeeNumber = createdEmployees + batchIndex + 1;
-      const firstName = faker.person.firstName();
-      const lastName = faker.person.lastName();
-      const organization = faker.helpers.arrayElement(organizations);
+    const employees = Array.from(
+      { length: currentBatchSize },
+      (_, batchIndex) => {
+        const employeeNumber = createdEmployees + batchIndex + 1;
+        const firstName = faker.person.firstName();
+        const lastName = faker.person.lastName();
+        const organization = faker.helpers.arrayElement(organizations);
 
-      return {
-        organizationId: organization.id,
-        name: `${firstName} ${lastName}`,
-        displayName: firstName,
-        email: `employee${employeeNumber}@seed.skillforge.local`,
-        password: hashedPassword,
-        phone: buildPhoneNumber(),
-        userType: "EMPLOYEE",
-        status: "ACTIVE",
-      };
-    });
+        return {
+          organizationId: organization.id,
+          name: `${firstName} ${lastName}`,
+          displayName: firstName,
+          email: `employee${employeeNumber}@seed.skillforge.local`,
+          password: hashedPassword,
+          phone: buildPhoneNumber(),
+          userType: "EMPLOYEE",
+          status: "ACTIVE",
+        };
+      },
+    );
 
     await prisma.user.createMany({
       data: employees,
@@ -166,7 +188,11 @@ async function main() {
   console.log("Resetting database...");
   await resetDatabase();
 
+  const hashedAdminPassword = await hash(ADMIN_PASSWORD, 12);
   const hashedPassword = await hash(DEFAULT_PASSWORD, 12);
+
+  console.log("Creating admin...");
+  await createAdmin(hashedAdminPassword);
 
   console.log("Creating managers...");
   const managers = await createManagers(hashedPassword);
@@ -184,15 +210,18 @@ async function main() {
   console.log(
     JSON.stringify(
       {
+        admins: 1,
         managers: MANAGER_COUNT,
         organizations: COMPANY_COUNT,
         employees: EMPLOYEE_COUNT,
         courses: COURSE_COUNT,
+        adminEmail: ADMIN_EMAIL,
+        adminPassword: ADMIN_PASSWORD,
         defaultPassword: DEFAULT_PASSWORD,
       },
       null,
-      2
-    )
+      2,
+    ),
   );
 }
 

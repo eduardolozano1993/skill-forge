@@ -45,6 +45,7 @@ model User {
   bookmarks          Bookmark[]
   completedCourses   CompletedCourse[]
 
+  @@index([organizationId])
   @@map("users")
 }
 

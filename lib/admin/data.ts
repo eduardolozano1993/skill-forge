@@ -1,8 +1,15 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { Prisma } from "@prisma/client";
 
 import { requireAdmin } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma/prisma";
+import {
+  buildTablePagination,
+  DEFAULT_TABLE_PAGE_SIZE,
+  normalizeTablePage,
+  normalizeTableSearch,
+} from "@/lib/table/utils";
 import type {
   AdminCourseRow,
   AdminDashboardData,
@@ -10,9 +17,9 @@ import type {
   AdminOrganizationRow,
   AdminPlatformSummary,
   AdminSignInLogData,
-  AdminTableResult,
   AdminUserRow,
 } from "@/lib/admin/types";
+import type { TableResult } from "@/lib/table/types";
 
 const SIGN_IN_LOG_FILE = path.join(
   process.cwd(),
@@ -20,10 +27,6 @@ const SIGN_IN_LOG_FILE = path.join(
   "sign_in",
   "lockouts.log",
 );
-
-function normalizeSearchQuery(search?: string | null) {
-  return search?.trim() ?? "";
-}
 
 function matchesSearch(search: string, values: Array<string | number | null>) {
   if (!search) {
@@ -81,9 +84,42 @@ async function fetchAdminPlatformSummary(): Promise<AdminPlatformSummary> {
 
 async function fetchAdminUsersTableData(
   search?: string | null,
-): Promise<AdminTableResult<AdminUserRow>> {
-  const normalizedSearch = normalizeSearchQuery(search);
+  page?: number | null,
+): Promise<TableResult<AdminUserRow>> {
+  const normalizedSearch = normalizeTableSearch(search);
+  const normalizedPage = normalizeTablePage(page);
+  const where: Prisma.UserWhereInput = normalizedSearch
+    ? {
+        OR: [
+          {
+            name: {
+              contains: normalizedSearch,
+              mode: "insensitive",
+            },
+          },
+          {
+            email: {
+              contains: normalizedSearch,
+              mode: "insensitive",
+            },
+          },
+        ],
+      }
+    : {};
+
+  const totalRows = await prisma.user.count({
+    where,
+  });
+  const pagination = buildTablePagination(
+    totalRows,
+    normalizedPage,
+    DEFAULT_TABLE_PAGE_SIZE,
+  );
+  const skip =
+    totalRows === 0 ? 0 : (pagination.page - 1) * pagination.pageSize;
+
   const users = await prisma.user.findMany({
+    where,
     select: {
       id: true,
       name: true,
@@ -100,47 +136,42 @@ async function fetchAdminUsersTableData(
         },
       },
     },
+    orderBy: [
+      {
+        name: "asc",
+      },
+      {
+        id: "asc",
+      },
+    ],
+    skip,
+    take: pagination.pageSize,
   });
 
-  const rows = users
-    .map<AdminUserRow>((user) => ({
-      id: user.id,
-      name: user.name,
-      displayName: user.displayName,
-      email: user.email,
-      phone: user.phone,
-      userType: user.userType,
-      status: user.status,
-      organizationId: user.organization?.id ?? null,
-      organizationName: user.organization?.name ?? null,
-      createdAt: user.createdAt,
-    }))
-    .filter((user) =>
-      matchesSearch(normalizedSearch, [
-        user.id,
-        user.name,
-        user.displayName,
-        user.email,
-        user.phone,
-        user.userType,
-        user.status,
-        user.organizationName,
-      ]),
-    )
-    .sort((left, right) =>
-      sortByTextAndId(left.displayName, right.displayName, left, right),
-    );
+  const rows = users.map<AdminUserRow>((user) => ({
+    id: user.id,
+    name: user.name,
+    displayName: user.displayName,
+    email: user.email,
+    phone: user.phone,
+    userType: user.userType,
+    status: user.status,
+    organizationId: user.organization?.id ?? null,
+    organizationName: user.organization?.name ?? null,
+    createdAt: user.createdAt,
+  }));
 
   return {
     search: normalizedSearch,
     rows,
+    pagination,
   };
 }
 
 async function fetchAdminOrganizationsTableData(
   search?: string | null,
-): Promise<AdminTableResult<AdminOrganizationRow>> {
-  const normalizedSearch = normalizeSearchQuery(search);
+): Promise<TableResult<AdminOrganizationRow>> {
+  const normalizedSearch = normalizeTableSearch(search);
   const organizations = await prisma.organization.findMany({
     select: {
       id: true,
@@ -195,8 +226,8 @@ async function fetchAdminOrganizationsTableData(
 
 async function fetchAdminCoursesTableData(
   search?: string | null,
-): Promise<AdminTableResult<AdminCourseRow>> {
-  const normalizedSearch = normalizeSearchQuery(search);
+): Promise<TableResult<AdminCourseRow>> {
+  const normalizedSearch = normalizeTableSearch(search);
   const courses = await prisma.course.findMany({
     select: {
       id: true,
@@ -246,9 +277,12 @@ export async function getAdminPlatformSummary() {
   return fetchAdminPlatformSummary();
 }
 
-export async function getAdminUsersTableData(search?: string | null) {
+export async function getAdminUsersTableData(
+  search?: string | null,
+  page?: number | null,
+) {
   await requireAdmin();
-  return fetchAdminUsersTableData(search);
+  return fetchAdminUsersTableData(search, page);
 }
 
 export async function getAdminOrganizationsTableData(search?: string | null) {

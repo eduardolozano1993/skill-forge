@@ -5,19 +5,21 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 
-type AdminUrlSearchProps = {
+type TableUrlSearchProps = {
   label: string;
   placeholder: string;
   paramName: string;
   query: string;
+  resetParams?: string[];
 };
 
-export function AdminUrlSearch({
+export function TableUrlSearch({
   label,
   placeholder,
   paramName,
   query,
-}: AdminUrlSearchProps) {
+  resetParams = [],
+}: TableUrlSearchProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,6 +39,10 @@ export function AdminUrlSearch({
       params.set(paramName, nextValue);
     } else {
       params.delete(paramName);
+    }
+
+    for (const resetParam of resetParams) {
+      params.delete(resetParam);
     }
 
     const nextQuery = params.toString();
