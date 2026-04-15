@@ -6,6 +6,16 @@ export type CourseDetail = {
   status: "ACTIVE" | "DEACTIVATED";
 };
 
+export type AdminTableCourseRow = {
+  id: number;
+  name: string;
+  summary: string;
+  status: "ACTIVE" | "DEACTIVATED";
+  assignedOrganizationCount: number;
+  completedUserCount: number;
+  bookmarkCount: number;
+};
+
 // TODO: review
 export type AppCourse = {
   id: number;

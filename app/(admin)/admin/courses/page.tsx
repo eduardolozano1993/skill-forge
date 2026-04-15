@@ -1,7 +1,8 @@
 import { AdminCoursesTable } from "@/components/admin/admin-tables";
 import { TableEmptyState } from "@/components/ui/table";
 import { TableUrlSearch } from "@/components/ui/table-url-search";
-import { getAdminCoursesTableData } from "@/lib/admin/data";
+import { getAdminCoursesTableData } from "@/lib/courses/temp/services";
+
 import { getSingleQueryParam } from "@/lib/table/utils";
 
 type AdminCoursesPageProps = {
@@ -15,7 +16,7 @@ export default async function AdminCoursesPage({
 }: AdminCoursesPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const coursesSearch = getSingleQueryParam(resolvedSearchParams?.courses);
-  const data = await getAdminCoursesTableData(coursesSearch);
+  const { courses, search } = await getAdminCoursesTableData(coursesSearch);
 
   return (
     <section className="space-y-lg">
@@ -37,16 +38,16 @@ export default async function AdminCoursesPage({
         label="Search courses"
         placeholder="Search courses by title, summary, or status"
         paramName="courses"
-        query={data.search}
+        query={search}
       />
 
-      {data.rows.length > 0 ? (
-        <AdminCoursesTable rows={data.rows} />
+      {courses.length > 0 ? (
+        <AdminCoursesTable rows={courses} />
       ) : (
         <TableEmptyState
           title="No courses found"
           description={
-            data.search
+            search
               ? "Try a different courses search term."
               : "Courses will appear here once they are created."
           }

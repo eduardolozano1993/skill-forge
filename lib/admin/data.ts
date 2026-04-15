@@ -11,19 +11,20 @@ import {
 import {
   buildTablePagination,
   DEFAULT_TABLE_PAGE_SIZE,
+  matchesSearch,
   normalizeTablePage,
   normalizeTableSearch,
 } from "@/lib/table/utils";
 import type {
-  AdminCourseRow,
   AdminDashboardData,
   AdminDashboardSearchFilters,
-  AdminOrganizationRow,
   AdminPlatformSummary,
   AdminSignInLogData,
   AdminUserRow,
 } from "@/lib/admin/types";
 import type { TableResult } from "@/lib/table/types";
+import { AdminTableCourseRow } from "../courses/temp/types";
+import { sortByTextAndId } from "../utils/textSort";
 
 const SIGN_IN_LOG_FILE = path.join(
   process.cwd(),
@@ -31,35 +32,6 @@ const SIGN_IN_LOG_FILE = path.join(
   "sign_in",
   "lockouts.log",
 );
-
-function matchesSearch(search: string, values: Array<string | number | null>) {
-  if (!search) {
-    return true;
-  }
-
-  const normalizedSearch = search.toLocaleLowerCase();
-
-  return values.some((value) =>
-    String(value ?? "")
-      .toLocaleLowerCase()
-      .includes(normalizedSearch),
-  );
-}
-
-function sortByTextAndId<T extends { id: number }>(
-  leftLabel: string,
-  rightLabel: string,
-  left: T,
-  right: T,
-) {
-  const nameComparison = leftLabel.localeCompare(rightLabel);
-
-  if (nameComparison !== 0) {
-    return nameComparison;
-  }
-
-  return left.id - right.id;
-}
 
 async function fetchAdminPlatformSummary(): Promise<AdminPlatformSummary> {
   const [totalUsers, totalCourses, totalOrganizations, totalCompletedCourses] =
@@ -168,65 +140,9 @@ async function fetchAdminUsersTableData(
   };
 }
 
-async function fetchAdminOrganizationsTableData(
-  search?: string | null,
-): Promise<TableResult<AdminOrganizationRow>> {
-  const normalizedSearch = normalizeTableSearch(search);
-  const organizations = await prisma.organization.findMany({
-    select: {
-      id: true,
-      name: true,
-      status: true,
-      createdAt: true,
-      owner: {
-        select: {
-          id: true,
-          displayName: true,
-          email: true,
-        },
-      },
-      _count: {
-        select: {
-          users: true,
-          courses: true,
-        },
-      },
-    },
-  });
-
-  const rows = organizations
-    .map<AdminOrganizationRow>((organization) => ({
-      id: organization.id,
-      name: organization.name,
-      status: organization.status,
-      ownerUserId: organization.owner.id,
-      ownerDisplayName: organization.owner.displayName,
-      ownerEmail: organization.owner.email,
-      memberCount: organization._count.users,
-      assignedCourseCount: organization._count.courses,
-      createdAt: organization.createdAt,
-    }))
-    .filter((organization) =>
-      matchesSearch(normalizedSearch, [
-        organization.id,
-        organization.name,
-        organization.status,
-        organization.ownerUserId,
-        organization.ownerDisplayName,
-        organization.ownerEmail,
-      ]),
-    )
-    .sort((left, right) => sortByTextAndId(left.name, right.name, left, right));
-
-  return {
-    search: normalizedSearch,
-    rows,
-  };
-}
-
 async function fetchAdminCoursesTableData(
   search?: string | null,
-): Promise<TableResult<AdminCourseRow>> {
+): Promise<TableResult<AdminTableCourseRow>> {
   const normalizedSearch = normalizeTableSearch(search);
   const courses = await prisma.course.findMany({
     select: {
@@ -246,7 +162,7 @@ async function fetchAdminCoursesTableData(
   });
 
   const rows = courses
-    .map<AdminCourseRow>((course) => ({
+    .map<AdminTableCourseRow>((course) => ({
       id: course.id,
       name: course.name,
       summary: course.summary,
@@ -288,11 +204,6 @@ export async function getAdminUsersTableData(
   return fetchAdminUsersTableData(search, page);
 }
 
-export async function getAdminOrganizationsTableData(search?: string | null) {
-  await requireAdmin();
-  return fetchAdminOrganizationsTableData(search);
-}
-
 export async function getAdminCoursesTableData(search?: string | null) {
   await requireAdmin();
   return fetchAdminCoursesTableData(search);
@@ -303,22 +214,23 @@ export async function getAdminDashboardData(
 ): Promise<AdminDashboardData> {
   await requireAdmin();
 
-  const [summary, users, organizations, courses] = await Promise.all([
-    readThroughJsonCache(
-      ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
-      fetchAdminPlatformSummary,
-    ),
-    fetchAdminUsersTableData(filters.usersSearch),
-    fetchAdminOrganizationsTableData(filters.organizationsSearch),
-    fetchAdminCoursesTableData(filters.coursesSearch),
-  ]);
+  // const [summary, users, organizations, courses] = await Promise.all([
+  //   readThroughJsonCache(
+  //     ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+  //     fetchAdminPlatformSummary,
+  //   ),
+  //   fetchAdminUsersTableData(filters.usersSearch),
+  //   // fetchAdminOrganizationsTableData(filters.organizationsSearch),
+  //   fetchAdminCoursesTableData(filters.coursesSearch),
+  // ]);
 
-  return {
-    summary,
-    users,
-    organizations,
-    courses,
-  };
+  // return {
+  //   summary,
+  //   users,
+  //   organizations,
+  //   courses,
+  // };
+  return {} as AdminDashboardData;
 }
 
 export async function getAdminSignInLogData(

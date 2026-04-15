@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma/prisma";
 import { readThroughJsonCache } from "@/lib/redis/cache";
-import { CourseDetail } from "./types";
+import { AdminTableCourseRow, CourseDetail } from "./types";
 import { getCourseByIdCacheKey } from "./utils";
+import { matchesSearch } from "@/lib/table/utils";
+import { sortByTextAndId } from "@/lib/utils/textSort";
 
 const courseDetailSelect = {
   id: true,
@@ -10,6 +12,49 @@ const courseDetailSelect = {
   content: true,
   status: true,
 } as const;
+
+export async function queryCourses(search: string) {
+  let courses;
+
+  courses = await prisma.course.findMany({
+    select: {
+      id: true,
+      name: true,
+      summary: true,
+      status: true,
+      _count: {
+        select: {
+          organizations: true,
+          completedByUsers: true,
+          bookmarks: true,
+        },
+      },
+    },
+  });
+
+  courses = courses.map<AdminTableCourseRow>((course) => ({
+    id: course.id,
+    name: course.name,
+    summary: course.summary,
+    status: course.status,
+    assignedOrganizationCount: course._count.organizations,
+    completedUserCount: course._count.completedByUsers,
+    bookmarkCount: course._count.bookmarks,
+  }));
+
+  if (search.trim().length) {
+    courses = courses.filter((course) => matchesSearch(search, [course.name]));
+  }
+
+  courses = courses.sort((left, right) =>
+    sortByTextAndId(left.name, right.name, left, right),
+  );
+
+  return {
+    search,
+    courses,
+  };
+}
 
 async function queryCourseById(courseId: number): Promise<CourseDetail | null> {
   return prisma.course.findUnique({

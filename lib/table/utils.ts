@@ -10,6 +10,23 @@ export function normalizeTableSearch(search?: string | null) {
   return search?.trim() ?? "";
 }
 
+export function matchesSearch(
+  search: string,
+  values: Array<string | number | null>,
+) {
+  if (!search) {
+    return true;
+  }
+
+  const normalizedSearch = search.toLocaleLowerCase();
+
+  return values.some((value) =>
+    String(value ?? "")
+      .toLocaleLowerCase()
+      .includes(normalizedSearch),
+  );
+}
+
 export function parsePageQueryParam(value?: string | string[]) {
   const rawValue = getSingleQueryParam(value);
   const parsedPage = Number.parseInt(rawValue, 10);

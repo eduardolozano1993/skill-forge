@@ -7,7 +7,6 @@ import { requireAdmin } from "@/lib/auth/auth";
 import {
   getAdminCoursesTableData,
   getAdminDashboardData,
-  getAdminOrganizationsTableData,
   getAdminPlatformSummary,
   getAdminSignInLogData,
   getAdminUsersTableData,
@@ -85,12 +84,6 @@ export async function getAdminDashboardDataAction(
 
 export async function getAdminUsersTableDataAction(search?: string | null) {
   return getAdminUsersTableData(parseTableSearch(search));
-}
-
-export async function getAdminOrganizationsTableDataAction(
-  search?: string | null,
-) {
-  return getAdminOrganizationsTableData(parseTableSearch(search));
 }
 
 export async function getAdminCoursesTableDataAction(search?: string | null) {
