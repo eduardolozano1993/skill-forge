@@ -5,7 +5,8 @@ import type {
 import { isAdmin } from "@/lib/utils/checkUserType";
 import { findActiveCoursesById, findCourseById, queryCourses } from "./queries";
 import { requireAdmin } from "@/lib/auth/auth";
-import { normalizeTableSearch } from "@/lib/table/utils";
+import { normalizeTablePage, normalizeTableSearch } from "@/lib/table/utils";
+import type { TableResult } from "@/lib/table/types";
 
 export async function getCourseById(
   courseId: number,
@@ -28,13 +29,12 @@ export async function getCourseById(
 
 export async function getAdminCoursesTableData(
   search?: string | null,
-): Promise<{
-  search: string;
-  courses: AdminTableCourseRow[];
-}> {
+  page?: number | null,
+): Promise<TableResult<AdminTableCourseRow>> {
   await requireAdmin();
 
   const normalizedSearch = normalizeTableSearch(search);
+  const normalizedPage = normalizeTablePage(page);
 
-  return await queryCourses(normalizedSearch);
+  return await queryCourses(normalizedSearch, normalizedPage);
 }

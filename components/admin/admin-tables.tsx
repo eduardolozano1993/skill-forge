@@ -9,11 +9,8 @@ import {
 import { AdminOrganizationStatusAction } from "@/components/admin/admin-organization-status-action";
 import { AdminCourseActions } from "@/components/admin/admin-course-actions";
 import { AdminUserStatusAction } from "@/components/admin/admin-user-status-action";
-import type {
-  AdminCourseRow,
-  AdminOrganizationRow,
-  AdminUserRow,
-} from "@/lib/admin/types";
+import type { AdminOrganizationRow, AdminUserRow } from "@/lib/admin/types";
+import { AdminTableCourseRow } from "@/lib/courses/temp/types";
 
 type AdminUsersTableProps = {
   rows: AdminUserRow[];
@@ -24,7 +21,7 @@ type AdminOrganizationsTableProps = {
 };
 
 type AdminCoursesTableProps = {
-  rows: AdminCourseRow[];
+  rows: AdminTableCourseRow[];
 };
 
 function formatDate(date: Date) {
@@ -51,7 +48,7 @@ function getOrganizationStatusPillClasses(
     : "border border-red-200 bg-red-50 text-red-700";
 }
 
-function getCourseStatusPillClasses(status: AdminCourseRow["status"]) {
+function getCourseStatusPillClasses(status: AdminTableCourseRow["status"]) {
   return status === "ACTIVE"
     ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border border-red-200 bg-red-50 text-red-700";
@@ -61,7 +58,7 @@ function getOrganizationStatusLabel(status: AdminOrganizationRow["status"]) {
   return status === "ACTIVE" ? "Active" : "Deactivated";
 }
 
-function getCourseStatusLabel(status: AdminCourseRow["status"]) {
+function getCourseStatusLabel(status: AdminTableCourseRow["status"]) {
   return status === "ACTIVE" ? "Active" : "Deactivated";
 }
 
@@ -200,7 +197,6 @@ export function AdminCoursesTable({ rows }: AdminCoursesTableProps) {
             <TableCell>
               <div className="space-y-2xs">
                 <p className="font-medium text-text-strong">{course.name}</p>
-                <p className="text-sm text-text-soft">{course.summary}</p>
               </div>
             </TableCell>
             <TableCell>

@@ -1,9 +1,13 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma/prisma";
 import { readThroughJsonCache } from "@/lib/redis/cache";
 import { AdminTableCourseRow, CourseDetail } from "./types";
 import { getCourseByIdCacheKey } from "./utils";
-import { matchesSearch } from "@/lib/table/utils";
-import { sortByTextAndId } from "@/lib/utils/textSort";
+import {
+  buildTablePagination,
+  DEFAULT_TABLE_PAGE_SIZE,
+} from "@/lib/table/utils";
+import type { TableResult } from "@/lib/table/types";
 
 const courseDetailSelect = {
   id: true,
@@ -13,10 +17,34 @@ const courseDetailSelect = {
   status: true,
 } as const;
 
-export async function queryCourses(search: string) {
-  let courses;
+export async function queryCourses(
+  search: string,
+  page: number,
+): Promise<TableResult<AdminTableCourseRow>> {
+  const where: Prisma.CourseWhereInput = search
+    ? {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      }
+    : {};
 
-  courses = await prisma.course.findMany({
+  const totalRows = await prisma.course.count({
+    where,
+  });
+
+  const pagination = buildTablePagination(
+    totalRows,
+    page,
+    DEFAULT_TABLE_PAGE_SIZE,
+  );
+
+  const skip =
+    totalRows === 0 ? 0 : (pagination.page - 1) * pagination.pageSize;
+
+  const courses = await prisma.course.findMany({
+    where,
     select: {
       id: true,
       name: true,
@@ -30,9 +58,19 @@ export async function queryCourses(search: string) {
         },
       },
     },
+    orderBy: [
+      {
+        name: "asc",
+      },
+      {
+        id: "asc",
+      },
+    ],
+    skip,
+    take: pagination.pageSize,
   });
 
-  courses = courses.map<AdminTableCourseRow>((course) => ({
+  const rows = courses.map<AdminTableCourseRow>((course) => ({
     id: course.id,
     name: course.name,
     summary: course.summary,
@@ -42,17 +80,10 @@ export async function queryCourses(search: string) {
     bookmarkCount: course._count.bookmarks,
   }));
 
-  if (search.trim().length) {
-    courses = courses.filter((course) => matchesSearch(search, [course.name]));
-  }
-
-  courses = courses.sort((left, right) =>
-    sortByTextAndId(left.name, right.name, left, right),
-  );
-
   return {
-    search,
-    courses,
+    search: search,
+    rows,
+    pagination,
   };
 }
 
