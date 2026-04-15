@@ -1,21 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { notFound, redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma/prisma";
-import { requireAdmin, requireAuth, requireEmployee } from "@/lib/auth/auth";
+import { requireAuth, requireEmployee } from "@/lib/auth/auth";
 import {
   deleteCacheKeys,
   getCourseDetailActionStateCacheKey,
   getManagerDashboardCacheKey,
 } from "@/lib/redis/cache";
 import type { AppCourse, DashboardCourses } from "@/lib/courses/temp/types";
-import { isAdmin } from "../utils/checkUserType";
-import {
-  toggleCourseSelectionSchema,
-  updateCourseContentSchema,
-} from "./schemas";
+import { toggleCourseSelectionSchema } from "./temp/schemas";
 
 function serializeCourses({
   courses,
@@ -358,48 +353,4 @@ export async function toggleCourseCompletionAction(courseId: number) {
     success: true,
     isCompleted: !courseSelection.isCompleted,
   };
-}
-
-export async function updateCourseContentAction(formData: FormData) {
-  await requireAdmin();
-
-  const parsedPayload = updateCourseContentSchema.safeParse({
-    courseId: formData.get("courseId"),
-    content: formData.get("content"),
-  });
-
-  if (!parsedPayload.success) {
-    notFound();
-  }
-
-  const { courseId, content } = parsedPayload.data;
-
-  const existingCourse = await prisma.course.findUnique({
-    where: {
-      id: courseId,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!existingCourse) {
-    notFound();
-  }
-
-  await prisma.course.update({
-    where: {
-      id: courseId,
-    },
-    data: {
-      content,
-    },
-  });
-
-  revalidatePath("/dashboard");
-  revalidatePath("/courses");
-  revalidatePath(`/courses/${courseId}`);
-  revalidatePath(`/admin/courses/${courseId}/edit`);
-
-  redirect(`/courses/${courseId}`);
 }

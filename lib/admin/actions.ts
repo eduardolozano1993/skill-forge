@@ -20,6 +20,7 @@ import {
   deleteCacheKeysByPattern,
   getManagerDashboardCacheKey,
 } from "@/lib/redis/cache";
+import { getCourseByIdCacheKey } from "../courses/temp/utils";
 
 const adminSearchFiltersSchema = z.object({
   usersSearch: z.string().optional().nullable(),
@@ -99,7 +100,9 @@ export async function getAdminCoursesTableDataAction(search?: string | null) {
 export async function getAdminSignInLogDataAction(limit?: number) {
   const parsedLimit = adminLogLimitSchema.safeParse({ limit });
 
-  return getAdminSignInLogData(parsedLimit.success ? parsedLimit.data.limit : 500);
+  return getAdminSignInLogData(
+    parsedLimit.success ? parsedLimit.data.limit : 500,
+  );
 }
 
 export async function updateAdminUserStatusAction(
@@ -136,7 +139,8 @@ export async function updateAdminUserStatusAction(
 
   if (user.userType === "ADMIN") {
     return {
-      error: "Admin accounts cannot be deactivated or activated from this table.",
+      error:
+        "Admin accounts cannot be deactivated or activated from this table.",
     };
   }
 
@@ -162,7 +166,9 @@ export async function updateAdminUserStatusAction(
 
   await deleteCacheKeys([
     ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
-    user.organizationId ? getManagerDashboardCacheKey(user.organizationId) : null,
+    user.organizationId
+      ? getManagerDashboardCacheKey(user.organizationId)
+      : null,
   ]);
 
   revalidatePath("/admin");
@@ -269,7 +275,10 @@ export async function updateAdminCourseStatusAction(
   courseId: number,
   status: "ACTIVE" | "DEACTIVATED",
 ) {
-  const parsedPayload = updateCourseStatusSchema.safeParse({ courseId, status });
+  const parsedPayload = updateCourseStatusSchema.safeParse({
+    courseId,
+    status,
+  });
 
   if (!parsedPayload.success) {
     return {
@@ -316,7 +325,10 @@ export async function updateAdminCourseStatusAction(
   });
 
   await Promise.all([
-    deleteCacheKeys([ADMIN_PLATFORM_SUMMARY_CACHE_KEY]),
+    deleteCacheKeys([
+      ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+      getCourseByIdCacheKey(course.id),
+    ]),
     deleteCacheKeysByPattern([`cache:course:${course.id}:detail:*`]),
   ]);
 

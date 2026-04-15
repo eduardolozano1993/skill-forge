@@ -38,7 +38,7 @@ export type AdminOrganizationRow = {
 
 export type AdminCourseRow = {
   id: number;
-  title: string;
+  name: string;
   summary: string;
   status: AdminCourseStatus;
   assignedOrganizationCount: number;

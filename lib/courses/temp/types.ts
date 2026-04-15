@@ -3,6 +3,7 @@ export type CourseDetail = {
   name: string;
   summary: string;
   content: string;
+  status: "ACTIVE" | "DEACTIVATED";
 };
 
 // TODO: review

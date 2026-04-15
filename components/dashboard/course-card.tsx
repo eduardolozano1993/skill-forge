@@ -12,7 +12,7 @@ import {
 import { CardDescription, CardTitle } from "@/components/ui/card";
 
 type CourseCardProps = {
-  title: string;
+  name: string;
   summary: string;
   href?: string;
   isBookmarked?: boolean;
@@ -26,7 +26,7 @@ type CourseCardProps = {
 };
 
 export function CourseCard({
-  title,
+  name,
   summary,
   href,
   isBookmarked = false,
@@ -43,8 +43,7 @@ export function CourseCard({
   const isClickable = Boolean(href);
   const showCourseActions = pathname.startsWith("/courses");
   const showOrganizationIcon = isAssigned && showCourseActions;
-  const shouldShowBookmarkAction =
-    showBookmarkAction ?? showCourseActions;
+  const shouldShowBookmarkAction = showBookmarkAction ?? showCourseActions;
   const shouldShowCompletedAction = showCompletedAction ?? true;
   const showBookmarkIcon =
     shouldShowBookmarkAction && !showOrganizationIcon && isBookmarked;
@@ -113,10 +112,7 @@ export function CourseCard({
                   }
                   className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Bookmark
-                    className="size-4"
-                    fill="currentColor"
-                  />
+                  <Bookmark className="size-4" fill="currentColor" />
                 </button>
               ) : null}
               {shouldShowCompletedAction && onCompletedToggle ? (
@@ -145,7 +141,7 @@ export function CourseCard({
             </div>
           </div>
           <CardTitle className="line-clamp-2 font-heading text-lg text-text-strong">
-            {title}
+            {name}
           </CardTitle>
         </div>
       </DashboardItemHeader>

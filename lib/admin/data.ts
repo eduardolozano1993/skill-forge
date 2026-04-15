@@ -248,7 +248,7 @@ async function fetchAdminCoursesTableData(
   const rows = courses
     .map<AdminCourseRow>((course) => ({
       id: course.id,
-      title: course.name,
+      name: course.name,
       summary: course.summary,
       status: course.status,
       assignedOrganizationCount: course._count.organizations,
@@ -264,9 +264,7 @@ async function fetchAdminCoursesTableData(
         course.status,
       ]),
     )
-    .sort((left, right) =>
-      sortByTextAndId(left.title, right.title, left, right),
-    );
+    .sort((left, right) => sortByTextAndId(left.name, right.name, left, right));
 
   return {
     search: normalizedSearch,

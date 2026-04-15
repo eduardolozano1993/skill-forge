@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { updateCourseContentAction } from "@/lib/courses/actions";
+import { updateCourseContentAction } from "@/lib/courses/temp/actions";
 import type { CourseDetail } from "@/lib/courses/temp/types";
 import { cn } from "@/lib/tailwind/utils";
+import { Button } from "@/components/ui/button";
 
 type CourseEditFormProps = {
   course: CourseDetail;
