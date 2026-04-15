@@ -90,7 +90,7 @@ export function ManagerAssignedCoursesTable({
           {courses.map((course) => (
             <TableRow key={course.courseId}>
               <TableCell className="font-medium text-text-strong">
-                {course.courseTitle}
+                {course.courseName}
               </TableCell>
               <TableCell className="text-text-soft">
                 {course.completedEmployees}/{course.totalEmployees} (
@@ -129,7 +129,7 @@ export function ManagerAssignedCoursesTable({
               <DialogDescription>
                 Are you sure you want to remove{" "}
                 <span className="font-medium text-text-strong">
-                  {selectedCourse.courseTitle}
+                  {selectedCourse.courseName}
                 </span>{" "}
                 from the organization?
               </DialogDescription>

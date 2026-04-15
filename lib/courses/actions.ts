@@ -2,38 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { z } from "zod";
 
 import { prisma } from "@/lib/prisma/prisma";
 import { requireAdmin, requireAuth, requireEmployee } from "@/lib/auth/auth";
-import type { AppCourse, DashboardCourses } from "@/lib/courses/types";
-
-const updateCourseContentSchema = z.object({
-  courseId: z.coerce.number().int().positive(),
-  content: z.string().trim().min(1, "Course content is required."),
-});
-
-const toggleCourseSelectionSchema = z.object({
-  courseId: z.number().int().positive(),
-});
-
-function getCourseContentText(content: unknown) {
-  if (typeof content === "string") {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    return content
-      .filter((item): item is string => typeof item === "string")
-      .join("\n\n");
-  }
-
-  if (content && typeof content === "object") {
-    return JSON.stringify(content, null, 2);
-  }
-
-  return "";
-}
+import {
+  deleteCacheKeys,
+  getCourseDetailActionStateCacheKey,
+  getManagerDashboardCacheKey,
+} from "@/lib/redis/cache";
+import type { AppCourse, DashboardCourses } from "@/lib/courses/temp/types";
+import { isAdmin } from "../utils/checkUserType";
+import {
+  toggleCourseSelectionSchema,
+  updateCourseContentSchema,
+} from "./schemas";
 
 function serializeCourses({
   courses,
@@ -43,15 +25,15 @@ function serializeCourses({
     id: number;
     name: string;
     summary: string;
-    content: unknown;
+    content: string;
   }>;
   assignedCourseIds: Set<number>;
 }) {
   return courses.map<AppCourse>((course) => ({
     id: course.id,
-    title: course.name,
+    name: course.name,
     summary: course.summary,
-    content: getCourseContentText(course.content),
+    content: course.content,
     isAssigned: assignedCourseIds.has(course.id),
   }));
 }
@@ -184,6 +166,7 @@ async function requireEmployeeCourseSelection(courseId: number) {
 
   return {
     userId,
+    organizationId,
     courseId,
     isBookmarked: Boolean(existingBookmark),
     isCompleted: Boolean(existingCompletion),
@@ -193,6 +176,7 @@ async function requireEmployeeCourseSelection(courseId: number) {
 async function requireEmployeeCourseBookmarkSelection(courseId: number) {
   const session = await requireEmployee();
   const userId = Number(session.user.id);
+  const organizationId = session.user.organizationId;
 
   const [course, existingBookmark] = await Promise.all([
     prisma.course.findUnique({
@@ -223,6 +207,7 @@ async function requireEmployeeCourseBookmarkSelection(courseId: number) {
 
   return {
     userId,
+    organizationId,
     courseId,
     isBookmarked: Boolean(existingBookmark),
   };
@@ -262,40 +247,6 @@ export async function getDashboardCoursesAction(): Promise<DashboardCourses> {
   };
 }
 
-export async function getCourseByIdAction(courseId: number) {
-  const session = await requireAuth();
-
-  if (session.user.userType === "ADMIN") {
-    const course = await prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-      select: {
-        id: true,
-        name: true,
-        summary: true,
-        content: true,
-      },
-    });
-
-    if (!course) {
-      return null;
-    }
-
-    return {
-      id: course.id,
-      title: course.name,
-      summary: course.summary,
-      content: getCourseContentText(course.content),
-      isAssigned: false,
-    };
-  }
-
-  const { courses } = await getVisibleCoursesForUser();
-
-  return courses.find((course) => course.id === courseId) ?? null;
-}
-
 export async function toggleCourseBookmarkAction(courseId: number) {
   const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
 
@@ -332,6 +283,16 @@ export async function toggleCourseBookmarkAction(courseId: number) {
       },
     });
   }
+
+  await deleteCacheKeys([
+    getCourseDetailActionStateCacheKey(
+      courseSelection.courseId,
+      courseSelection.userId,
+    ),
+    courseSelection.organizationId
+      ? getManagerDashboardCacheKey(courseSelection.organizationId)
+      : null,
+  ]);
 
   revalidatePath("/dashboard");
   revalidatePath("/courses");
@@ -379,6 +340,16 @@ export async function toggleCourseCompletionAction(courseId: number) {
       },
     });
   }
+
+  await deleteCacheKeys([
+    getCourseDetailActionStateCacheKey(
+      courseSelection.courseId,
+      courseSelection.userId,
+    ),
+    courseSelection.organizationId
+      ? getManagerDashboardCacheKey(courseSelection.organizationId)
+      : null,
+  ]);
 
   revalidatePath("/dashboard");
   revalidatePath("/courses");

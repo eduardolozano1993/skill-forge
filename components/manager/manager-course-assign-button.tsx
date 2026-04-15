@@ -17,14 +17,14 @@ import { assignCourseToOrganizationAction } from "@/lib/manager/actions";
 
 type ManagerCourseAssignButtonProps = {
   courseId: number;
-  courseTitle: string;
+  courseName: string;
   organizationName: string;
   isAssigned: boolean;
 };
 
 export function ManagerCourseAssignButton({
   courseId,
-  courseTitle,
+  courseName,
   organizationName,
   isAssigned,
 }: ManagerCourseAssignButtonProps) {
@@ -67,8 +67,8 @@ export function ManagerCourseAssignButton({
           type="button"
           aria-label={
             isAssigned
-              ? `${courseTitle} is already assigned to ${organizationName}`
-              : `Add ${courseTitle} to ${organizationName}`
+              ? `${courseName} is already assigned to ${organizationName}`
+              : `Add ${courseName} to ${organizationName}`
           }
           disabled={isAssigned}
           onClick={() => {
@@ -88,21 +88,19 @@ export function ManagerCourseAssignButton({
           <DialogHeader>
             <DialogTitle>Add course to organization?</DialogTitle>
             <DialogDescription>
-                Are you sure you want to add{" "}
-                <span className="font-medium text-text-strong">
-                  {courseTitle}
-                </span>{" "}
-                to{" "}
-                <span className="font-medium text-text-strong">
-                  {organizationName}
-                </span>
-                ?
+              Are you sure you want to add{" "}
+              <span className="font-medium text-text-strong">{courseName}</span>{" "}
+              to{" "}
+              <span className="font-medium text-text-strong">
+                {organizationName}
+              </span>
+              ?
             </DialogDescription>
-              {error ? (
-                <p className="rounded-2xl border border-destructive/20 bg-destructive/10 px-md py-sm text-sm text-destructive">
-                  {error}
-                </p>
-              ) : null}
+            {error ? (
+              <p className="rounded-2xl border border-destructive/20 bg-destructive/10 px-md py-sm text-sm text-destructive">
+                {error}
+              </p>
+            ) : null}
           </DialogHeader>
           <DialogFooter>
             <Button

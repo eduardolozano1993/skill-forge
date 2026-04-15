@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { updateCourseContentAction } from "@/lib/courses/actions";
-import type { AppCourse } from "@/lib/courses/types";
+import type { CourseDetail } from "@/lib/courses/temp/types";
 import { cn } from "@/lib/tailwind/utils";
 
 type CourseEditFormProps = {
-  course: AppCourse;
+  course: CourseDetail;
 };
 
 export function CourseEditForm({ course }: CourseEditFormProps) {
@@ -26,7 +26,7 @@ export function CourseEditForm({ course }: CourseEditFormProps) {
   return (
     <form action={updateCourseContentAction} className="">
       <h1 className="font-heading text-3xl font-semibold text-text-strong pb-lg">
-        {course.title}
+        {course.name}
       </h1>
 
       <input type="hidden" name="courseId" value={course.id} />

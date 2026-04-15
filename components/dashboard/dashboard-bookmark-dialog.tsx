@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 
 type DashboardBookmarkDialogProps = {
   course: AppCourse | null;
@@ -32,8 +32,9 @@ export function DashboardBookmarkDialog({
         <DialogHeader>
           <DialogTitle>Remove bookmarked course?</DialogTitle>
           <DialogDescription>
-            Remove <span className="font-medium text-text-strong">{course.title}</span> from your
-            bookmarked courses?
+            Remove{" "}
+            <span className="font-medium text-text-strong">{course.name}</span>{" "}
+            from your bookmarked courses?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

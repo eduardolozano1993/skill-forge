@@ -6,9 +6,9 @@ import { CourseContentView } from "@/components/courses/course-content-view";
 import { EmployeeCourseBookmarkButton } from "@/components/employee/employee-course-bookmark-button";
 import { EmployeeCourseOrgIndicator } from "@/components/employee/employee-course-org-indicator";
 import { ManagerCourseAssignButton } from "@/components/manager/manager-course-assign-button";
-import { getCourseByIdAction } from "@/lib/courses/actions";
 import { requireAuth } from "@/lib/auth/auth";
 import { getCourseDetailActionState } from "@/lib/courses/queries";
+import { getCourseById } from "@/lib/courses/temp/services";
 
 type CourseDetailPageProps = {
   params: Promise<{
@@ -27,14 +27,15 @@ export default async function CourseDetailPage({
     notFound();
   }
 
-  const course = await getCourseByIdAction(courseId);
-  const canEditCourse = session.user.userType === "ADMIN";
-  const isEmployee = session.user.userType === "EMPLOYEE";
-  const isManager = session.user.userType === "MANAGER";
+  const course = await getCourseById(courseId);
 
   if (!course) {
     notFound();
   }
+
+  const canEditCourse = session.user.userType === "ADMIN";
+  const isEmployee = session.user.userType === "EMPLOYEE";
+  const isManager = session.user.userType === "MANAGER";
 
   const courseDetailActionState = await getCourseDetailActionState({
     courseId,
@@ -53,11 +54,11 @@ export default async function CourseDetailPage({
           <div className="flex items-center gap-xs">
             {isEmployee ? (
               courseDetailActionState.employeeBookmark?.isAssigned ? (
-                <EmployeeCourseOrgIndicator courseTitle={course.title} />
+                <EmployeeCourseOrgIndicator courseName={course.name} />
               ) : (
                 <EmployeeCourseBookmarkButton
                   courseId={course.id}
-                  courseTitle={course.title}
+                  courseName={course.name}
                   isBookmarked={
                     courseDetailActionState.employeeBookmark?.isBookmarked ??
                     false
@@ -68,7 +69,7 @@ export default async function CourseDetailPage({
             {isManager && courseDetailActionState.managerOrganization ? (
               <ManagerCourseAssignButton
                 courseId={course.id}
-                courseTitle={course.title}
+                courseName={course.name}
                 organizationName={
                   courseDetailActionState.managerOrganization.name
                 }
@@ -80,7 +81,7 @@ export default async function CourseDetailPage({
             {canEditCourse ? (
               <Link
                 href={`/admin/courses/${course.id}/edit`}
-                aria-label={`Edit ${course.title}`}
+                aria-label={`Edit ${course.name}`}
                 className="rounded-full p-2 text-brand transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)]"
               >
                 <Pencil className="size-5" />
@@ -91,7 +92,7 @@ export default async function CourseDetailPage({
         <div>
           <div>
             <h1 className="font-heading text-3xl font-semibold text-text-strong">
-              {course.title}
+              {course.name}
             </h1>
           </div>
           <p className="mt-xs max-w-3xl text-base text-text-soft">

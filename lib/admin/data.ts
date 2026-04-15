@@ -5,6 +5,10 @@ import type { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma/prisma";
 import {
+  ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+  readThroughJsonCache,
+} from "@/lib/redis/cache";
+import {
   buildTablePagination,
   DEFAULT_TABLE_PAGE_SIZE,
   normalizeTablePage,
@@ -58,21 +62,17 @@ function sortByTextAndId<T extends { id: number }>(
 }
 
 async function fetchAdminPlatformSummary(): Promise<AdminPlatformSummary> {
-  const [
-    totalUsers,
-    totalCourses,
-    totalOrganizations,
-    totalCompletedCourses,
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.course.count({
-      where: {
-        status: "ACTIVE",
-      },
-    }),
-    prisma.organization.count(),
-    prisma.completedCourse.count(),
-  ]);
+  const [totalUsers, totalCourses, totalOrganizations, totalCompletedCourses] =
+    await Promise.all([
+      prisma.user.count(),
+      prisma.course.count({
+        where: {
+          status: "ACTIVE",
+        },
+      }),
+      prisma.organization.count(),
+      prisma.completedCourse.count(),
+    ]);
 
   return {
     totalUsers,
@@ -259,12 +259,14 @@ async function fetchAdminCoursesTableData(
     .filter((course) =>
       matchesSearch(normalizedSearch, [
         course.id,
-        course.title,
+        course.name,
         course.summary,
         course.status,
       ]),
     )
-    .sort((left, right) => sortByTextAndId(left.title, right.title, left, right));
+    .sort((left, right) =>
+      sortByTextAndId(left.title, right.title, left, right),
+    );
 
   return {
     search: normalizedSearch,
@@ -274,7 +276,10 @@ async function fetchAdminCoursesTableData(
 
 export async function getAdminPlatformSummary() {
   await requireAdmin();
-  return fetchAdminPlatformSummary();
+  return readThroughJsonCache(
+    ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+    fetchAdminPlatformSummary,
+  );
 }
 
 export async function getAdminUsersTableData(
@@ -301,7 +306,10 @@ export async function getAdminDashboardData(
   await requireAdmin();
 
   const [summary, users, organizations, courses] = await Promise.all([
-    fetchAdminPlatformSummary(),
+    readThroughJsonCache(
+      ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+      fetchAdminPlatformSummary,
+    ),
     fetchAdminUsersTableData(filters.usersSearch),
     fetchAdminOrganizationsTableData(filters.organizationsSearch),
     fetchAdminCoursesTableData(filters.coursesSearch),

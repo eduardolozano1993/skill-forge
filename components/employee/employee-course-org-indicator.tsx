@@ -3,15 +3,15 @@
 import { Building2 } from "lucide-react";
 
 type EmployeeCourseOrgIndicatorProps = {
-  courseTitle: string;
+  courseName: string;
 };
 
 export function EmployeeCourseOrgIndicator({
-  courseTitle,
+  courseName,
 }: EmployeeCourseOrgIndicatorProps) {
   return (
     <span
-      aria-label={`${courseTitle} is assigned to your organization`}
+      aria-label={`${courseName} is assigned to your organization`}
       title="Assigned to your organization"
       className="rounded-full p-2 text-brand"
     >

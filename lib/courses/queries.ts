@@ -1,4 +1,8 @@
 import { prisma } from "@/lib/prisma/prisma";
+import {
+  getCourseDetailActionStateCacheKey,
+  readThroughJsonCache,
+} from "@/lib/redis/cache";
 
 type CourseDetailActionStateParams = {
   courseId: number;
@@ -18,7 +22,7 @@ export type CourseDetailActionState = {
   } | null;
 };
 
-export async function getCourseDetailActionState({
+async function fetchCourseDetailActionState({
   courseId,
   userId,
   userType,
@@ -96,4 +100,29 @@ export async function getCourseDetailActionState({
     employeeBookmark: null,
     managerOrganization: null,
   };
+}
+
+export async function getCourseDetailActionState({
+  courseId,
+  userId,
+  userType,
+  organizationId,
+}: CourseDetailActionStateParams): Promise<CourseDetailActionState> {
+  if (userType === "ADMIN") {
+    return {
+      employeeBookmark: null,
+      managerOrganization: null,
+    };
+  }
+
+  return readThroughJsonCache(
+    getCourseDetailActionStateCacheKey(courseId, userId),
+    () =>
+      fetchCourseDetailActionState({
+        courseId,
+        userId,
+        userType,
+        organizationId,
+      }),
+  );
 }

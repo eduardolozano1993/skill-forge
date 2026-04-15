@@ -199,7 +199,7 @@ export function AdminCoursesTable({ rows }: AdminCoursesTableProps) {
           <TableRow key={course.id}>
             <TableCell>
               <div className="space-y-2xs">
-                <p className="font-medium text-text-strong">{course.title}</p>
+                <p className="font-medium text-text-strong">{course.name}</p>
                 <p className="text-sm text-text-soft">{course.summary}</p>
               </div>
             </TableCell>
@@ -222,7 +222,7 @@ export function AdminCoursesTable({ rows }: AdminCoursesTableProps) {
             <TableCell>
               <AdminCourseActions
                 courseId={course.id}
-                title={course.title}
+                title={course.name}
                 status={course.status}
               />
             </TableCell>

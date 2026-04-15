@@ -1,4 +1,4 @@
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 
 export function normalizeCourseSearchQuery(query: string) {
   return query.trim().toLowerCase();
@@ -12,7 +12,7 @@ export function filterCoursesByQuery(courses: AppCourse[], query: string) {
   }
 
   return courses.filter((course) => {
-    const normalizedTitle = course.title.toLowerCase();
+    const normalizedTitle = course.name.toLowerCase();
     const normalizedSummary = course.summary.toLowerCase();
 
     return (

@@ -14,6 +14,12 @@ import {
 } from "@/lib/admin/data";
 import type { AdminDashboardSearchFilters } from "@/lib/admin/types";
 import { prisma } from "@/lib/prisma/prisma";
+import {
+  ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+  deleteCacheKeys,
+  deleteCacheKeysByPattern,
+  getManagerDashboardCacheKey,
+} from "@/lib/redis/cache";
 
 const adminSearchFiltersSchema = z.object({
   usersSearch: z.string().optional().nullable(),
@@ -118,6 +124,7 @@ export async function updateAdminUserStatusAction(
       id: true,
       userType: true,
       status: true,
+      organizationId: true,
     },
   });
 
@@ -152,6 +159,11 @@ export async function updateAdminUserStatusAction(
       status: true,
     },
   });
+
+  await deleteCacheKeys([
+    ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+    user.organizationId ? getManagerDashboardCacheKey(user.organizationId) : null,
+  ]);
 
   revalidatePath("/admin");
   revalidatePath("/admin/users");
@@ -236,6 +248,11 @@ export async function updateAdminOrganizationStatusAction(
     };
   });
 
+  await deleteCacheKeys([
+    ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
+    getManagerDashboardCacheKey(organization.id),
+  ]);
+
   revalidatePath("/admin");
   revalidatePath("/admin/organizations");
   revalidatePath("/admin/users");
@@ -297,6 +314,11 @@ export async function updateAdminCourseStatusAction(
       status: true,
     },
   });
+
+  await Promise.all([
+    deleteCacheKeys([ADMIN_PLATFORM_SUMMARY_CACHE_KEY]),
+    deleteCacheKeysByPattern([`cache:course:${course.id}:detail:*`]),
+  ]);
 
   revalidatePath("/admin");
   revalidatePath("/admin/courses");

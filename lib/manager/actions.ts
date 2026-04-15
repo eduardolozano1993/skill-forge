@@ -5,10 +5,36 @@ import { z } from "zod";
 
 import { requireManager } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma/prisma";
+import {
+  deleteCacheKeys,
+  getCourseDetailActionStateCacheKey,
+  getManagerDashboardCacheKey,
+} from "@/lib/redis/cache";
 
 const assignBookmarkedCourseSchema = z.object({
   courseId: z.number().int().positive(),
 });
+
+async function invalidateManagerOrganizationCaches(
+  organizationId: number,
+  courseId: number,
+) {
+  const organizationUsers = await prisma.user.findMany({
+    where: {
+      organizationId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  await deleteCacheKeys([
+    getManagerDashboardCacheKey(organizationId),
+    ...organizationUsers.map((user) =>
+      getCourseDetailActionStateCacheKey(courseId, user.id),
+    ),
+  ]);
+}
 
 export async function assignCourseToOrganizationAction(courseId: number) {
   const parsedPayload = assignBookmarkedCourseSchema.safeParse({ courseId });
@@ -71,6 +97,11 @@ export async function assignCourseToOrganizationAction(courseId: number) {
       courseId: parsedPayload.data.courseId,
     },
   });
+
+  await invalidateManagerOrganizationCaches(
+    organizationId,
+    parsedPayload.data.courseId,
+  );
 
   revalidatePath("/manager");
   revalidatePath("/courses");
@@ -163,6 +194,11 @@ export async function assignBookmarkedCourseToOrganizationAction(
     }
   });
 
+  await invalidateManagerOrganizationCaches(
+    organizationId,
+    parsedPayload.data.courseId,
+  );
+
   revalidatePath("/manager");
   revalidatePath("/courses");
   revalidatePath("/dashboard");
@@ -223,6 +259,11 @@ export async function removeAssignedCourseFromOrganizationAction(
       },
     },
   });
+
+  await invalidateManagerOrganizationCaches(
+    organizationId,
+    parsedPayload.data.courseId,
+  );
 
   revalidatePath("/manager");
   revalidatePath("/courses");

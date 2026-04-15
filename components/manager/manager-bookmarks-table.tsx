@@ -92,7 +92,7 @@ export function ManagerBookmarksTable({
           {courses.map((course) => (
             <TableRow key={course.courseId}>
               <TableCell className="font-medium text-text-strong">
-                {course.courseTitle}
+                {course.courseName}
               </TableCell>
               <TableCell className="text-text-soft">
                 {course.employeeCount}
@@ -129,7 +129,7 @@ export function ManagerBookmarksTable({
               <DialogDescription>
                 Are you sure you want to add{" "}
                 <span className="font-medium text-text-strong">
-                  {selectedCourse.courseTitle}
+                  {selectedCourse.courseName}
                 </span>{" "}
                 to{" "}
                 <span className="font-medium text-text-strong">

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CourseEditForm } from "@/components/courses/course-edit-form";
-import { getCourseByIdAction } from "@/lib/courses/actions";
+import { getCourseById } from "@/lib/courses/temp/services";
 import { requireAdmin } from "@/lib/auth/auth";
 
 type CourseEditPageProps = {
@@ -19,7 +19,7 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
     notFound();
   }
 
-  const course = await getCourseByIdAction(courseId);
+  const course = await getCourseById(courseId);
 
   if (!course) {
     notFound();

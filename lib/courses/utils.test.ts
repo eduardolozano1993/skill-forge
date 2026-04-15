@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { AppCourse } from "./types";
+import type { AppCourse } from "./temp/types";
 import { filterCoursesByQuery } from "./utils";
 
 const courses: AppCourse[] = [

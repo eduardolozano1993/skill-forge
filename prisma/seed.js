@@ -29,17 +29,6 @@ function buildPhoneNumber() {
   return faker.helpers.fromRegExp("\\+52-55-[0-9]{4}-[0-9]{4}");
 }
 
-function buildCourseContent() {
-  return {
-    overview: faker.lorem.paragraphs(2),
-    objectives: Array.from({ length: 3 }, () => faker.lorem.sentence()),
-    lessons: Array.from({ length: 5 }, (_, lessonIndex) => ({
-      title: `Lesson ${lessonIndex + 1}: ${faker.company.buzzPhrase()}`,
-      summary: faker.lorem.paragraph(),
-    })),
-  };
-}
-
 async function resetDatabase() {
   await prisma.organizationCourse.deleteMany();
   await prisma.bookmark.deleteMany();
@@ -173,7 +162,7 @@ async function createCourses() {
   const courses = Array.from({ length: COURSE_COUNT }, (_, index) => ({
     name: `Course ${index + 1}: ${faker.company.buzzPhrase()}`,
     summary: faker.lorem.paragraph(),
-    content: buildCourseContent(),
+    content: faker.lorem.paragraph(10),
     status: "ACTIVE",
   }));
 

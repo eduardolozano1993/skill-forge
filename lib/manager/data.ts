@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma/prisma";
 import { requireManager } from "@/lib/auth/auth";
+import {
+  getManagerDashboardCacheKey,
+  readThroughJsonCache,
+} from "@/lib/redis/cache";
 
 export type ManagerOrganizationSummary = {
   totalEmployees: number;
@@ -9,7 +13,7 @@ export type ManagerOrganizationSummary = {
 
 export type ManagerAssignedCourseSummary = {
   courseId: number;
-  courseTitle: string;
+  courseName: string;
   completedEmployees: number;
   totalEmployees: number;
   completionRate: number;
@@ -17,7 +21,7 @@ export type ManagerAssignedCourseSummary = {
 
 export type ManagerBookmarkedCourseSummary = {
   courseId: number;
-  courseTitle: string;
+  courseName: string;
   employeeCount: number;
   isAssigned: boolean;
 };
@@ -34,124 +38,116 @@ export type ManagerDashboardData = {
   bookmarkedCourses: ManagerBookmarkedCourseSummary[];
 };
 
-export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
-  const session = await requireManager();
-  const organizationId = session.user.organizationId;
-
-  if (!organizationId) {
-    return {
-      organization: null,
-      summary: {
-        totalEmployees: 0,
-        totalAssignedCourses: 0,
-        totalCompletedCourses: 0,
+async function fetchManagerDashboardData(
+  organizationId: number,
+): Promise<ManagerDashboardData> {
+  const [
+    organization,
+    totalEmployees,
+    totalAssignedCourses,
+    totalCompletedCourses,
+    assignedCourses,
+    bookmarkedCoursesByEmployee,
+  ] = await Promise.all([
+    prisma.organization.findUnique({
+      where: {
+        id: organizationId,
       },
-      assignedCourses: [],
-      bookmarkedCourses: [],
-    };
-  }
-
-  const [organization, totalEmployees, totalAssignedCourses, totalCompletedCourses, assignedCourses, bookmarkedCoursesByEmployee] =
-    await Promise.all([
-      prisma.organization.findUnique({
-        where: {
-          id: organizationId,
-        },
-        select: {
-          id: true,
-          name: true,
-          owner: {
-            select: {
-              displayName: true,
-              email: true,
-            },
+      select: {
+        id: true,
+        name: true,
+        owner: {
+          select: {
+            displayName: true,
+            email: true,
           },
         },
-      }),
-      prisma.user.count({
-        where: {
+      },
+    }),
+    prisma.user.count({
+      where: {
+        organizationId,
+        userType: "EMPLOYEE",
+      },
+    }),
+    prisma.organizationCourse.count({
+      where: {
+        organizationId,
+      },
+    }),
+    prisma.completedCourse.count({
+      where: {
+        user: {
           organizationId,
           userType: "EMPLOYEE",
         },
-      }),
-      prisma.organizationCourse.count({
-        where: {
-          organizationId,
+      },
+    }),
+    prisma.organizationCourse.findMany({
+      where: {
+        organizationId,
+      },
+      orderBy: {
+        course: {
+          name: "asc",
         },
-      }),
-      prisma.completedCourse.count({
-        where: {
-          user: {
-            organizationId,
-            userType: "EMPLOYEE",
-          },
-        },
-      }),
-      prisma.organizationCourse.findMany({
-        where: {
-          organizationId,
-        },
-        orderBy: {
-          course: {
-            name: "asc",
-          },
-        },
-        select: {
-          course: {
-            select: {
-              id: true,
-              name: true,
-              completedByUsers: {
-                where: {
-                  user: {
-                    organizationId,
-                    userType: "EMPLOYEE",
-                  },
+      },
+      select: {
+        course: {
+          select: {
+            id: true,
+            name: true,
+            completedByUsers: {
+              where: {
+                user: {
+                  organizationId,
+                  userType: "EMPLOYEE",
                 },
-                select: {
-                  userId: true,
-                },
+              },
+              select: {
+                userId: true,
               },
             },
           },
         },
-      }),
-      prisma.bookmark.findMany({
-        where: {
+      },
+    }),
+    prisma.bookmark.findMany({
+      where: {
+        user: {
+          organizationId,
+          userType: "EMPLOYEE",
+        },
+      },
+      orderBy: [
+        {
           user: {
-            organizationId,
-            userType: "EMPLOYEE",
+            displayName: "asc",
           },
         },
-        orderBy: [
-          {
-            user: {
-              displayName: "asc",
-            },
-          },
-          {
-            course: {
-              name: "asc",
-            },
-          },
-        ],
-        select: {
-          user: {
-            select: {
-              id: true,
-              displayName: true,
-              email: true,
-            },
-          },
+        {
           course: {
-            select: {
-              id: true,
-              name: true,
-            },
+            name: "asc",
           },
         },
-      }),
-    ]);
+      ],
+      select: {
+        user: {
+          select: {
+            id: true,
+            displayName: true,
+            email: true,
+          },
+        },
+        course: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    }),
+  ]);
 
   return {
     organization: organization
@@ -174,7 +170,7 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
 
       return {
         courseId: course.id,
-        courseTitle: course.name,
+        courseName: course.name,
         completedEmployees,
         totalEmployees,
         completionRate:
@@ -194,10 +190,12 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
 
         accumulator[bookmark.course.id] = {
           courseId: bookmark.course.id,
-          courseTitle: bookmark.course.name,
+          courseName: bookmark.course.name,
           employeeCount: 1,
           isAssigned: Boolean(
-            assignedCourses.find(({ course }) => course.id === bookmark.course.id),
+            assignedCourses.find(
+              ({ course }) => course.id === bookmark.course.id,
+            ),
           ),
         };
 
@@ -209,8 +207,30 @@ export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
           return right.employeeCount - left.employeeCount;
         }
 
-        return left.courseTitle.localeCompare(right.courseTitle);
+        return left.courseName.localeCompare(right.courseName);
       })
       .slice(0, 10),
   };
+}
+
+export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
+  const session = await requireManager();
+  const organizationId = session.user.organizationId;
+
+  if (!organizationId) {
+    return {
+      organization: null,
+      summary: {
+        totalEmployees: 0,
+        totalAssignedCourses: 0,
+        totalCompletedCourses: 0,
+      },
+      assignedCourses: [],
+      bookmarkedCourses: [],
+    };
+  }
+
+  return readThroughJsonCache(getManagerDashboardCacheKey(organizationId), () =>
+    fetchManagerDashboardData(organizationId),
+  );
 }

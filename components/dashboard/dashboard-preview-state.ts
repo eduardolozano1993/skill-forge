@@ -1,4 +1,4 @@
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 
 type DashboardPreviewStateInput = {
   assignedCourses: AppCourse[] | null;
@@ -27,8 +27,12 @@ export function createDashboardPreviewInitialState({
 }: DashboardPreviewStateInput): DashboardPreviewState {
   return {
     assignedCourses,
-    bookmarkedCourseIds: new Set((bookmarkedCourses ?? []).map((course) => course.id)),
-    completedCourseIds: new Set((completedCourses ?? []).map((course) => course.id)),
+    bookmarkedCourseIds: new Set(
+      (bookmarkedCourses ?? []).map((course) => course.id),
+    ),
+    completedCourseIds: new Set(
+      (completedCourses ?? []).map((course) => course.id),
+    ),
     pendingBookmarkRemoval: null,
   };
 }

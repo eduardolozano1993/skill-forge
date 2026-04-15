@@ -67,7 +67,7 @@ model Course {
   id               Int                  @id @default(autoincrement())
   name             String
   summary          String
-  content          Json
+  content          String
   status           CourseStatus         @default(ACTIVE)
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")

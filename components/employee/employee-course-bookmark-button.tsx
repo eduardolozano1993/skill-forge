@@ -8,13 +8,13 @@ import { toggleCourseBookmarkAction } from "@/lib/courses/actions";
 
 type EmployeeCourseBookmarkButtonProps = {
   courseId: number;
-  courseTitle: string;
+  courseName: string;
   isBookmarked: boolean;
 };
 
 export function EmployeeCourseBookmarkButton({
   courseId,
-  courseTitle,
+  courseName,
   isBookmarked,
 }: EmployeeCourseBookmarkButtonProps) {
   const router = useRouter();
@@ -43,12 +43,19 @@ export function EmployeeCourseBookmarkButton({
     <button
       type="button"
       disabled={isSubmitting}
-      aria-label={bookmarked ? `Remove bookmark for ${courseTitle}` : `Bookmark ${courseTitle}`}
+      aria-label={
+        bookmarked
+          ? `Remove bookmark for ${courseName}`
+          : `Bookmark ${courseName}`
+      }
       title={bookmarked ? "Remove bookmark" : "Bookmark this course"}
       onClick={handleToggle}
       className="rounded-full p-2 text-amber-400 transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand)/0.35)] disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <Bookmark className="size-5" fill={bookmarked ? "currentColor" : "none"} />
+      <Bookmark
+        className="size-5"
+        fill={bookmarked ? "currentColor" : "none"}
+      />
     </button>
   );
 }

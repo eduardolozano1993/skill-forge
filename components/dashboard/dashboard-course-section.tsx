@@ -10,7 +10,7 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { Button } from "@/components/ui/button";
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 
 type DashboardCourseSectionProps = {
   title: string;

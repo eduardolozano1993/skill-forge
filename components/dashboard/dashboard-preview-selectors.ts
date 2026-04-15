@@ -1,5 +1,5 @@
 import type { DashboardPreviewState } from "@/components/dashboard/dashboard-preview-state";
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 import { filterCoursesByQuery } from "@/lib/courses/utils";
 
 export function getFilteredCourses(courses: AppCourse[] | null, query: string) {
@@ -26,7 +26,8 @@ export function getCourseProgressCount(
   completedCourseIds: Set<number>,
 ) {
   const total = courses?.length ?? 0;
-  const completed = courses?.filter((course) => completedCourseIds.has(course.id)).length ?? 0;
+  const completed =
+    courses?.filter((course) => completedCourseIds.has(course.id)).length ?? 0;
 
   return {
     completed,
@@ -50,8 +51,14 @@ export function getDashboardPreviewCollections(
   ];
 
   return {
-    filteredAssignedCourses: getFilteredCourses(incompleteAssignedCourses, query),
-    bookmarkedCourses: getUniqueMatchingCourses(allVisibleCourses, state.bookmarkedCourseIds),
+    filteredAssignedCourses: getFilteredCourses(
+      incompleteAssignedCourses,
+      query,
+    ),
+    bookmarkedCourses: getUniqueMatchingCourses(
+      allVisibleCourses,
+      state.bookmarkedCourseIds,
+    ),
     completedCourses: getUniqueMatchingCourses(
       completedCourses ?? [],
       state.completedCourseIds,

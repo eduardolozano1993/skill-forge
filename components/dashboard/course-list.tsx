@@ -1,6 +1,9 @@
-import { CourseCard, CourseCardSkeleton } from "@/components/dashboard/course-card";
+import {
+  CourseCard,
+  CourseCardSkeleton,
+} from "@/components/dashboard/course-card";
 import { DashboardListLayout } from "@/components/dashboard/dashboard-list-layout";
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 
 type CourseListProps = {
   courses: AppCourse[];
@@ -47,8 +50,12 @@ export function CourseList({
           actionsDisabled={pendingCourseIds?.has(course.id)}
           showBookmarkAction={showBookmarkAction}
           showCompletedAction={showCompletedAction}
-          onBookmarkToggle={onBookmarkToggle ? () => onBookmarkToggle(course) : undefined}
-          onCompletedToggle={onCompletedToggle ? () => onCompletedToggle(course) : undefined}
+          onBookmarkToggle={
+            onBookmarkToggle ? () => onBookmarkToggle(course) : undefined
+          }
+          onCompletedToggle={
+            onCompletedToggle ? () => onCompletedToggle(course) : undefined
+          }
         />
       ))}
     </DashboardListLayout>

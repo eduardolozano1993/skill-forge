@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { CourseList } from "@/components/dashboard/course-list";
 import { toggleCourseBookmarkAction } from "@/lib/courses/actions";
-import type { AppCourse } from "@/lib/courses/types";
+import type { AppCourse } from "@/lib/courses/temp/types";
 
 type CoursesLibraryListProps = {
   courses: AppCourse[];
