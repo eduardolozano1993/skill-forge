@@ -6,17 +6,21 @@ import { filterCoursesByQuery } from "./utils";
 const courses: AppCourse[] = [
   {
     id: 1,
-    title: "GraphQL Fundamentals",
+    name: "GraphQL Fundamentals",
     summary: "Learn how APIs model relationships and schemas.",
     content: "GraphQL course content",
     isAssigned: true,
+    isBookmarked: false,
+    isCompleted: false,
   },
   {
     id: 2,
-    title: "Reliable Queues",
+    name: "Reliable Queues",
     summary: "Covers retries, dead-letter queues, and idempotency patterns.",
     content: "Queue course content",
     isAssigned: true,
+    isBookmarked: false,
+    isCompleted: false,
   },
 ];
 

@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-
 import { CoursesLibraryList } from "@/components/courses/courses-library-list";
 import { CourseList } from "@/components/dashboard/course-list";
 import { CoursesUrlSearch } from "@/components/dashboard/courses-url-search";
@@ -10,23 +9,29 @@ import {
   DashboardSectionEmptyState,
 } from "@/components/dashboard/dashboard-section";
 import { requireAuth } from "@/lib/auth/auth";
-import { getCoursesPageDataAction } from "@/lib/courses/actions";
-import { filterCoursesByQuery } from "@/lib/courses/utils";
+import { getCourses } from "@/lib/courses/temp/services";
+import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
 
 type CoursesPageProps = {
   searchParams: Promise<{
-    q?: string;
+    q?: string | string[];
+    page?: string | string[];
   }>;
 };
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
-  await requireAuth();
-  const { q = "" } = await searchParams;
+  const session = await requireAuth();
+
+  const resolvedSearchParams = await searchParams;
+  const q = getSingleQueryParam(resolvedSearchParams.q);
+  const page = parsePageQueryParam(resolvedSearchParams.page);
 
   return (
     <section className="space-y-lg">
       <header className="space-y-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">Courses</p>
+        <p className="text-sm font-medium uppercase tracking-[0.14em] text-brand">
+          Courses
+        </p>
         <div>
           <h1 className="font-heading text-3xl font-semibold text-text-strong">
             Course library
@@ -37,8 +42,8 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
         </div>
       </header>
       <CoursesUrlSearch query={q} />
-      <Suspense key={q} fallback={<CoursesListFallback />}>
-        <CoursesListSection query={q} />
+      <Suspense key={`${q}-${page}`} fallback={<CoursesListFallback />}>
+        <CoursesListSection query={q} page={page} session={session} />
       </Suspense>
     </section>
   );
@@ -46,13 +51,18 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
 type CoursesListSectionProps = {
   query: string;
+  page: number;
+  session: any;
 };
 
-async function CoursesListSection({ query }: CoursesListSectionProps) {
-  const coursesPageData = await getCoursesPageDataAction();
-  const filteredCourses = filterCoursesByQuery(coursesPageData.courses, query);
+async function CoursesListSection({
+  query,
+  page,
+  session,
+}: CoursesListSectionProps) {
+  const { rows, search, pagination } = await getCourses(session, query, page);
 
-  if (coursesPageData.courses.length === 0) {
+  if (rows.length === 0) {
     return (
       <DashboardSectionEmptyState
         title="No courses available"
@@ -61,7 +71,7 @@ async function CoursesListSection({ query }: CoursesListSectionProps) {
     );
   }
 
-  if (filteredCourses.length === 0) {
+  if (rows.length === 0) {
     return (
       <DashboardSectionEmptyState
         title="No courses match"
@@ -72,10 +82,10 @@ async function CoursesListSection({ query }: CoursesListSectionProps) {
 
   return (
     <CoursesLibraryList
-      courses={filteredCourses}
-      bookmarkedCourseIds={coursesPageData.bookmarkedCourseIds}
-      completedCourseIds={coursesPageData.completedCourseIds}
-      userType={coursesPageData.userType}
+      courses={rows}
+      userType={session.userType}
+      pagination={pagination}
+      search={search}
     />
   );
 }

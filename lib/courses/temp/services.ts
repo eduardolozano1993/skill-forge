@@ -3,7 +3,12 @@ import type {
   CourseDetail,
 } from "@/lib/courses/temp/types";
 import { isAdmin } from "@/lib/utils/checkUserType";
-import { findActiveCoursesById, findCourseById, queryCourses } from "./queries";
+import {
+  findActiveCoursesById,
+  findCourseById,
+  queryAdminCourses,
+  queryCourses,
+} from "./queries";
 import { requireAdmin } from "@/lib/auth/auth";
 import { normalizeTablePage, normalizeTableSearch } from "@/lib/table/utils";
 import type { TableResult } from "@/lib/table/types";
@@ -36,5 +41,16 @@ export async function getAdminCoursesTableData(
   const normalizedSearch = normalizeTableSearch(search);
   const normalizedPage = normalizeTablePage(page);
 
-  return await queryCourses(normalizedSearch, normalizedPage);
+  return await queryAdminCourses(normalizedSearch, normalizedPage);
+}
+
+export async function getCourses(
+  session: any,
+  search?: string | null,
+  page?: number | null,
+) {
+  const normalizedSearch = normalizeTableSearch(search);
+  const normalizedPage = normalizeTablePage(page);
+
+  return await queryCourses(session, normalizedSearch, normalizedPage);
 }

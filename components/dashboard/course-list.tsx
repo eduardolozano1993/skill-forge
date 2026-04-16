@@ -8,9 +8,6 @@ import type { AppCourse } from "@/lib/courses/temp/types";
 type CourseListProps = {
   courses: AppCourse[];
   isLoading?: boolean;
-  bookmarkedCourseIds?: Set<number>;
-  completedCourseIds?: Set<number>;
-  pendingCourseIds?: Set<number>;
   showBookmarkAction?: boolean;
   showCompletedAction?: boolean;
   onBookmarkToggle?: (course: AppCourse) => void;
@@ -20,11 +17,8 @@ type CourseListProps = {
 export function CourseList({
   courses,
   isLoading = false,
-  bookmarkedCourseIds,
-  completedCourseIds,
-  pendingCourseIds,
-  showBookmarkAction,
-  showCompletedAction,
+  showBookmarkAction = false,
+  showCompletedAction = false,
   onBookmarkToggle,
   onCompletedToggle,
 }: CourseListProps) {
@@ -43,11 +37,13 @@ export function CourseList({
       {courses.map((course) => (
         <CourseCard
           key={course.id}
-          {...course}
+          name={course.name}
+          summary={course.summary}
           href={`/courses/${course.id}`}
-          isBookmarked={bookmarkedCourseIds?.has(course.id)}
-          isCompleted={completedCourseIds?.has(course.id)}
-          actionsDisabled={pendingCourseIds?.has(course.id)}
+          isBookmarked={course.isBookmarked}
+          isCompleted={course.isCompleted}
+          isAssigned={course.isAssigned}
+          // actionsDisabled={pendingCourseIds?.has(course.id)}
           showBookmarkAction={showBookmarkAction}
           showCompletedAction={showCompletedAction}
           onBookmarkToggle={

@@ -15,6 +15,8 @@ import { toggleCourseSelectionSchema } from "./temp/schemas";
 function serializeCourses({
   courses,
   assignedCourseIds,
+  bookmarkedCourseIds,
+  completedCourseIds,
 }: {
   courses: Array<{
     id: number;
@@ -23,6 +25,8 @@ function serializeCourses({
     content: string;
   }>;
   assignedCourseIds: Set<number>;
+  bookmarkedCourseIds: Set<number>;
+  completedCourseIds: Set<number>;
 }) {
   return courses.map<AppCourse>((course) => ({
     id: course.id,
@@ -30,6 +34,8 @@ function serializeCourses({
     summary: course.summary,
     content: course.content,
     isAssigned: assignedCourseIds.has(course.id),
+    isBookmarked: bookmarkedCourseIds.has(course.id),
+    isCompleted: completedCourseIds.has(course.id),
   }));
 }
 
@@ -87,6 +93,8 @@ async function getVisibleCoursesForUser() {
   const serializedCourses = serializeCourses({
     courses,
     assignedCourseIds,
+    bookmarkedCourseIds,
+    completedCourseIds,
   });
 
   return {
@@ -212,19 +220,6 @@ export async function getCoursesAction() {
   const { courses } = await getVisibleCoursesForUser();
 
   return courses;
-}
-
-export async function getCoursesPageDataAction() {
-  const session = await requireAuth();
-  const { courses, bookmarkedCourseIds, completedCourseIds } =
-    await getVisibleCoursesForUser();
-
-  return {
-    courses,
-    bookmarkedCourseIds: Array.from(bookmarkedCourseIds),
-    completedCourseIds: Array.from(completedCourseIds),
-    userType: session.user.userType,
-  };
 }
 
 export async function getDashboardCoursesAction(): Promise<DashboardCourses> {

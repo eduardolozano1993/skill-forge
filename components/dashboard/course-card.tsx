@@ -32,7 +32,6 @@ export function CourseCard({
   isBookmarked = false,
   isCompleted = false,
   isAssigned = false,
-  actionsDisabled = false,
   showBookmarkAction,
   showCompletedAction,
   onBookmarkToggle,
@@ -105,7 +104,6 @@ export function CourseCard({
               {showBookmarkIcon && onBookmarkToggle ? (
                 <button
                   type="button"
-                  disabled={actionsDisabled}
                   aria-label="Remove bookmark"
                   onClick={(event) =>
                     handleActionClick(event, onBookmarkToggle)
@@ -118,7 +116,6 @@ export function CourseCard({
               {shouldShowCompletedAction && onCompletedToggle ? (
                 <button
                   type="button"
-                  disabled={actionsDisabled}
                   aria-label={
                     isCompleted
                       ? "Mark course as incomplete"

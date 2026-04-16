@@ -31,6 +31,8 @@ export function CoursesUrlSearch({ query }: CoursesUrlSearchProps) {
       params.delete("q");
     }
 
+    params.delete("page");
+
     const nextQueryString = params.toString();
     const nextUrl = nextQueryString ? `${pathname}?${nextQueryString}` : pathname;
 

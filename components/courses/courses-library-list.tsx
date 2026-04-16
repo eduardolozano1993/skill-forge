@@ -4,83 +4,47 @@ import { startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { CourseList } from "@/components/dashboard/course-list";
-import { toggleCourseBookmarkAction } from "@/lib/courses/actions";
+import { Pagination } from "@/components/ui/pagination";
+import {
+  toggleCourseBookmarkAction,
+  toggleCourseCompletionAction,
+} from "@/lib/courses/actions";
 import type { AppCourse } from "@/lib/courses/temp/types";
+import type { TablePagination } from "@/lib/table/types";
 
 type CoursesLibraryListProps = {
   courses: AppCourse[];
-  bookmarkedCourseIds: number[];
-  completedCourseIds: number[];
   userType: "ADMIN" | "MANAGER" | "EMPLOYEE";
+  pagination?: TablePagination;
+  search: string;
 };
 
 export function CoursesLibraryList({
   courses,
-  bookmarkedCourseIds,
-  completedCourseIds,
   userType,
+  pagination,
+  search,
 }: CoursesLibraryListProps) {
   const router = useRouter();
-  const [bookmarkIds, setBookmarkIds] = useState<Set<number>>(
-    () => new Set(bookmarkedCourseIds),
-  );
-  const [completionIds] = useState<Set<number>>(
-    () => new Set(completedCourseIds),
-  );
-  const [pendingCourseIds, setPendingCourseIds] = useState<Set<number>>(
-    () => new Set(),
-  );
-
-  function updatePendingCourse(courseId: number, isPending: boolean) {
-    setPendingCourseIds((current) => {
-      const next = new Set(current);
-
-      if (isPending) {
-        next.add(courseId);
-      } else {
-        next.delete(courseId);
-      }
-
-      return next;
-    });
-  }
 
   async function handleBookmarkToggle(course: AppCourse) {
     if (userType !== "EMPLOYEE") {
       return;
     }
 
-    setBookmarkIds((current) => {
-      const next = new Set(current);
-
-      if (next.has(course.id)) {
-        next.delete(course.id);
-      } else {
-        next.add(course.id);
-      }
-
-      return next;
-    });
-    updatePendingCourse(course.id, true);
-
     const result = await toggleCourseBookmarkAction(course.id);
 
-    updatePendingCourse(course.id, false);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
 
-    if (result?.error) {
-      setBookmarkIds((current) => {
-        const next = new Set(current);
-
-        if (next.has(course.id)) {
-          next.delete(course.id);
-        } else {
-          next.add(course.id);
-        }
-
-        return next;
-      });
+  async function handleCompletedToggle(course: AppCourse) {
+    if (userType !== "EMPLOYEE") {
       return;
     }
+
+    const result = await toggleCourseCompletionAction(course.id);
 
     startTransition(() => {
       router.refresh();
@@ -88,14 +52,44 @@ export function CoursesLibraryList({
   }
 
   return (
-    <CourseList
-      courses={courses}
-      bookmarkedCourseIds={bookmarkIds}
-      completedCourseIds={completionIds}
-      pendingCourseIds={pendingCourseIds}
-      onBookmarkToggle={
-        userType === "EMPLOYEE" ? handleBookmarkToggle : undefined
-      }
-    />
+    <div className="space-y-md">
+      {pagination ? (
+        <div className="flex flex-col gap-2 text-sm text-text-soft md:flex-row md:items-center md:justify-between">
+          <p>
+            Showing {(pagination.page - 1) * pagination.pageSize + 1}
+            {" - "}
+            {Math.min(
+              pagination.page * pagination.pageSize,
+              pagination.totalRows,
+            )}{" "}
+            of {pagination.totalRows} courses
+          </p>
+          <p>
+            {pagination.totalRows === 1
+              ? "1 result"
+              : `${pagination.totalRows} results`}
+          </p>
+        </div>
+      ) : null}
+
+      <CourseList
+        courses={courses}
+        showBookmarkAction={userType === "EMPLOYEE"}
+        showCompletedAction={userType === "EMPLOYEE"}
+        onBookmarkToggle={handleBookmarkToggle}
+        onCompletedToggle={handleCompletedToggle}
+      />
+
+      {pagination ? (
+        <Pagination
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
+          pathname="/courses"
+          searchParams={{
+            q: search || undefined,
+          }}
+        />
+      ) : null}
+    </div>
   );
 }
