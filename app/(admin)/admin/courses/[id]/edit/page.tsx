@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CourseEditForm } from "@/components/courses/course-edit-form";
-import { getCourseById } from "@/lib/courses/temp/services";
+import { getCourseById } from "@/lib/courses/services";
 import { requireAdmin } from "@/lib/auth/auth";
 
 type CourseEditPageProps = {

@@ -7,7 +7,6 @@ import { requireManager } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma/prisma";
 import {
   deleteCacheKeys,
-  getCourseDetailActionStateCacheKey,
   getManagerDashboardCacheKey,
 } from "@/lib/redis/cache";
 
@@ -28,12 +27,7 @@ async function invalidateManagerOrganizationCaches(
     },
   });
 
-  await deleteCacheKeys([
-    getManagerDashboardCacheKey(organizationId),
-    ...organizationUsers.map((user) =>
-      getCourseDetailActionStateCacheKey(courseId, user.id),
-    ),
-  ]);
+  await deleteCacheKeys([getManagerDashboardCacheKey(organizationId)]);
 }
 
 export async function assignCourseToOrganizationAction(courseId: number) {

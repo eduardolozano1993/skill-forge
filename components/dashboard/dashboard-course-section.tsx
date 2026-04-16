@@ -10,12 +10,12 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { Button } from "@/components/ui/button";
-import type { AppCourse } from "@/lib/courses/temp/types";
+import type { CourseDetail } from "@/lib/courses/types";
 
 type DashboardCourseSectionProps = {
   title: string;
   description: string;
-  courses: AppCourse[] | null;
+  courses: CourseDetail[] | null;
   emptyTitle: string;
   emptyDescription: string;
   errorTitle: string;
@@ -25,8 +25,8 @@ type DashboardCourseSectionProps = {
   pendingCourseIds?: Set<number>;
   showBookmarkAction?: boolean;
   showCompletedAction?: boolean;
-  onBookmarkToggle: (course: AppCourse) => void;
-  onCompletedToggle: (course: AppCourse) => void;
+  onBookmarkToggle: (course: CourseDetail) => void;
+  onCompletedToggle: (course: CourseDetail) => void;
   action?: ReactNode;
   progress?: {
     completed: number;

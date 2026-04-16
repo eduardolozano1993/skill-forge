@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { updateCourseContentAction } from "@/lib/courses/temp/actions";
-import type { CourseDetail } from "@/lib/courses/temp/types";
+import { updateCourseContentAction } from "@/lib/courses/actions";
+import type { CourseDetail } from "@/lib/courses/types";
 import { cn } from "@/lib/tailwind/utils";
 import { Button } from "@/components/ui/button";
 

@@ -2,7 +2,7 @@ import { AdminCoursesTable } from "@/components/admin/admin-tables";
 import { Pagination } from "@/components/ui/pagination";
 import { TableEmptyState } from "@/components/ui/table";
 import { TableUrlSearch } from "@/components/ui/table-url-search";
-import { getAdminCoursesTableData } from "@/lib/courses/temp/services";
+import { getAdminCoursesTableData } from "@/lib/courses/services";
 import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
 
 type AdminCoursesPageProps = {

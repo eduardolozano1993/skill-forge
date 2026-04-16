@@ -7,7 +7,7 @@ import { EmployeeCourseBookmarkButton } from "@/components/employee/employee-cou
 import { EmployeeCourseOrgIndicator } from "@/components/employee/employee-course-org-indicator";
 import { ManagerCourseAssignButton } from "@/components/manager/manager-course-assign-button";
 import { requireAuth } from "@/lib/auth/auth";
-import { getCourseById } from "@/lib/courses/temp/services";
+import { getCourseById } from "@/lib/courses/services";
 
 type CourseDetailPageProps = {
   params: Promise<{

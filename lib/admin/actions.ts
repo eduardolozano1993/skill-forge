@@ -19,7 +19,7 @@ import {
   deleteCacheKeysByPattern,
   getManagerDashboardCacheKey,
 } from "@/lib/redis/cache";
-import { getCourseByIdCacheKey } from "../courses/temp/utils";
+import { getCourseByIdCacheKey } from "../courses/utils";
 
 const adminSearchFiltersSchema = z.object({
   usersSearch: z.string().optional().nullable(),

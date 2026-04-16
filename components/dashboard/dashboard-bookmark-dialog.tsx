@@ -7,10 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { AppCourse } from "@/lib/courses/temp/types";
+import type { CourseDetail } from "@/lib/courses/types";
 
 type DashboardBookmarkDialogProps = {
-  course: AppCourse | null;
+  course: CourseDetail | null;
   isSubmitting?: boolean;
   onCancel: () => void;
   onConfirm: () => void;

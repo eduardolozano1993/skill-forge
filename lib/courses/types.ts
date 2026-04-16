@@ -8,7 +8,6 @@ export type AdminTableCourseRow = {
   bookmarkCount: number;
 };
 
-// TODO: review
 export type CourseDetail = {
   id: number;
   name: string;
@@ -20,20 +19,8 @@ export type CourseDetail = {
   isCompleted: boolean;
 };
 
-// TODO: review
-export type AppCourse = {
-  id: number;
-  name: string;
-  summary: string;
-  content: string;
-  isAssigned: boolean;
-  isBookmarked: boolean;
-  isCompleted: boolean;
-};
-
-// TODO: review
 export type DashboardCourses = {
-  assignedCourses: AppCourse[];
-  bookmarkedCourses: AppCourse[];
-  completedCourses: AppCourse[];
+  assignedCourses: CourseDetail[];
+  bookmarkedCourses: CourseDetail[];
+  completedCourses: CourseDetail[];
 };

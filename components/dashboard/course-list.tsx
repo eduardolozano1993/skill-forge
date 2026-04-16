@@ -3,20 +3,26 @@ import {
   CourseCardSkeleton,
 } from "@/components/dashboard/course-card";
 import { DashboardListLayout } from "@/components/dashboard/dashboard-list-layout";
-import type { AppCourse } from "@/lib/courses/temp/types";
+import type { CourseDetail } from "@/lib/courses/types";
 
 type CourseListProps = {
-  courses: AppCourse[];
+  courses: CourseDetail[];
   isLoading?: boolean;
+  bookmarkedCourseIds?: Set<number>;
+  completedCourseIds?: Set<number>;
+  pendingCourseIds?: Set<number>;
   showBookmarkAction?: boolean;
   showCompletedAction?: boolean;
-  onBookmarkToggle?: (course: AppCourse) => void;
-  onCompletedToggle?: (course: AppCourse) => void;
+  onBookmarkToggle?: (course: CourseDetail) => void;
+  onCompletedToggle?: (course: CourseDetail) => void;
 };
 
 export function CourseList({
   courses,
   isLoading = false,
+  bookmarkedCourseIds,
+  completedCourseIds,
+  pendingCourseIds,
   showBookmarkAction = false,
   showCompletedAction = false,
   onBookmarkToggle,
@@ -40,10 +46,12 @@ export function CourseList({
           name={course.name}
           summary={course.summary}
           href={`/courses/${course.id}`}
-          isBookmarked={course.isBookmarked}
-          isCompleted={course.isCompleted}
+          isBookmarked={
+            bookmarkedCourseIds?.has(course.id) ?? course.isBookmarked
+          }
+          isCompleted={completedCourseIds?.has(course.id) ?? course.isCompleted}
           isAssigned={course.isAssigned}
-          // actionsDisabled={pendingCourseIds?.has(course.id)}
+          actionsDisabled={pendingCourseIds?.has(course.id)}
           showBookmarkAction={showBookmarkAction}
           showCompletedAction={showCompletedAction}
           onBookmarkToggle={

@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 
 import { CourseList } from "@/components/dashboard/course-list";
 import { Pagination } from "@/components/ui/pagination";
+import type { CourseDetail } from "@/lib/courses/types";
+import type { TablePagination } from "@/lib/table/types";
 import {
   toggleCourseBookmarkAction,
   toggleCourseCompletionAction,
 } from "@/lib/courses/actions";
-import type { AppCourse } from "@/lib/courses/temp/types";
-import type { TablePagination } from "@/lib/table/types";
 
 type CoursesLibraryListProps = {
-  courses: AppCourse[];
+  courses: CourseDetail[];
   userType: "ADMIN" | "MANAGER" | "EMPLOYEE";
   pagination?: TablePagination;
   search: string;
@@ -27,7 +27,7 @@ export function CoursesLibraryList({
 }: CoursesLibraryListProps) {
   const router = useRouter();
 
-  async function handleBookmarkToggle(course: AppCourse) {
+  async function handleBookmarkToggle(course: CourseDetail) {
     if (userType !== "EMPLOYEE") {
       return;
     }
@@ -39,7 +39,7 @@ export function CoursesLibraryList({
     });
   }
 
-  async function handleCompletedToggle(course: AppCourse) {
+  async function handleCompletedToggle(course: CourseDetail) {
     if (userType !== "EMPLOYEE") {
       return;
     }

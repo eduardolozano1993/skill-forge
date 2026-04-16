@@ -10,7 +10,7 @@ import { AdminOrganizationStatusAction } from "@/components/admin/admin-organiza
 import { AdminCourseActions } from "@/components/admin/admin-course-actions";
 import { AdminUserStatusAction } from "@/components/admin/admin-user-status-action";
 import type { AdminOrganizationRow, AdminUserRow } from "@/lib/admin/types";
-import { AdminTableCourseRow } from "@/lib/courses/temp/types";
+import { AdminTableCourseRow } from "@/lib/courses/types";
 
 type AdminUsersTableProps = {
   rows: AdminUserRow[];

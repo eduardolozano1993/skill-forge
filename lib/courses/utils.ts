@@ -1,6 +1,6 @@
-import type { AppCourse } from "@/lib/courses/temp/types";
+import type { CourseDetail } from "@/lib/courses/types";
 
-export function filterCoursesByQuery(courses: AppCourse[], query: string) {
+export function filterCoursesByQuery(courses: CourseDetail[], query: string) {
   const normalizedQuery = query.trim().toLowerCase();
 
   if (!normalizedQuery) {

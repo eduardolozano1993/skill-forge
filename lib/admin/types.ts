@@ -1,5 +1,5 @@
 import type { TableResult } from "@/lib/table/types";
-import { AdminTableCourseRow } from "../courses/temp/types";
+import { AdminTableCourseRow } from "../courses/types";
 
 export type AdminUserStatus = "ACTIVE" | "DEACTIVATED";
 export type AdminOrganizationStatus = "ACTIVE" | "DEACTIVATED";

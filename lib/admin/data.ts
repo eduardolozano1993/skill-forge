@@ -23,7 +23,7 @@ import type {
   AdminUserRow,
 } from "@/lib/admin/types";
 import type { TableResult } from "@/lib/table/types";
-import { AdminTableCourseRow } from "../courses/temp/types";
+import { AdminTableCourseRow } from "../courses/types";
 import { sortByTextAndId } from "../utils/textSort";
 
 const SIGN_IN_LOG_FILE = path.join(

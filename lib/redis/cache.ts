@@ -8,13 +8,6 @@ export function getManagerDashboardCacheKey(organizationId: number) {
   return `cache:manager:${organizationId}:dashboard`;
 }
 
-export function getCourseDetailActionStateCacheKey(
-  courseId: number,
-  userId: number,
-) {
-  return `cache:course:${courseId}:detail:${userId}`;
-}
-
 async function getOptionalRedisClient() {
   if (!process.env.REDIS_URL) {
     return null;

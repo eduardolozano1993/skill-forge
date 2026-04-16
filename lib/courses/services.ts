@@ -1,7 +1,4 @@
-import type {
-  AdminTableCourseRow,
-  CourseDetail,
-} from "@/lib/courses/temp/types";
+import type { AdminTableCourseRow, CourseDetail } from "@/lib/courses/types";
 import {
   findActiveCoursesById,
   findCourseById,

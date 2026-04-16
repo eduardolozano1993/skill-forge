@@ -1,24 +1,24 @@
-import type { AppCourse } from "@/lib/courses/temp/types";
+import type { CourseDetail } from "@/lib/courses/types";
 
 type DashboardPreviewStateInput = {
-  assignedCourses: AppCourse[] | null;
-  bookmarkedCourses: AppCourse[] | null;
-  completedCourses: AppCourse[] | null;
+  assignedCourses: CourseDetail[] | null;
+  bookmarkedCourses: CourseDetail[] | null;
+  completedCourses: CourseDetail[] | null;
 };
 
 export type DashboardPreviewState = {
-  assignedCourses: AppCourse[] | null;
+  assignedCourses: CourseDetail[] | null;
   bookmarkedCourseIds: Set<number>;
   completedCourseIds: Set<number>;
-  pendingBookmarkRemoval: AppCourse | null;
+  pendingBookmarkRemoval: CourseDetail | null;
 };
 
 export type DashboardPreviewAction =
-  | { type: "bookmark_added"; course: AppCourse }
-  | { type: "bookmark_removed"; course: AppCourse }
-  | { type: "bookmark_removal_requested"; course: AppCourse }
+  | { type: "bookmark_added"; course: CourseDetail }
+  | { type: "bookmark_removed"; course: CourseDetail }
+  | { type: "bookmark_removal_requested"; course: CourseDetail }
   | { type: "bookmark_removal_cancelled" }
-  | { type: "course_completion_toggled"; course: AppCourse };
+  | { type: "course_completion_toggled"; course: CourseDetail };
 
 export function createDashboardPreviewInitialState({
   assignedCourses,

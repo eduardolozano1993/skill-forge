@@ -17,17 +17,17 @@ import {
   DashboardSectionHeader,
 } from "@/components/dashboard/dashboard-section";
 import { getDashboardPreviewCollections } from "@/components/dashboard/dashboard-preview-selectors";
+import type { CourseDetail } from "@/lib/courses/types";
 import {
   toggleCourseBookmarkAction,
   toggleCourseCompletionAction,
 } from "@/lib/courses/actions";
-import type { AppCourse } from "@/lib/courses/temp/types";
 
 type DashboardPreviewProps = {
   query: string;
-  assignedCourses: AppCourse[] | null;
-  bookmarkedCourses: AppCourse[] | null;
-  completedCourses: AppCourse[] | null;
+  assignedCourses: CourseDetail[] | null;
+  bookmarkedCourses: CourseDetail[] | null;
+  completedCourses: CourseDetail[] | null;
 };
 
 export function DashboardPreview({
@@ -90,7 +90,7 @@ export function DashboardPreview({
     });
   }
 
-  async function handleBookmarkAdd(course: AppCourse) {
+  async function handleBookmarkAdd(course: CourseDetail) {
     setMutationError(null);
     dispatch({ type: "bookmark_added", course });
     updatePendingCourse(course.id, true);
@@ -132,7 +132,7 @@ export function DashboardPreview({
     refreshDashboard();
   }
 
-  async function handleCompletionToggle(course: AppCourse) {
+  async function handleCompletionToggle(course: CourseDetail) {
     setMutationError(null);
     dispatch({ type: "course_completion_toggled", course });
     updatePendingCourse(course.id, true);

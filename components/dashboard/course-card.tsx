@@ -32,6 +32,7 @@ export function CourseCard({
   isBookmarked = false,
   isCompleted = false,
   isAssigned = false,
+  actionsDisabled = false,
   showBookmarkAction,
   showCompletedAction,
   onBookmarkToggle,
@@ -108,6 +109,7 @@ export function CourseCard({
                   onClick={(event) =>
                     handleActionClick(event, onBookmarkToggle)
                   }
+                  disabled={actionsDisabled}
                   className="rounded-full p-1 text-amber-400 transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Bookmark className="size-4" fill="currentColor" />
@@ -124,6 +126,7 @@ export function CourseCard({
                   onClick={(event) =>
                     handleActionClick(event, onCompletedToggle)
                   }
+                  disabled={actionsDisabled}
                   className="rounded-full p-1 transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <CheckCircle2
