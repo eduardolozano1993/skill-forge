@@ -1,6 +1,6 @@
 import type { DashboardPreviewState } from "@/components/dashboard/dashboard-preview-state";
 import type { AppCourse } from "@/lib/courses/temp/types";
-import { filterCoursesByQuery } from "@/lib/courses/utils";
+import { filterCoursesByQuery } from "@/lib/courses/temp/utils";
 
 export function getFilteredCourses(courses: AppCourse[] | null, query: string) {
   if (!courses) {

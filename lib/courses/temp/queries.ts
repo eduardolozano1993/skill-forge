@@ -1,8 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma/prisma";
-import { readThroughJsonCache } from "@/lib/redis/cache";
 import { AdminTableCourseRow, AppCourse, CourseDetail } from "./types";
-import { getCourseByIdCacheKey } from "./utils";
 import {
   buildTablePagination,
   DEFAULT_TABLE_PAGE_SIZE,
@@ -177,25 +175,113 @@ export async function queryCourses(
   };
 }
 
-async function queryCourseById(courseId: number): Promise<CourseDetail | null> {
-  return prisma.course.findUnique({
+export async function findCourseById(
+  courseId: number,
+  session: any,
+): Promise<CourseDetail | null> {
+  const userId = Number(session.user.id);
+  const organizationId = Number(session.user.organizationId);
+
+  const course = await prisma.course.findUnique({
     where: {
       id: courseId,
     },
-    select: courseDetailSelect,
+    select: {
+      ...courseDetailSelect,
+      organizations: {
+        where: {
+          organizationId,
+        },
+        select: {
+          courseId: true,
+        },
+      },
+      bookmarks: {
+        where: {
+          userId,
+        },
+        select: {
+          courseId: true,
+        },
+      },
+      completedByUsers: {
+        where: {
+          userId,
+        },
+        select: {
+          courseId: true,
+        },
+      },
+    },
   });
+
+  if (!course) {
+    return null;
+  }
+
+  const courseDetail: CourseDetail = {
+    ...course,
+    isAssigned: course.organizations.length > 0,
+    isBookmarked: course.bookmarks.length > 0,
+    isCompleted: course.completedByUsers.length > 0,
+  };
+
+  return courseDetail;
 }
 
-async function queryActiveCourseById(
+export async function findActiveCoursesById(
   courseId: number,
+  session: any,
 ): Promise<CourseDetail | null> {
-  return prisma.course.findFirst({
+  const userId = Number(session.user.id);
+  const organizationId = Number(session.user.organizationId);
+
+  const course = await prisma.course.findFirst({
     where: {
       id: courseId,
       status: "ACTIVE",
     },
-    select: courseDetailSelect,
+    select: {
+      ...courseDetailSelect,
+      organizations: {
+        where: {
+          organizationId,
+        },
+        select: {
+          courseId: true,
+        },
+      },
+      bookmarks: {
+        where: {
+          userId,
+        },
+        select: {
+          courseId: true,
+        },
+      },
+      completedByUsers: {
+        where: {
+          userId,
+        },
+        select: {
+          courseId: true,
+        },
+      },
+    },
   });
+
+  if (!course || course.status !== "ACTIVE") {
+    return null;
+  }
+
+  const courseDetail: CourseDetail = {
+    ...course,
+    isAssigned: course.organizations.length > 0,
+    isBookmarked: course.bookmarks.length > 0,
+    isCompleted: course.completedByUsers.length > 0,
+  };
+
+  return courseDetail;
 }
 
 export async function updateCourse(
@@ -208,27 +294,4 @@ export async function updateCourse(
     },
     data: content,
   });
-}
-
-export async function findCourseById(
-  courseId: number,
-): Promise<CourseDetail | null> {
-  return readThroughJsonCache(getCourseByIdCacheKey(courseId), () =>
-    queryCourseById(courseId),
-  );
-}
-
-export async function findActiveCoursesById(
-  courseId: number,
-): Promise<CourseDetail | null> {
-  const course = await readThroughJsonCache(
-    getCourseByIdCacheKey(courseId),
-    () => queryActiveCourseById(courseId),
-  );
-
-  if (!course || course.status !== "ACTIVE") {
-    return null;
-  }
-
-  return course;
 }

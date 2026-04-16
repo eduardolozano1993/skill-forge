@@ -1,11 +1,3 @@
-export type CourseDetail = {
-  id: number;
-  name: string;
-  summary: string;
-  content: string;
-  status: "ACTIVE" | "DEACTIVATED";
-};
-
 export type AdminTableCourseRow = {
   id: number;
   name: string;
@@ -16,6 +8,19 @@ export type AdminTableCourseRow = {
   bookmarkCount: number;
 };
 
+// TODO: review
+export type CourseDetail = {
+  id: number;
+  name: string;
+  summary: string;
+  content: string;
+  status: "ACTIVE" | "DEACTIVATED";
+  isAssigned: boolean;
+  isBookmarked: boolean;
+  isCompleted: boolean;
+};
+
+// TODO: review
 export type AppCourse = {
   id: number;
   name: string;

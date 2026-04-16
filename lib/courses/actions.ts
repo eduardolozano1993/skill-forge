@@ -216,12 +216,6 @@ async function requireEmployeeCourseBookmarkSelection(courseId: number) {
   };
 }
 
-export async function getCoursesAction() {
-  const { courses } = await getVisibleCoursesForUser();
-
-  return courses;
-}
-
 export async function getDashboardCoursesAction(): Promise<DashboardCourses> {
   const { courses, bookmarkedCourseIds, completedCourseIds } =
     await getVisibleCoursesForUser();

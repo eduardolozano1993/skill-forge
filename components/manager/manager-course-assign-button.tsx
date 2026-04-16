@@ -18,14 +18,12 @@ import { assignCourseToOrganizationAction } from "@/lib/manager/actions";
 type ManagerCourseAssignButtonProps = {
   courseId: number;
   courseName: string;
-  organizationName: string;
   isAssigned: boolean;
 };
 
 export function ManagerCourseAssignButton({
   courseId,
   courseName,
-  organizationName,
   isAssigned,
 }: ManagerCourseAssignButtonProps) {
   const router = useRouter();
@@ -67,8 +65,8 @@ export function ManagerCourseAssignButton({
           type="button"
           aria-label={
             isAssigned
-              ? `${courseName} is already assigned to ${organizationName}`
-              : `Add ${courseName} to ${organizationName}`
+              ? `${courseName} is already assigned to your organization`
+              : `Add ${courseName} to your organization`
           }
           disabled={isAssigned}
           onClick={() => {
@@ -90,11 +88,7 @@ export function ManagerCourseAssignButton({
             <DialogDescription>
               Are you sure you want to add{" "}
               <span className="font-medium text-text-strong">{courseName}</span>{" "}
-              to{" "}
-              <span className="font-medium text-text-strong">
-                {organizationName}
-              </span>
-              ?
+              to your organization?
             </DialogDescription>
             {error ? (
               <p className="rounded-2xl border border-destructive/20 bg-destructive/10 px-md py-sm text-sm text-destructive">

@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { CheckCircle2, Pencil } from "lucide-react";
 
 import { CourseContentView } from "@/components/courses/course-content-view";
 import { EmployeeCourseBookmarkButton } from "@/components/employee/employee-course-bookmark-button";
 import { EmployeeCourseOrgIndicator } from "@/components/employee/employee-course-org-indicator";
 import { ManagerCourseAssignButton } from "@/components/manager/manager-course-assign-button";
 import { requireAuth } from "@/lib/auth/auth";
-import { getCourseDetailActionState } from "@/lib/courses/queries";
 import { getCourseById } from "@/lib/courses/temp/services";
 
 type CourseDetailPageProps = {
@@ -37,13 +36,6 @@ export default async function CourseDetailPage({
   const isEmployee = session.user.userType === "EMPLOYEE";
   const isManager = session.user.userType === "MANAGER";
 
-  const courseDetailActionState = await getCourseDetailActionState({
-    courseId,
-    userId: Number(session.user.id),
-    userType: session.user.userType,
-    organizationId: session.user.organizationId,
-  });
-
   return (
     <article className="space-y-lg">
       <header className="space-y-sm">
@@ -53,31 +45,31 @@ export default async function CourseDetailPage({
           </p>
           <div className="flex items-center gap-xs">
             {isEmployee ? (
-              courseDetailActionState.employeeBookmark?.isAssigned ? (
+              course.isCompleted ? (
+                <span
+                  aria-label={`${course.name} is completed`}
+                  title="Completed"
+                  className="rounded-full p-2 text-emerald-500"
+                >
+                  <CheckCircle2 className="size-5" />
+                </span>
+              ) : course.isAssigned ? (
                 <EmployeeCourseOrgIndicator courseName={course.name} />
               ) : (
                 <EmployeeCourseBookmarkButton
                   courseId={course.id}
                   courseName={course.name}
-                  isBookmarked={
-                    courseDetailActionState.employeeBookmark?.isBookmarked ??
-                    false
-                  }
+                  isBookmarked={course.isBookmarked ?? false}
                 />
               )
             ) : null}
-            {isManager && courseDetailActionState.managerOrganization ? (
+            {isManager && (
               <ManagerCourseAssignButton
                 courseId={course.id}
                 courseName={course.name}
-                organizationName={
-                  courseDetailActionState.managerOrganization.name
-                }
-                isAssigned={
-                  courseDetailActionState.managerOrganization.isAssigned
-                }
+                isAssigned={course.isAssigned}
               />
-            ) : null}
+            )}
             {canEditCourse ? (
               <Link
                 href={`/admin/courses/${course.id}/edit`}

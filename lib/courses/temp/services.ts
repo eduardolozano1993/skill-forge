@@ -2,14 +2,13 @@ import type {
   AdminTableCourseRow,
   CourseDetail,
 } from "@/lib/courses/temp/types";
-import { isAdmin } from "@/lib/utils/checkUserType";
 import {
   findActiveCoursesById,
   findCourseById,
   queryAdminCourses,
   queryCourses,
 } from "./queries";
-import { requireAdmin } from "@/lib/auth/auth";
+import { requireAdmin, requireAuth } from "@/lib/auth/auth";
 import { normalizeTablePage, normalizeTableSearch } from "@/lib/table/utils";
 import type { TableResult } from "@/lib/table/types";
 
@@ -17,12 +16,12 @@ export async function getCourseById(
   courseId: number,
 ): Promise<CourseDetail | null> {
   let course;
-  const isCurrentUserAdmin = await isAdmin();
+  const session = await requireAuth();
 
-  if (isCurrentUserAdmin) {
-    course = await findCourseById(courseId);
+  if (session.user.userType === "ADMIN") {
+    course = await findCourseById(courseId, session);
   } else {
-    course = await findActiveCoursesById(courseId);
+    course = await findActiveCoursesById(courseId, session);
   }
 
   if (!course) {
