@@ -9,13 +9,45 @@ import type { TableResult } from "@/lib/table/types";
 import { requireAuth, requireEmployee } from "@/lib/auth/auth";
 import { Session } from "next-auth";
 
-const courseDetailSelect = {
-  id: true,
-  name: true,
-  summary: true,
-  content: true,
-  status: true,
-} as const;
+function buildCourseDetailSelect({
+  userId,
+  organizationId,
+}: {
+  userId: number;
+  organizationId: number;
+}) {
+  return {
+    id: true,
+    name: true,
+    summary: true,
+    content: true,
+    status: true,
+    organizations: {
+      where: {
+        organizationId,
+      },
+      select: {
+        courseId: true,
+      },
+    },
+    bookmarks: {
+      where: {
+        userId,
+      },
+      select: {
+        courseId: true,
+      },
+    },
+    completedByUsers: {
+      where: {
+        userId,
+      },
+      select: {
+        courseId: true,
+      },
+    },
+  } satisfies Prisma.CourseSelect;
+}
 
 function serializeCourses({
   courses,
@@ -147,37 +179,7 @@ export async function queryCourses(
 
   const courses = await prisma.course.findMany({
     where,
-    select: {
-      id: true,
-      name: true,
-      summary: true,
-      content: true,
-      status: true,
-      organizations: {
-        where: {
-          organizationId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-      bookmarks: {
-        where: {
-          userId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-      completedByUsers: {
-        where: {
-          userId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-    },
+    select: buildCourseDetailSelect({ userId, organizationId }),
     orderBy: [
       {
         name: "asc",
@@ -217,7 +219,13 @@ export async function findCourseById(
       where: {
         id: courseId,
       },
-      select: courseDetailSelect,
+      select: {
+        id: true,
+        name: true,
+        summary: true,
+        content: true,
+        status: true,
+      },
     });
 
     if (!course) {
@@ -239,33 +247,7 @@ export async function findCourseById(
     where: {
       id: courseId,
     },
-    select: {
-      ...courseDetailSelect,
-      organizations: {
-        where: {
-          organizationId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-      bookmarks: {
-        where: {
-          userId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-      completedByUsers: {
-        where: {
-          userId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-    },
+    select: buildCourseDetailSelect({ userId, organizationId }),
   });
 
   if (!course) {
@@ -294,33 +276,7 @@ export async function findActiveCoursesById(
       id: courseId,
       status: "ACTIVE",
     },
-    select: {
-      ...courseDetailSelect,
-      organizations: {
-        where: {
-          organizationId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-      bookmarks: {
-        where: {
-          userId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-      completedByUsers: {
-        where: {
-          userId,
-        },
-        select: {
-          courseId: true,
-        },
-      },
-    },
+    select: buildCourseDetailSelect({ userId, organizationId }),
   });
 
   if (!course || course.status !== "ACTIVE") {
