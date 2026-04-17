@@ -201,7 +201,9 @@ export async function queryCourses(
     take: pagination.pageSize,
   });
 
-  const rows = courses.map<CourseDetail>((course) => toCourseDetail({ course }));
+  const rows = courses.map<CourseDetail>((course) =>
+    toCourseDetail({ course }),
+  );
 
   return {
     search,
@@ -214,32 +216,6 @@ export async function findCourseById(
   courseId: number,
   session: Session,
 ): Promise<CourseDetail | null> {
-  if (!session) {
-    const course = await prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-      select: {
-        id: true,
-        name: true,
-        summary: true,
-        content: true,
-        status: true,
-      },
-    });
-
-    if (!course) {
-      return null;
-    }
-
-    return {
-      ...course,
-      isAssigned: false,
-      isBookmarked: false,
-      isCompleted: false,
-    };
-  }
-
   const userId = Number(session.user.id);
   const organizationId = Number(session.user.organizationId);
 
