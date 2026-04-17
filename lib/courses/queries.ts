@@ -34,6 +34,21 @@ type CourseContext = {
   organizationId: number;
 };
 
+export type EmployeeCourseSelection = {
+  userId: number;
+  organizationId: number | null;
+  courseId: number;
+  isBookmarked: boolean;
+  isCompleted: boolean;
+};
+
+export type EmployeeCourseBookmarkSelection = {
+  userId: number;
+  organizationId: number | null;
+  courseId: number;
+  isBookmarked: boolean;
+};
+
 function getCourseContext(session: Session): CourseContext {
   return {
     userId: Number(session.user.id),
@@ -435,7 +450,7 @@ export async function requireEmployeeCourseSelection(courseId: number) {
     courseId,
     isBookmarked: Boolean(existingBookmark),
     isCompleted: Boolean(existingCompletion),
-  };
+  } satisfies EmployeeCourseSelection;
 }
 
 export async function requireEmployeeCourseBookmarkSelection(courseId: number) {
@@ -475,5 +490,49 @@ export async function requireEmployeeCourseBookmarkSelection(courseId: number) {
     organizationId,
     courseId,
     isBookmarked: Boolean(existingBookmark),
-  };
+  } satisfies EmployeeCourseBookmarkSelection;
+}
+
+export async function toggleEmployeeCourseBookmark(
+  courseSelection: EmployeeCourseBookmarkSelection,
+) {
+  if (courseSelection.isBookmarked) {
+    return prisma.bookmark.delete({
+      where: {
+        userId_courseId: {
+          userId: courseSelection.userId,
+          courseId: courseSelection.courseId,
+        },
+      },
+    });
+  }
+
+  return prisma.bookmark.create({
+    data: {
+      userId: courseSelection.userId,
+      courseId: courseSelection.courseId,
+    },
+  });
+}
+
+export async function toggleEmployeeCourseCompletion(
+  courseSelection: EmployeeCourseSelection,
+) {
+  if (courseSelection.isCompleted) {
+    return prisma.completedCourse.delete({
+      where: {
+        userId_courseId: {
+          userId: courseSelection.userId,
+          courseId: courseSelection.courseId,
+        },
+      },
+    });
+  }
+
+  return prisma.completedCourse.create({
+    data: {
+      userId: courseSelection.userId,
+      courseId: courseSelection.courseId,
+    },
+  });
 }

@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma/prisma";
 import {
   deleteCacheKeys,
   getManagerDashboardCacheKey,
@@ -13,10 +12,14 @@ import {
   updateCourseContentSchema,
 } from "./schemas";
 import {
+  type EmployeeCourseBookmarkSelection,
+  type EmployeeCourseSelection,
   findCourseById,
   getVisibleCoursesForUser,
   requireEmployeeCourseBookmarkSelection,
   requireEmployeeCourseSelection,
+  toggleEmployeeCourseBookmark,
+  toggleEmployeeCourseCompletion,
   updateCourse,
 } from "./queries";
 import type { DashboardCourses } from "./types";
@@ -42,7 +45,7 @@ type ToggleCourseActionOptions<
   TStateKey extends string,
 > = {
   loadSelection: (courseId: number) => Promise<TSelection | null>;
-  mutateSelection: (selection: TSelection) => Promise<void>;
+  mutateSelection: (selection: TSelection) => Promise<unknown>;
   successField: TStateKey;
   nextValue: (selection: TSelection) => boolean;
   revalidationPaths?: (courseId: number) => string[];
@@ -145,27 +148,10 @@ export async function getDashboardCoursesAction(): Promise<DashboardCourses> {
 export async function toggleCourseBookmarkAction(courseId: number) {
   return toggleCourseAction(courseId, {
     loadSelection: requireEmployeeCourseBookmarkSelection,
-    mutateSelection: async (courseSelection) => {
-      if (courseSelection.isBookmarked) {
-        await prisma.bookmark.delete({
-          where: {
-            userId_courseId: {
-              userId: courseSelection.userId,
-              courseId: courseSelection.courseId,
-            },
-          },
-        });
-      } else {
-        await prisma.bookmark.create({
-          data: {
-            userId: courseSelection.userId,
-            courseId: courseSelection.courseId,
-          },
-        });
-      }
-    },
+    mutateSelection: toggleEmployeeCourseBookmark,
     successField: "isBookmarked",
-    nextValue: (courseSelection) => !courseSelection.isBookmarked,
+    nextValue: (courseSelection: EmployeeCourseBookmarkSelection) =>
+      !courseSelection.isBookmarked,
     revalidationPaths: (selectedCourseId) => [`/courses/${selectedCourseId}`],
   });
 }
@@ -173,27 +159,10 @@ export async function toggleCourseBookmarkAction(courseId: number) {
 export async function toggleCourseCompletionAction(courseId: number) {
   return toggleCourseAction(courseId, {
     loadSelection: requireEmployeeCourseSelection,
-    mutateSelection: async (courseSelection) => {
-      if (courseSelection.isCompleted) {
-        await prisma.completedCourse.delete({
-          where: {
-            userId_courseId: {
-              userId: courseSelection.userId,
-              courseId: courseSelection.courseId,
-            },
-          },
-        });
-      } else {
-        await prisma.completedCourse.create({
-          data: {
-            userId: courseSelection.userId,
-            courseId: courseSelection.courseId,
-          },
-        });
-      }
-    },
+    mutateSelection: toggleEmployeeCourseCompletion,
     successField: "isCompleted",
-    nextValue: (courseSelection) => !courseSelection.isCompleted,
+    nextValue: (courseSelection: EmployeeCourseSelection) =>
+      !courseSelection.isCompleted,
     revalidationPaths: (selectedCourseId) => [`/courses/${selectedCourseId}`],
   });
 }
