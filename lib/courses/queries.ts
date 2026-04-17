@@ -49,33 +49,42 @@ function buildCourseDetailSelect({
   } satisfies Prisma.CourseSelect;
 }
 
-function serializeCourses({
-  courses,
+function toCourseDetail({
+  course,
   assignedCourseIds,
   bookmarkedCourseIds,
   completedCourseIds,
 }: {
-  courses: Array<{
+  course: {
     id: number;
     name: string;
     summary: string;
     content: string;
     status: "ACTIVE" | "DEACTIVATED";
-  }>;
-  assignedCourseIds: Set<number>;
-  bookmarkedCourseIds: Set<number>;
-  completedCourseIds: Set<number>;
+    organizations?: Array<{ courseId: number }>;
+    bookmarks?: Array<{ courseId: number }>;
+    completedByUsers?: Array<{ courseId: number }>;
+  };
+  assignedCourseIds?: Set<number>;
+  bookmarkedCourseIds?: Set<number>;
+  completedCourseIds?: Set<number>;
 }) {
-  return courses.map<CourseDetail>((course) => ({
+  return {
     id: course.id,
     name: course.name,
     summary: course.summary,
     content: course.content,
     status: course.status,
-    isAssigned: assignedCourseIds.has(course.id),
-    isBookmarked: bookmarkedCourseIds.has(course.id),
-    isCompleted: completedCourseIds.has(course.id),
-  }));
+    isAssigned: assignedCourseIds
+      ? assignedCourseIds.has(course.id)
+      : (course.organizations?.length ?? 0) > 0,
+    isBookmarked: bookmarkedCourseIds
+      ? bookmarkedCourseIds.has(course.id)
+      : (course.bookmarks?.length ?? 0) > 0,
+    isCompleted: completedCourseIds
+      ? completedCourseIds.has(course.id)
+      : (course.completedByUsers?.length ?? 0) > 0,
+  };
 }
 
 export async function queryAdminCourses(
@@ -192,16 +201,7 @@ export async function queryCourses(
     take: pagination.pageSize,
   });
 
-  const rows = courses.map<CourseDetail>((course) => ({
-    id: course.id,
-    name: course.name,
-    summary: course.summary,
-    content: course.content,
-    status: course.status,
-    isBookmarked: course.bookmarks.length > 0,
-    isCompleted: course.completedByUsers.length > 0,
-    isAssigned: course.organizations.length > 0,
-  }));
+  const rows = courses.map<CourseDetail>((course) => toCourseDetail({ course }));
 
   return {
     search,
@@ -254,14 +254,7 @@ export async function findCourseById(
     return null;
   }
 
-  const courseDetail: CourseDetail = {
-    ...course,
-    isAssigned: course.organizations.length > 0,
-    isBookmarked: course.bookmarks.length > 0,
-    isCompleted: course.completedByUsers.length > 0,
-  };
-
-  return courseDetail;
+  return toCourseDetail({ course });
 }
 
 export async function findActiveCoursesById(
@@ -283,14 +276,7 @@ export async function findActiveCoursesById(
     return null;
   }
 
-  const courseDetail: CourseDetail = {
-    ...course,
-    isAssigned: course.organizations.length > 0,
-    isBookmarked: course.bookmarks.length > 0,
-    isCompleted: course.completedByUsers.length > 0,
-  };
-
-  return courseDetail;
+  return toCourseDetail({ course });
 }
 
 export async function updateCourse(
@@ -356,12 +342,14 @@ export async function getVisibleCoursesForUser() {
     completedCourses.map((course) => course.courseId),
   );
 
-  const serializedCourses = serializeCourses({
-    courses,
-    assignedCourseIds,
-    bookmarkedCourseIds,
-    completedCourseIds,
-  });
+  const serializedCourses = courses.map((course) =>
+    toCourseDetail({
+      course,
+      assignedCourseIds,
+      bookmarkedCourseIds,
+      completedCourseIds,
+    }),
+  );
 
   return {
     courses: serializedCourses,
