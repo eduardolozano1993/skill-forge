@@ -9,13 +9,87 @@ import type { TableResult } from "@/lib/table/types";
 import { requireAuth, requireEmployee } from "@/lib/auth/auth";
 import { Session } from "next-auth";
 
+type CourseStatus = "ACTIVE" | "DEACTIVATED";
+
+type CourseUserState = {
+  organizations?: Array<{ courseId: number }>;
+  bookmarks?: Array<{ courseId: number }>;
+  completedByUsers?: Array<{ courseId: number }>;
+};
+
+type CourseDetailSource = {
+  id: number;
+  name: string;
+  summary: string;
+  content: string;
+  status: CourseStatus;
+} & CourseUserState;
+
+type CourseContext = {
+  userId: number;
+  organizationId: number;
+};
+
+function getCourseContext(session: Session): CourseContext {
+  return {
+    userId: Number(session.user.id),
+    organizationId: Number(session.user.organizationId),
+  };
+}
+
+function buildCourseSearchWhere(search: string): Prisma.CourseWhereInput {
+  return search
+    ? {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      }
+    : {};
+}
+
+function buildActiveCourseWhere(search: string): Prisma.CourseWhereInput {
+  return {
+    status: "ACTIVE",
+    ...buildCourseSearchWhere(search),
+  };
+}
+
+function buildCourseOrderBy(): Prisma.CourseOrderByWithRelationInput[] {
+  return [
+    {
+      name: "asc",
+    },
+    {
+      id: "asc",
+    },
+  ];
+}
+
+function buildPaginationArgs({
+  totalRows,
+  page,
+  pageSize,
+}: {
+  totalRows: number;
+  page: number;
+  pageSize: number;
+}) {
+  const pagination = buildTablePagination(totalRows, page, pageSize);
+  const skip =
+    totalRows === 0 ? 0 : (pagination.page - 1) * pagination.pageSize;
+
+  return {
+    pagination,
+    skip,
+    take: pagination.pageSize,
+  };
+}
+
 function buildCourseDetailSelect({
   userId,
   organizationId,
-}: {
-  userId: number;
-  organizationId: number;
-}) {
+}: CourseContext) {
   return {
     id: true,
     name: true,
@@ -55,16 +129,7 @@ function toCourseDetail({
   bookmarkedCourseIds,
   completedCourseIds,
 }: {
-  course: {
-    id: number;
-    name: string;
-    summary: string;
-    content: string;
-    status: "ACTIVE" | "DEACTIVATED";
-    organizations?: Array<{ courseId: number }>;
-    bookmarks?: Array<{ courseId: number }>;
-    completedByUsers?: Array<{ courseId: number }>;
-  };
+  course: CourseDetailSource;
   assignedCourseIds?: Set<number>;
   bookmarkedCourseIds?: Set<number>;
   completedCourseIds?: Set<number>;
@@ -91,27 +156,17 @@ export async function queryAdminCourses(
   search: string,
   page: number,
 ): Promise<TableResult<AdminTableCourseRow>> {
-  const where: Prisma.CourseWhereInput = search
-    ? {
-        name: {
-          contains: search,
-          mode: "insensitive",
-        },
-      }
-    : {};
+  const where = buildCourseSearchWhere(search);
 
   const totalRows = await prisma.course.count({
     where,
   });
 
-  const pagination = buildTablePagination(
+  const { pagination, skip, take } = buildPaginationArgs({
     totalRows,
     page,
-    DEFAULT_TABLE_PAGE_SIZE,
-  );
-
-  const skip =
-    totalRows === 0 ? 0 : (pagination.page - 1) * pagination.pageSize;
+    pageSize: DEFAULT_TABLE_PAGE_SIZE,
+  });
 
   const courses = await prisma.course.findMany({
     where,
@@ -128,16 +183,9 @@ export async function queryAdminCourses(
         },
       },
     },
-    orderBy: [
-      {
-        name: "asc",
-      },
-      {
-        id: "asc",
-      },
-    ],
+    orderBy: buildCourseOrderBy(),
     skip,
-    take: pagination.pageSize,
+    take,
   });
 
   const rows = courses.map<AdminTableCourseRow>((course) => ({
@@ -162,43 +210,25 @@ export async function queryCourses(
   search: string,
   page: number,
 ): Promise<TableResult<CourseDetail>> {
-  const userId = Number(session.user.id);
-  const organizationId = Number(session.user.organizationId);
-
-  const where: Prisma.CourseWhereInput = {
-    status: "ACTIVE",
-    ...(search
-      ? {
-          name: {
-            contains: search,
-            mode: "insensitive",
-          },
-        }
-      : {}),
-  };
+  const courseContext = getCourseContext(session);
+  const where = buildActiveCourseWhere(search);
 
   const totalRows = await prisma.course.count({
     where,
   });
 
-  const pagination = buildTablePagination(totalRows, page, 12);
-
-  const skip =
-    totalRows === 0 ? 0 : (pagination.page - 1) * pagination.pageSize;
+  const { pagination, skip, take } = buildPaginationArgs({
+    totalRows,
+    page,
+    pageSize: 12,
+  });
 
   const courses = await prisma.course.findMany({
     where,
-    select: buildCourseDetailSelect({ userId, organizationId }),
-    orderBy: [
-      {
-        name: "asc",
-      },
-      {
-        id: "asc",
-      },
-    ],
+    select: buildCourseDetailSelect(courseContext),
+    orderBy: buildCourseOrderBy(),
     skip,
-    take: pagination.pageSize,
+    take,
   });
 
   const rows = courses.map<CourseDetail>((course) =>
@@ -216,14 +246,13 @@ export async function findCourseById(
   courseId: number,
   session: Session,
 ): Promise<CourseDetail | null> {
-  const userId = Number(session.user.id);
-  const organizationId = Number(session.user.organizationId);
+  const courseContext = getCourseContext(session);
 
   const course = await prisma.course.findUnique({
     where: {
       id: courseId,
     },
-    select: buildCourseDetailSelect({ userId, organizationId }),
+    select: buildCourseDetailSelect(courseContext),
   });
 
   if (!course) {
@@ -237,15 +266,14 @@ export async function findActiveCoursesById(
   courseId: number,
   session: Session,
 ): Promise<CourseDetail | null> {
-  const userId = Number(session.user.id);
-  const organizationId = Number(session.user.organizationId);
+  const courseContext = getCourseContext(session);
 
   const course = await prisma.course.findFirst({
     where: {
+      ...buildActiveCourseWhere(""),
       id: courseId,
-      status: "ACTIVE",
     },
-    select: buildCourseDetailSelect({ userId, organizationId }),
+    select: buildCourseDetailSelect(courseContext),
   });
 
   if (!course || course.status !== "ACTIVE") {
