@@ -29,15 +29,15 @@ export default async function AdminPage() {
             Platform dashboard
           </h1>
           <p className="mt-xs max-w-3xl text-base text-text-soft">
-            Platform-wide visibility into users, organizations, and sign-in lockout activity.
+            Platform-wide matrics
           </p>
         </div>
       </header>
 
       <div className="grid gap-md md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard label="Total users" value={summary.totalUsers} />
-        <SummaryCard label="Total courses" value={summary.totalCourses} />
         <SummaryCard label="Total orgs" value={summary.totalOrganizations} />
+        <SummaryCard label="Total courses" value={summary.totalCourses} />
         <SummaryCard
           label="Completed courses"
           value={summary.totalCompletedCourses}
@@ -50,7 +50,8 @@ export default async function AdminPage() {
           <CardTitle>Recent sign-in lockouts</CardTitle>
           <CardDescription>
             Last {logData.lines.length} entries from{" "}
-            <span className="font-mono text-xs">logs/sign_in/lockouts.log</span>.
+            <span className="font-mono text-xs">logs/sign_in/lockouts.log</span>
+            .
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -72,7 +73,6 @@ export default async function AdminPage() {
           )}
         </CardContent>
       </Card>
-
     </section>
   );
 }

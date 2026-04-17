@@ -16,8 +16,6 @@ import {
   normalizeTableSearch,
 } from "@/lib/table/utils";
 import type {
-  AdminDashboardData,
-  AdminDashboardSearchFilters,
   AdminPlatformSummary,
   AdminSignInLogData,
   AdminUserRow,
@@ -207,30 +205,6 @@ export async function getAdminUsersTableData(
 export async function getAdminCoursesTableData(search?: string | null) {
   await requireAdmin();
   return fetchAdminCoursesTableData(search);
-}
-
-export async function getAdminDashboardData(
-  _filters: AdminDashboardSearchFilters = {},
-): Promise<AdminDashboardData> {
-  await requireAdmin();
-
-  // const [summary, users, organizations, courses] = await Promise.all([
-  //   readThroughJsonCache(
-  //     ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
-  //     fetchAdminPlatformSummary,
-  //   ),
-  //   fetchAdminUsersTableData(filters.usersSearch),
-  //   // fetchAdminOrganizationsTableData(filters.organizationsSearch),
-  //   fetchAdminCoursesTableData(filters.coursesSearch),
-  // ]);
-
-  // return {
-  //   summary,
-  //   users,
-  //   organizations,
-  //   courses,
-  // };
-  return {} as AdminDashboardData;
 }
 
 export async function getAdminSignInLogData(

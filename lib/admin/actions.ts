@@ -6,12 +6,10 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/auth";
 import {
   getAdminCoursesTableData,
-  getAdminDashboardData,
   getAdminPlatformSummary,
   getAdminSignInLogData,
   getAdminUsersTableData,
 } from "@/lib/admin/data";
-import type { AdminDashboardSearchFilters } from "@/lib/admin/types";
 import { prisma } from "@/lib/prisma/prisma";
 import {
   ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
@@ -19,13 +17,6 @@ import {
   deleteCacheKeysByPattern,
   getManagerDashboardCacheKey,
 } from "@/lib/redis/cache";
-import { getCourseByIdCacheKey } from "../courses/utils";
-
-const adminSearchFiltersSchema = z.object({
-  usersSearch: z.string().optional().nullable(),
-  organizationsSearch: z.string().optional().nullable(),
-  coursesSearch: z.string().optional().nullable(),
-});
 
 const adminTableSearchSchema = z.object({
   search: z.string().optional().nullable(),
@@ -50,18 +41,6 @@ const updateCourseStatusSchema = z.object({
   status: z.enum(["ACTIVE", "DEACTIVATED"]),
 });
 
-function parseSearchFilters(
-  filters: AdminDashboardSearchFilters = {},
-): AdminDashboardSearchFilters {
-  const parsedFilters = adminSearchFiltersSchema.safeParse(filters);
-
-  if (!parsedFilters.success) {
-    return {};
-  }
-
-  return parsedFilters.data;
-}
-
 function parseTableSearch(search?: string | null) {
   const parsedSearch = adminTableSearchSchema.safeParse({ search });
 
@@ -74,12 +53,6 @@ function parseTableSearch(search?: string | null) {
 
 export async function getAdminPlatformSummaryAction() {
   return getAdminPlatformSummary();
-}
-
-export async function getAdminDashboardDataAction(
-  filters: AdminDashboardSearchFilters = {},
-) {
-  return getAdminDashboardData(parseSearchFilters(filters));
 }
 
 export async function getAdminUsersTableDataAction(search?: string | null) {
@@ -318,10 +291,7 @@ export async function updateAdminCourseStatusAction(
   });
 
   await Promise.all([
-    deleteCacheKeys([
-      ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
-      getCourseByIdCacheKey(course.id),
-    ]),
+    deleteCacheKeys([ADMIN_PLATFORM_SUMMARY_CACHE_KEY]),
     deleteCacheKeysByPattern([`cache:course:${course.id}:detail:*`]),
   ]);
 

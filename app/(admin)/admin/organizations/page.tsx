@@ -1,8 +1,8 @@
-import { AdminOrganizationsTable } from "@/components/admin/admin-tables";
-import { TableEmptyState } from "@/components/ui/table";
-import { TableUrlSearch } from "@/components/ui/table-url-search";
-import { getAdminOrganizationsTableData } from "@/lib/admin/data";
-import { getSingleQueryParam } from "@/lib/table/utils";
+// import { AdminOrganizationsTable } from "@/components/admin/admin-tables";
+// import { TableEmptyState } from "@/components/ui/table";
+// import { TableUrlSearch } from "@/components/ui/table-url-search";
+// import { getAdminOrganizationsTableData } from "@/lib/admin/data";
+// import { getSingleQueryParam } from "@/lib/table/utils";
 
 type AdminOrganizationsPageProps = {
   searchParams?: Promise<{
@@ -10,14 +10,16 @@ type AdminOrganizationsPageProps = {
   }>;
 };
 
-export default async function AdminOrganizationsPage({
-  searchParams,
-}: AdminOrganizationsPageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const organizationsSearch = getSingleQueryParam(
-    resolvedSearchParams?.organizations,
-  );
-  const data = await getAdminOrganizationsTableData(organizationsSearch);
+export default async function AdminOrganizationsPage(
+  {
+    // searchParams,
+  }: AdminOrganizationsPageProps,
+) {
+  // const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  // const organizationsSearch = getSingleQueryParam(
+  //   resolvedSearchParams?.organizations,
+  // );
+  // const data = await getAdminOrganizationsTableData(organizationsSearch);
 
   return (
     <section className="space-y-lg">
@@ -34,7 +36,7 @@ export default async function AdminOrganizationsPage({
           </p>
         </div>
       </header>
-
+      {/* 
       <TableUrlSearch
         label="Search organizations"
         placeholder="Search organizations by name or owner references"
@@ -53,7 +55,7 @@ export default async function AdminOrganizationsPage({
               : "Organizations will appear here once they are created."
           }
         />
-      )}
+      )} */}
     </section>
   );
 }
