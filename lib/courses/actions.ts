@@ -12,8 +12,6 @@ import {
   updateCourseContentSchema,
 } from "./schemas";
 import {
-  type EmployeeCourseBookmarkSelection,
-  type EmployeeCourseSelection,
   findCourseById,
   getVisibleCoursesForUser,
   requireEmployeeCourseBookmarkSelection,
@@ -29,10 +27,10 @@ type ToggleActionError = {
   error: string;
 };
 
-type ToggleActionSuccess<TStateKey extends string> = {
+type ToggleActionSuccess = {
   success: true;
   error?: undefined;
-} & Record<TStateKey, boolean>;
+};
 
 type ToggleCourseSelection = {
   userId: number;
@@ -40,30 +38,20 @@ type ToggleCourseSelection = {
   organizationId: number | null;
 };
 
-type ToggleCourseActionOptions<
-  TSelection extends ToggleCourseSelection,
-  TStateKey extends string,
-> = {
+type ToggleCourseActionOptions<TSelection extends ToggleCourseSelection> = {
   loadSelection: (courseId: number) => Promise<TSelection | null>;
   mutateSelection: (selection: TSelection) => Promise<unknown>;
-  successField: TStateKey;
-  nextValue: (selection: TSelection) => boolean;
   revalidationPaths?: (courseId: number) => string[];
 };
 
-async function toggleCourseAction<
-  TSelection extends ToggleCourseSelection,
-  TStateKey extends string,
->(
+async function toggleCourseAction<TSelection extends ToggleCourseSelection>(
   courseId: number,
   {
     loadSelection,
     mutateSelection,
-    successField,
-    nextValue,
     revalidationPaths = () => [],
-  }: ToggleCourseActionOptions<TSelection, TStateKey>,
-): Promise<ToggleActionError | ToggleActionSuccess<TStateKey>> {
+  }: ToggleCourseActionOptions<TSelection>,
+): Promise<ToggleActionError | ToggleActionSuccess> {
   const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
 
   if (!parsedPayload.success) {
@@ -98,8 +86,7 @@ async function toggleCourseAction<
 
   return {
     success: true,
-    [successField]: nextValue(courseSelection),
-  } as ToggleActionSuccess<TStateKey>;
+  };
 }
 
 export async function updateCourseContentAction(formData: FormData) {
@@ -149,9 +136,6 @@ export async function toggleCourseBookmarkAction(courseId: number) {
   return toggleCourseAction(courseId, {
     loadSelection: requireEmployeeCourseBookmarkSelection,
     mutateSelection: toggleEmployeeCourseBookmark,
-    successField: "isBookmarked",
-    nextValue: (courseSelection: EmployeeCourseBookmarkSelection) =>
-      !courseSelection.isBookmarked,
     revalidationPaths: (selectedCourseId) => [`/courses/${selectedCourseId}`],
   });
 }
@@ -160,9 +144,6 @@ export async function toggleCourseCompletionAction(courseId: number) {
   return toggleCourseAction(courseId, {
     loadSelection: requireEmployeeCourseSelection,
     mutateSelection: toggleEmployeeCourseCompletion,
-    successField: "isCompleted",
-    nextValue: (courseSelection: EmployeeCourseSelection) =>
-      !courseSelection.isCompleted,
     revalidationPaths: (selectedCourseId) => [`/courses/${selectedCourseId}`],
   });
 }

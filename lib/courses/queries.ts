@@ -38,15 +38,12 @@ export type EmployeeCourseSelection = {
   userId: number;
   organizationId: number | null;
   courseId: number;
-  isBookmarked: boolean;
-  isCompleted: boolean;
 };
 
 export type EmployeeCourseBookmarkSelection = {
   userId: number;
   organizationId: number | null;
   courseId: number;
-  isBookmarked: boolean;
 };
 
 function getCourseContext(session: Session): CourseContext {
@@ -448,8 +445,6 @@ export async function requireEmployeeCourseSelection(courseId: number) {
     userId,
     organizationId,
     courseId,
-    isBookmarked: Boolean(existingBookmark),
-    isCompleted: Boolean(existingCompletion),
   } satisfies EmployeeCourseSelection;
 }
 
@@ -489,50 +484,85 @@ export async function requireEmployeeCourseBookmarkSelection(courseId: number) {
     userId,
     organizationId,
     courseId,
-    isBookmarked: Boolean(existingBookmark),
   } satisfies EmployeeCourseBookmarkSelection;
 }
 
-export async function toggleEmployeeCourseBookmark(
-  courseSelection: EmployeeCourseBookmarkSelection,
-) {
-  if (courseSelection.isBookmarked) {
-    return prisma.bookmark.delete({
+export async function toggleEmployeeCourseBookmark({
+  userId,
+  courseId,
+}: EmployeeCourseBookmarkSelection) {
+  const existingBookmark = await prisma.bookmark.findUnique({
+    where: {
+      userId_courseId: {
+        userId,
+        courseId,
+      },
+    },
+    select: {
+      courseId: true,
+    },
+  });
+
+  if (existingBookmark) {
+    return prisma.bookmark.deleteMany({
       where: {
-        userId_courseId: {
-          userId: courseSelection.userId,
-          courseId: courseSelection.courseId,
-        },
+        userId,
+        courseId,
       },
     });
   }
 
-  return prisma.bookmark.create({
-    data: {
-      userId: courseSelection.userId,
-      courseId: courseSelection.courseId,
+  return prisma.bookmark.upsert({
+    where: {
+      userId_courseId: {
+        userId,
+        courseId,
+      },
+    },
+    update: {},
+    create: {
+      userId,
+      courseId,
     },
   });
 }
 
-export async function toggleEmployeeCourseCompletion(
-  courseSelection: EmployeeCourseSelection,
-) {
-  if (courseSelection.isCompleted) {
-    return prisma.completedCourse.delete({
+export async function toggleEmployeeCourseCompletion({
+  userId,
+  courseId,
+}: EmployeeCourseSelection) {
+  const existingCompletion = await prisma.completedCourse.findUnique({
+    where: {
+      userId_courseId: {
+        userId,
+        courseId,
+      },
+    },
+    select: {
+      courseId: true,
+    },
+  });
+
+  if (existingCompletion) {
+    return prisma.completedCourse.deleteMany({
       where: {
-        userId_courseId: {
-          userId: courseSelection.userId,
-          courseId: courseSelection.courseId,
-        },
+        userId,
+        courseId,
       },
     });
   }
 
-  return prisma.completedCourse.create({
-    data: {
-      userId: courseSelection.userId,
-      courseId: courseSelection.courseId,
+  return prisma.completedCourse.upsert({
+    where: {
+      userId_courseId: {
+        userId,
+        courseId,
+      },
+    },
+    update: {},
+    create: {
+      userId,
+      courseId,
     },
   });
 }

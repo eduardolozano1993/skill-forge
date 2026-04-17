@@ -1,7 +1,7 @@
 interface:
   display_name: "Code Quality Audit"
-  short_description: "Audit code for maintainability and design quality"
-  default_prompt: "Use $code-quality-audit to review the requested code or repository area against DRY, KISS, YAGNI, SOLID, and Clean Code, then return a structured findings report with concrete file references and refactoring guidance."
+  short_description: "Audit code for maintainability, design quality, and applicable transactional risks"
+  default_prompt: "Use $code-quality-audit to review the requested code or repository area against DRY, KISS, YAGNI, SOLID, Clean Code, Coupling & Cohesion, and Law of Demeter, plus ACID and Tell, Don't Ask when relevant. Determine which conditional standards apply. If all applied standards pass, return an inline checklist of the applied standards and the exact verdict `All applied standards passed. No violations found.` If any applied standard fails, write a timestamped Markdown report in ./agents/outputs with the audit checklist, findings table, verdict, and concrete file references."
 
 policy:
   allow_implicit_invocation: true
