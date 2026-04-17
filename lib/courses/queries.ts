@@ -25,6 +25,10 @@ type CourseDetailSource = {
   status: CourseStatus;
 } & CourseUserState;
 
+type UpdateCourseInput = Partial<
+  Pick<CourseDetailSource, "name" | "summary" | "content" | "status">
+>;
+
 type CourseContext = {
   userId: number;
   organizationId: number;
@@ -285,7 +289,7 @@ export async function findActiveCoursesById(
 
 export async function updateCourse(
   courseId: number,
-  content: Partial<CourseDetail>,
+  content: UpdateCourseInput,
 ) {
   return prisma.course.update({
     where: {
