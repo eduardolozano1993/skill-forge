@@ -1,34 +1,19 @@
 import type { DefaultSession } from "next-auth";
-
-type UserType = "ADMIN" | "MANAGER" | "EMPLOYEE";
+import type { AuthSessionUser, AuthUserType } from "@/lib/auth/user";
 
 declare module "next-auth" {
   interface Session {
-    user: DefaultSession["user"] & {
-      id: string;
-      displayName: string;
-      phone: string;
-      userType: UserType;
-      organizationId: number | null;
-    };
+    user: NonNullable<DefaultSession["user"]> & AuthSessionUser;
   }
 
-  interface User {
-    id: string;
-    email: string;
-    name: string;
-    displayName: string;
-    phone: string;
-    userType: UserType;
-    organizationId: number | null;
-  }
+  interface User extends AuthSessionUser {}
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     displayName?: string;
     phone?: string;
-    userType?: UserType;
+    userType?: AuthUserType;
     organizationId?: number | null;
   }
 }

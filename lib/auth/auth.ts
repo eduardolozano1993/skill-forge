@@ -1,16 +1,22 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import {
+  type AuthenticatedSession,
+  getAuthUserId,
+  loadActiveAuthUserById,
+  setSessionUser,
+  toAuthSessionUser,
+  type AuthUserType,
+} from "@/lib/auth/user";
 
-type UserType = "ADMIN" | "MANAGER" | "EMPLOYEE";
-
-const roleHomeRoutes: Record<UserType, string> = {
+const roleHomeRoutes: Record<AuthUserType, string> = {
   ADMIN: "/admin",
   MANAGER: "/manager",
   EMPLOYEE: "/dashboard",
 };
 
-export function getDefaultRouteForUserType(userType: UserType) {
+export function getDefaultRouteForUserType(userType: AuthUserType) {
   return roleHomeRoutes[userType];
 }
 
@@ -38,7 +44,7 @@ export function getPostSignInRedirect({
   userType,
   callbackUrl,
 }: {
-  userType: UserType;
+  userType: AuthUserType;
   callbackUrl?: string | null;
 }) {
   const defaultRoute = getDefaultRouteForUserType(userType);
@@ -61,21 +67,29 @@ export function getPostSignInRedirect({
   return safeCallbackPath;
 }
 
-export function redirectToUserHome(userType: UserType) {
+export function redirectToUserHome(userType: AuthUserType) {
   redirect(getDefaultRouteForUserType(userType));
 }
 
-export async function requireAuth() {
+export async function requireAuth(): Promise<AuthenticatedSession> {
   const session = await auth();
+  const userId = getAuthUserId(session?.user?.id);
 
-  if (!session?.user) {
+  if (!session?.user || userId === null) {
     redirect("/sign-in");
   }
 
-  return session;
+  const currentUser = await loadActiveAuthUserById(userId);
+  if (!currentUser) {
+    redirect("/sign-in");
+  }
+
+  return setSessionUser(session, toAuthSessionUser(currentUser));
 }
 
-async function requireUserType(allowedUserTypes: UserType[]) {
+async function requireUserType(
+  allowedUserTypes: AuthUserType[],
+): Promise<AuthenticatedSession> {
   const session = await requireAuth();
 
   if (!allowedUserTypes.includes(session.user.userType)) {

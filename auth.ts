@@ -2,7 +2,17 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { object, string } from "zod";
 
-import { getAuthenticatedUserByCredentials } from "@/lib/auth/credentials";
+import { authenticateCredentials } from "@/lib/auth/credentials";
+import { getClientIp } from "@/lib/auth/sign-in-rate-limit";
+import {
+  clearAuthTokenUser,
+  getAuthSessionUserFromToken,
+  getAuthUserId,
+  loadActiveAuthUserById,
+  setSessionUser,
+  setTokenUser,
+  toAuthSessionUser,
+} from "@/lib/auth/user";
 
 const credentialsSchema = object({
   email: string({ error: "Email is required" })
@@ -28,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(rawCredentials) {
+      async authorize(rawCredentials, request) {
         const parsedCredentials = credentialsSchema.safeParse(rawCredentials);
 
         if (!parsedCredentials.success) {
@@ -36,66 +46,51 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const { email, password } = parsedCredentials.data;
-        const user = await getAuthenticatedUserByCredentials({
+        const authenticationResult = await authenticateCredentials({
           email,
           password,
+          ip: getClientIp(request.headers),
         });
 
-        if (!user || user.status === "DEACTIVATED") {
+        if (authenticationResult.status !== "authenticated") {
           return null;
         }
 
-        return {
-          id: String(user.id),
-          email: user.email,
-          name: user.name,
-          displayName: user.displayName,
-          phone: user.phone,
-          userType: user.userType,
-          organizationId: user.organizationId,
-        };
+        return toAuthSessionUser(authenticationResult.user);
       },
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.sub = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.displayName = user.displayName;
-        token.phone = user.phone;
-        token.userType = user.userType;
-        token.organizationId = user.organizationId ?? null;
+        return setTokenUser(token, user);
       }
 
-      return token;
+      const userId = getAuthUserId(token.sub);
+      if (userId === null) {
+        return clearAuthTokenUser(token);
+      }
+
+      const currentUser = await loadActiveAuthUserById(userId);
+      if (!currentUser) {
+        return clearAuthTokenUser(token);
+      }
+
+      return setTokenUser(token, toAuthSessionUser(currentUser));
     },
     session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub ?? "";
-        session.user.email = token.email ?? session.user.email ?? "";
-        session.user.name = token.name ?? session.user.name ?? "";
-        session.user.displayName =
-          typeof token.displayName === "string" ? token.displayName : "";
-        session.user.phone = typeof token.phone === "string" ? token.phone : "";
-        session.user.userType =
-          token.userType === "ADMIN" ||
-          token.userType === "MANAGER" ||
-          token.userType === "EMPLOYEE"
-            ? token.userType
-            : "EMPLOYEE";
-        session.user.organizationId =
-          typeof token.organizationId === "number"
-            ? token.organizationId
-            : null;
+      const sessionUser = getAuthSessionUserFromToken(token);
+      if (!session.user || !sessionUser) {
+        return {
+          ...session,
+          user: undefined,
+        };
       }
 
-      return session;
+      return setSessionUser(session, sessionUser);
     },
-    authorized({ auth, request }) {
+    async authorized({ auth, request }) {
       const pathname = request.nextUrl.pathname;
-      const isAuthenticated = Boolean(auth?.user);
       const isPublicPath =
         pathname === "/" ||
         pathname === "/sign-in" ||
@@ -105,7 +100,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true;
       }
 
-      return isAuthenticated;
+      const userId = getAuthUserId(auth?.user?.id);
+      if (userId === null) {
+        return false;
+      }
+
+      return (await loadActiveAuthUserById(userId)) !== null;
     },
   },
 });

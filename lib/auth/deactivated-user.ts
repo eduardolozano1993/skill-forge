@@ -1,4 +1,4 @@
-type UserType = "ADMIN" | "MANAGER" | "EMPLOYEE";
+import type { AuthUserType } from "@/lib/auth/user";
 
 export type DeactivatedAccountDialogContent = {
   title: string;
@@ -6,7 +6,7 @@ export type DeactivatedAccountDialogContent = {
 };
 
 export function getDeactivatedAccountDialogContent(
-  userType: UserType,
+  userType: AuthUserType,
 ): DeactivatedAccountDialogContent {
   if (userType === "MANAGER") {
     return {

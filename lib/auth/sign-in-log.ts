@@ -10,13 +10,34 @@ type SignInLockoutLogArgs = {
   retryAfterSeconds: number;
 };
 
+function sanitizeLogValue(value: string) {
+  return value.replaceAll(/[\r\n\t]/g, " ").replaceAll(/[^\x20-\x7E]/g, "?");
+}
+
+export function formatSignInLockoutLogEntry({
+  email,
+  ip,
+  retryAfterSeconds,
+}: SignInLockoutLogArgs) {
+  return `${JSON.stringify({
+    timestamp: new Date().toISOString(),
+    event: "rate_limit_reached",
+    email: sanitizeLogValue(email),
+    ip: sanitizeLogValue(ip),
+    retryAfterSeconds,
+  })}\n`;
+}
+
 export async function logSignInLockout({
   email,
   ip,
   retryAfterSeconds,
 }: SignInLockoutLogArgs) {
-  const timestamp = new Date().toISOString();
-  const entry = `[${timestamp}] rate_limit_reached email=${email} ip=${ip} retry_after_seconds=${retryAfterSeconds}\n`;
+  const entry = formatSignInLockoutLogEntry({
+    email,
+    ip,
+    retryAfterSeconds,
+  });
 
   await mkdir(SIGN_IN_LOG_DIR, { recursive: true });
 
