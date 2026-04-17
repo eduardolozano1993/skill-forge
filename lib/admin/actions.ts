@@ -8,7 +8,6 @@ import {
   getAdminCoursesTableData,
   getAdminPlatformSummary,
   getAdminSignInLogData,
-  getAdminUsersTableData,
 } from "@/lib/admin/data";
 import { prisma } from "@/lib/prisma/prisma";
 import {
@@ -53,10 +52,6 @@ function parseTableSearch(search?: string | null) {
 
 export async function getAdminPlatformSummaryAction() {
   return getAdminPlatformSummary();
-}
-
-export async function getAdminUsersTableDataAction(search?: string | null) {
-  return getAdminUsersTableData(parseTableSearch(search));
 }
 
 export async function getAdminCoursesTableDataAction(search?: string | null) {

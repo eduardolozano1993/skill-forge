@@ -2,8 +2,8 @@ import { AdminUsersTable } from "@/components/admin/admin-tables";
 import { Pagination } from "@/components/ui/pagination";
 import { TableUrlSearch } from "@/components/ui/table-url-search";
 import { TableEmptyState } from "@/components/ui/table";
-import { getAdminUsersTableData } from "@/lib/admin/data";
 import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
+import { getUsers } from "@/lib/users/services";
 
 type AdminUsersPageProps = {
   searchParams?: Promise<{
@@ -18,8 +18,8 @@ export default async function AdminUsersPage({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const usersSearch = getSingleQueryParam(resolvedSearchParams?.users);
   const currentPage = parsePageQueryParam(resolvedSearchParams?.page);
-  const data = await getAdminUsersTableData(usersSearch, currentPage);
-  const pagination = data.pagination;
+  const users = await getUsers(usersSearch, currentPage);
+  const pagination = users.pagination;
 
   return (
     <section className="space-y-lg">
@@ -41,11 +41,11 @@ export default async function AdminUsersPage({
         label="Search users"
         placeholder="Search users by name or email"
         paramName="users"
-        query={data.search}
+        query={users.search}
         resetParams={["page"]}
       />
 
-      {data.rows.length > 0 ? (
+      {users.rows.length > 0 ? (
         <div className="space-y-md">
           {pagination ? (
             <div className="flex flex-col gap-2 text-sm text-text-soft md:flex-row md:items-center md:justify-between">
@@ -66,7 +66,7 @@ export default async function AdminUsersPage({
             </div>
           ) : null}
 
-          <AdminUsersTable rows={data.rows} />
+          <AdminUsersTable rows={users.rows} />
 
           {pagination ? (
             <Pagination
@@ -74,7 +74,7 @@ export default async function AdminUsersPage({
               totalPages={pagination.totalPages}
               pathname="/admin/users"
               searchParams={{
-                users: data.search || undefined,
+                users: users.search || undefined,
               }}
             />
           ) : null}
@@ -83,7 +83,7 @@ export default async function AdminUsersPage({
         <TableEmptyState
           title="No users found"
           description={
-            data.search
+            users.search
               ? "Try a different users search term."
               : "Users will appear here once accounts exist."
           }

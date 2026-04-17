@@ -9,11 +9,13 @@ import {
 import { AdminOrganizationStatusAction } from "@/components/admin/admin-organization-status-action";
 import { AdminCourseActions } from "@/components/admin/admin-course-actions";
 import { AdminUserStatusAction } from "@/components/admin/admin-user-status-action";
-import type { AdminOrganizationRow, AdminUserRow } from "@/lib/admin/types";
+import type { AdminOrganizationRow } from "@/lib/admin/types";
 import { AdminTableCourseRow } from "@/lib/courses/types";
+import { UsersTableRow } from "@/lib/users/types";
+import { formatDate } from "@/lib/utils/date-format";
 
 type AdminUsersTableProps = {
-  rows: AdminUserRow[];
+  rows: UsersTableRow[];
 };
 
 type AdminOrganizationsTableProps = {
@@ -24,41 +26,18 @@ type AdminCoursesTableProps = {
   rows: AdminTableCourseRow[];
 };
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-  }).format(date);
-}
+type AdminTableStatus =
+  | UsersTableRow["status"]
+  | AdminOrganizationRow["status"]
+  | AdminTableCourseRow["status"];
 
-function getUserStatusPillClasses(status: AdminUserRow["status"]) {
+function getStatusPillClasses(status: AdminTableStatus) {
   return status === "ACTIVE"
     ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border border-red-200 bg-red-50 text-red-700";
 }
 
-function getUserStatusLabel(status: AdminUserRow["status"]) {
-  return status === "ACTIVE" ? "Active" : "Deactivated";
-}
-
-function getOrganizationStatusPillClasses(
-  status: AdminOrganizationRow["status"],
-) {
-  return status === "ACTIVE"
-    ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-    : "border border-red-200 bg-red-50 text-red-700";
-}
-
-function getCourseStatusPillClasses(status: AdminTableCourseRow["status"]) {
-  return status === "ACTIVE"
-    ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-    : "border border-red-200 bg-red-50 text-red-700";
-}
-
-function getOrganizationStatusLabel(status: AdminOrganizationRow["status"]) {
-  return status === "ACTIVE" ? "Active" : "Deactivated";
-}
-
-function getCourseStatusLabel(status: AdminTableCourseRow["status"]) {
+function getStatusLabel(status: AdminTableStatus) {
   return status === "ACTIVE" ? "Active" : "Deactivated";
 }
 
@@ -90,9 +69,9 @@ export function AdminUsersTable({ rows }: AdminUsersTableProps) {
             </TableCell>
             <TableCell>
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getUserStatusPillClasses(user.status)}`}
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusPillClasses(user.status)}`}
               >
-                {getUserStatusLabel(user.status)}
+                {getStatusLabel(user.status)}
               </span>
             </TableCell>
             <TableCell className="text-text-soft">
@@ -153,9 +132,9 @@ export function AdminOrganizationsTable({
             </TableCell>
             <TableCell>
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getOrganizationStatusPillClasses(organization.status)}`}
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusPillClasses(organization.status)}`}
               >
-                {getOrganizationStatusLabel(organization.status)}
+                {getStatusLabel(organization.status)}
               </span>
             </TableCell>
             <TableCell className="text-text-soft">
@@ -201,9 +180,9 @@ export function AdminCoursesTable({ rows }: AdminCoursesTableProps) {
             </TableCell>
             <TableCell>
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getCourseStatusPillClasses(course.status)}`}
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusPillClasses(course.status)}`}
               >
-                {getCourseStatusLabel(course.status)}
+                {getStatusLabel(course.status)}
               </span>
             </TableCell>
             <TableCell className="text-text-soft">
