@@ -16,17 +16,7 @@ const assignBookmarkedCourseSchema = z.object({
 
 async function invalidateManagerOrganizationCaches(
   organizationId: number,
-  courseId: number,
 ) {
-  const organizationUsers = await prisma.user.findMany({
-    where: {
-      organizationId,
-    },
-    select: {
-      id: true,
-    },
-  });
-
   await deleteCacheKeys([getManagerDashboardCacheKey(organizationId)]);
 }
 
@@ -94,7 +84,6 @@ export async function assignCourseToOrganizationAction(courseId: number) {
 
   await invalidateManagerOrganizationCaches(
     organizationId,
-    parsedPayload.data.courseId,
   );
 
   revalidatePath("/manager");
@@ -190,7 +179,6 @@ export async function assignBookmarkedCourseToOrganizationAction(
 
   await invalidateManagerOrganizationCaches(
     organizationId,
-    parsedPayload.data.courseId,
   );
 
   revalidatePath("/manager");
@@ -256,7 +244,6 @@ export async function removeAssignedCourseFromOrganizationAction(
 
   await invalidateManagerOrganizationCaches(
     organizationId,
-    parsedPayload.data.courseId,
   );
 
   revalidatePath("/manager");

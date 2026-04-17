@@ -6,7 +6,6 @@ import { AppPreferencesActions } from "@/components/layouts/app-preferences-acti
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { EmployeeSidebarNav } from "@/components/layouts/employee-sidebar-nav";
 import { ProfileMenu } from "@/components/layouts/profile-menu";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,

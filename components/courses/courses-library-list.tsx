@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import { startTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { CourseList } from "@/components/dashboard/course-list";
@@ -32,7 +32,7 @@ export function CoursesLibraryList({
       return;
     }
 
-    const result = await toggleCourseBookmarkAction(course.id);
+    await toggleCourseBookmarkAction(course.id);
 
     startTransition(() => {
       router.refresh();
@@ -44,7 +44,7 @@ export function CoursesLibraryList({
       return;
     }
 
-    const result = await toggleCourseCompletionAction(course.id);
+    await toggleCourseCompletionAction(course.id);
 
     startTransition(() => {
       router.refresh();

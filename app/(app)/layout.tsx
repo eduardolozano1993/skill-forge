@@ -6,24 +6,17 @@ import { AppPreferencesActions } from "@/components/layouts/app-preferences-acti
 import { AuthenticatedShell } from "@/components/layouts/authenticated-shell";
 import { EmployeeSidebarNav } from "@/components/layouts/employee-sidebar-nav";
 import { ProfileMenu } from "@/components/layouts/profile-menu";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardEyebrow,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 type NavItem = {
   href: string;
   label: string;
 };
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/courses", label: "Courses" },
-];
 
 type AppLayoutProps = Readonly<{
   children: ReactNode;

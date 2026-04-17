@@ -453,28 +453,15 @@ export async function requireEmployeeCourseBookmarkSelection(courseId: number) {
   const userId = Number(session.user.id);
   const organizationId = session.user.organizationId;
 
-  const [course, existingBookmark] = await Promise.all([
-    prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-      select: {
-        id: true,
-        status: true,
-      },
-    }),
-    prisma.bookmark.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId,
-        },
-      },
-      select: {
-        courseId: true,
-      },
-    }),
-  ]);
+  const course = await prisma.course.findUnique({
+    where: {
+      id: courseId,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
 
   if (!course || course.status !== "ACTIVE") {
     return null;

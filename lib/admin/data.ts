@@ -210,7 +210,7 @@ export async function getAdminCoursesTableData(search?: string | null) {
 }
 
 export async function getAdminDashboardData(
-  filters: AdminDashboardSearchFilters = {},
+  _filters: AdminDashboardSearchFilters = {},
 ): Promise<AdminDashboardData> {
   await requireAdmin();
 

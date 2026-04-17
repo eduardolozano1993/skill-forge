@@ -1,12 +1,4 @@
 import { AdminOrganizationsTable } from "@/components/admin/admin-tables";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardEyebrow,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
 import { TableUrlSearch } from "@/components/ui/table-url-search";
 import { getAdminOrganizationsTableData } from "@/lib/admin/data";

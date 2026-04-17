@@ -1,5 +1,4 @@
 import type { DefaultSession } from "next-auth";
-import type { JWT } from "next-auth/jwt";
 
 type UserType = "ADMIN" | "MANAGER" | "EMPLOYEE";
 
