@@ -21,6 +21,84 @@ import {
 } from "./queries";
 import type { DashboardCourses } from "./types";
 
+type ToggleActionError = {
+  success?: false;
+  error: string;
+};
+
+type ToggleActionSuccess<TStateKey extends string> = {
+  success: true;
+  error?: undefined;
+} & Record<TStateKey, boolean>;
+
+type ToggleCourseSelection = {
+  userId: number;
+  courseId: number;
+  organizationId: number | null;
+};
+
+type ToggleCourseActionOptions<
+  TSelection extends ToggleCourseSelection,
+  TStateKey extends string,
+> = {
+  loadSelection: (courseId: number) => Promise<TSelection | null>;
+  mutateSelection: (selection: TSelection) => Promise<void>;
+  successField: TStateKey;
+  nextValue: (selection: TSelection) => boolean;
+  revalidationPaths?: (courseId: number) => string[];
+};
+
+async function toggleCourseAction<
+  TSelection extends ToggleCourseSelection,
+  TStateKey extends string,
+>(
+  courseId: number,
+  {
+    loadSelection,
+    mutateSelection,
+    successField,
+    nextValue,
+    revalidationPaths = () => [],
+  }: ToggleCourseActionOptions<TSelection, TStateKey>,
+): Promise<ToggleActionError | ToggleActionSuccess<TStateKey>> {
+  const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
+
+  if (!parsedPayload.success) {
+    return {
+      error: "Invalid course selection.",
+    };
+  }
+
+  const selectedCourseId = parsedPayload.data.courseId;
+  const courseSelection = await loadSelection(selectedCourseId);
+
+  if (!courseSelection) {
+    return {
+      error: "Course access is no longer available.",
+    };
+  }
+
+  await mutateSelection(courseSelection);
+
+  await deleteCacheKeys([
+    courseSelection.organizationId
+      ? getManagerDashboardCacheKey(courseSelection.organizationId)
+      : null,
+  ]);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/courses");
+
+  for (const path of revalidationPaths(selectedCourseId)) {
+    revalidatePath(path);
+  }
+
+  return {
+    success: true,
+    [successField]: nextValue(courseSelection),
+  } as ToggleActionSuccess<TStateKey>;
+}
+
 export async function updateCourseContentAction(formData: FormData) {
   const session = await requireAdmin();
 
@@ -65,106 +143,57 @@ export async function getDashboardCoursesAction(): Promise<DashboardCourses> {
 }
 
 export async function toggleCourseBookmarkAction(courseId: number) {
-  const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
-
-  if (!parsedPayload.success) {
-    return {
-      error: "Invalid course selection.",
-    };
-  }
-
-  const courseSelection = await requireEmployeeCourseBookmarkSelection(
-    parsedPayload.data.courseId,
-  );
-
-  if (!courseSelection) {
-    return {
-      error: "Course access is no longer available.",
-    };
-  }
-
-  if (courseSelection.isBookmarked) {
-    await prisma.bookmark.delete({
-      where: {
-        userId_courseId: {
-          userId: courseSelection.userId,
-          courseId: courseSelection.courseId,
-        },
-      },
-    });
-  } else {
-    await prisma.bookmark.create({
-      data: {
-        userId: courseSelection.userId,
-        courseId: courseSelection.courseId,
-      },
-    });
-  }
-
-  await deleteCacheKeys([
-    courseSelection.organizationId
-      ? getManagerDashboardCacheKey(courseSelection.organizationId)
-      : null,
-  ]);
-
-  revalidatePath("/dashboard");
-  revalidatePath("/courses");
-  revalidatePath(`/courses/${parsedPayload.data.courseId}`);
-
-  return {
-    success: true,
-    isBookmarked: !courseSelection.isBookmarked,
-  };
+  return toggleCourseAction(courseId, {
+    loadSelection: requireEmployeeCourseBookmarkSelection,
+    mutateSelection: async (courseSelection) => {
+      if (courseSelection.isBookmarked) {
+        await prisma.bookmark.delete({
+          where: {
+            userId_courseId: {
+              userId: courseSelection.userId,
+              courseId: courseSelection.courseId,
+            },
+          },
+        });
+      } else {
+        await prisma.bookmark.create({
+          data: {
+            userId: courseSelection.userId,
+            courseId: courseSelection.courseId,
+          },
+        });
+      }
+    },
+    successField: "isBookmarked",
+    nextValue: (courseSelection) => !courseSelection.isBookmarked,
+    revalidationPaths: (selectedCourseId) => [`/courses/${selectedCourseId}`],
+  });
 }
 
 export async function toggleCourseCompletionAction(courseId: number) {
-  const parsedPayload = toggleCourseSelectionSchema.safeParse({ courseId });
-
-  if (!parsedPayload.success) {
-    return {
-      error: "Invalid course selection.",
-    };
-  }
-
-  const courseSelection = await requireEmployeeCourseSelection(
-    parsedPayload.data.courseId,
-  );
-
-  if (!courseSelection) {
-    return {
-      error: "Course access is no longer available.",
-    };
-  }
-
-  if (courseSelection.isCompleted) {
-    await prisma.completedCourse.delete({
-      where: {
-        userId_courseId: {
-          userId: courseSelection.userId,
-          courseId: courseSelection.courseId,
-        },
-      },
-    });
-  } else {
-    await prisma.completedCourse.create({
-      data: {
-        userId: courseSelection.userId,
-        courseId: courseSelection.courseId,
-      },
-    });
-  }
-
-  await deleteCacheKeys([
-    courseSelection.organizationId
-      ? getManagerDashboardCacheKey(courseSelection.organizationId)
-      : null,
-  ]);
-
-  revalidatePath("/dashboard");
-  revalidatePath("/courses");
-
-  return {
-    success: true,
-    isCompleted: !courseSelection.isCompleted,
-  };
+  return toggleCourseAction(courseId, {
+    loadSelection: requireEmployeeCourseSelection,
+    mutateSelection: async (courseSelection) => {
+      if (courseSelection.isCompleted) {
+        await prisma.completedCourse.delete({
+          where: {
+            userId_courseId: {
+              userId: courseSelection.userId,
+              courseId: courseSelection.courseId,
+            },
+          },
+        });
+      } else {
+        await prisma.completedCourse.create({
+          data: {
+            userId: courseSelection.userId,
+            courseId: courseSelection.courseId,
+          },
+        });
+      }
+    },
+    successField: "isCompleted",
+    nextValue: (courseSelection) => !courseSelection.isCompleted,
+    revalidationPaths: (selectedCourseId) => [`/courses/${selectedCourseId}`],
+  });
 }
