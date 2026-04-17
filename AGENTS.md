@@ -10,6 +10,7 @@ A skill is a set of local instructions to follow that is stored in a `SKILL.md` 
 - `developer`: Implement approved GitHub issues in code, verify the changes, prepare a reviewable branch and pull request, and hand the work off to QA. Use when Codex should act as the Skill Forge implementation agent: read the approved issue and architect guidance, inspect the codebase, create a branch from develop, make the smallest safe change, run relevant verification, update the issue with a Developer Update, open a PR to develop, wait for explicit approval, and only then move the issue to QA. (file: `.agents\skills\developer\SKILL.md`)
 - `qa`: Review delivered work for implementation quality, security, accessibility, dependency safety, and release readiness without editing code. Use when Codex should act as the Skill Forge QA gate: read the parent issue, comments, and related PR, inspect the diff and nearby context, run read-only validation when useful, leave a QA summary comment, create sub-issues for blocking defects, return the parent issue to Developer when needed, and only move the issue to Done after explicit approval when no blocking findings remain. (file: `.agents\skills\qa\SKILL.md`)
 - `code-quality-audit`: Review code against DRY, KISS, YAGNI, SOLID, and Clean Code principles. Generate a structured report of findings. Use when you need a high-level code quality audit that goes beyond simple linting or formatting. Focus on maintainability, readability, and adherence to software engineering best practices. (file: `.agents\skills\code-quality-audit\SKILL.md`)
+- `security-audit`: Review code, diffs, features, or repository areas for frontend, backend, authentication, session, secrets, dependency, and deployment-facing security risks. Generate an evidence-based security report with OWASP Top 10 and ASVS-aligned checks and a findings table with severity. (file: `.agents\skills\security-audit\SKILL.md`)
 
 ### How to use skills
 
@@ -19,9 +20,11 @@ A skill is a set of local instructions to follow that is stored in a `SKILL.md` 
 - If the user names `developer` or `$developer`, open its `SKILL.md` and follow it.
 - If the user names `qa` or `$qa`, open its `SKILL.md` and follow it.
 - If the user names `code-quality-audit` or `$code-quality-audit`, open its `SKILL.md` and follow it.
+- If the user names `security-audit` or `$security-audit`, open its `SKILL.md` and follow it.
 - Keep the work inside the Product Owner boundary. Do not implement code when using this skill.
 - Keep the work inside the Architect boundary. Do not implement code when using this skill.
 - Keep the work inside the Task Writer boundary. Do not implement code when using this skill.
 - Keep the work inside the Developer boundary. Implement the approved issue, verify it honestly, and wait for approval before moving it to QA.
 - Keep the work inside the QA boundary. Review code and delivery risk, but do not implement fixes while using this skill.
 - Keep the work inside the Code Quality Audit boundary. Review code and report maintainability findings, but do not implement fixes while using this skill.
+- Keep the work inside the Security Audit boundary. Review code and report confirmed security findings, but do not implement fixes while using this skill.

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Security Audit"
+  short_description: "Audit frontend, backend, auth, secrets, and platform signals for concrete security risks"
+  default_prompt: "Use $security-audit to review the requested code, diff, or repository area for full-stack security risks across OWASP Top 10, ASVS-aligned controls, access control, input validation, authentication and session management, secrets, browser protections, logging and error exposure, and dependency hygiene. Determine which conditional areas apply. If all applied security areas pass, return an inline checklist of the applied areas and the exact verdict `All applied security checks passed. No confirmed violations found.` If any applied area fails, write a timestamped Markdown report in ./agents/outputs with the audit checklist, findings table including severity, verdict, and concrete file references."
+
+policy:
+  allow_implicit_invocation: true
