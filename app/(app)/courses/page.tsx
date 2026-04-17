@@ -8,9 +8,9 @@ import {
   DashboardSectionHeader,
   DashboardSectionEmptyState,
 } from "@/components/dashboard/dashboard-section";
-import { requireAuth } from "@/lib/auth/auth";
 import { getCourses } from "@/lib/courses/services";
 import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
+import { requireAuth } from "@/lib/auth/auth";
 
 type CoursesPageProps = {
   searchParams: Promise<{
@@ -20,8 +20,6 @@ type CoursesPageProps = {
 };
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
-  const session = await requireAuth();
-
   const resolvedSearchParams = await searchParams;
   const q = getSingleQueryParam(resolvedSearchParams.q);
   const page = parsePageQueryParam(resolvedSearchParams.page);
@@ -43,7 +41,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       </header>
       <CoursesUrlSearch query={q} />
       <Suspense key={`${q}-${page}`} fallback={<CoursesListFallback />}>
-        <CoursesListSection query={q} page={page} session={session} />
+        <CoursesListSection query={q} page={page} />
       </Suspense>
     </section>
   );
@@ -52,15 +50,12 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 type CoursesListSectionProps = {
   query: string;
   page: number;
-  session: any;
 };
 
-async function CoursesListSection({
-  query,
-  page,
-  session,
-}: CoursesListSectionProps) {
-  const { rows, search, pagination } = await getCourses(session, query, page);
+async function CoursesListSection({ query, page }: CoursesListSectionProps) {
+  const session = await requireAuth();
+
+  const { rows, search, pagination } = await getCourses(query, page);
 
   if (rows.length === 0) {
     return (
@@ -83,7 +78,7 @@ async function CoursesListSection({
   return (
     <CoursesLibraryList
       courses={rows}
-      userType={session.userType}
+      userType={session.user.userType}
       pagination={pagination}
       search={search}
     />

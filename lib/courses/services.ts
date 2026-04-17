@@ -12,20 +12,13 @@ import type { TableResult } from "@/lib/table/types";
 export async function getCourseById(
   courseId: number,
 ): Promise<CourseDetail | null> {
-  let course;
   const session = await requireAuth();
 
   if (session.user.userType === "ADMIN") {
-    course = await findCourseById(courseId, session);
+    return await findCourseById(courseId, session);
   } else {
-    course = await findActiveCoursesById(courseId, session);
+    return await findActiveCoursesById(courseId, session);
   }
-
-  if (!course) {
-    return null;
-  }
-
-  return course;
 }
 
 export async function getAdminCoursesTableData(
@@ -41,10 +34,11 @@ export async function getAdminCoursesTableData(
 }
 
 export async function getCourses(
-  session: any,
   search?: string | null,
   page?: number | null,
-) {
+): Promise<TableResult<CourseDetail>> {
+  const session = await requireAuth();
+
   const normalizedSearch = normalizeTableSearch(search);
   const normalizedPage = normalizeTablePage(page);
 

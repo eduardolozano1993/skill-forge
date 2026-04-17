@@ -1,0 +1,7 @@
+interface:
+  display_name: "Code Quality Audit"
+  short_description: "Audit code for maintainability and design quality"
+  default_prompt: "Use $code-quality-audit to review the requested code or repository area against DRY, KISS, YAGNI, SOLID, and Clean Code, then return a structured findings report with concrete file references and refactoring guidance."
+
+policy:
+  allow_implicit_invocation: true

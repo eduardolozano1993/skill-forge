@@ -22,7 +22,7 @@ import {
 import type { DashboardCourses } from "./types";
 
 export async function updateCourseContentAction(formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsedPayload = updateCourseContentSchema.safeParse({
     courseId: formData.get("courseId"),
@@ -34,7 +34,7 @@ export async function updateCourseContentAction(formData: FormData) {
   }
 
   const { courseId, content } = parsedPayload.data;
-  const course = await findCourseById(courseId);
+  const course = await findCourseById(courseId, session);
 
   if (!course) {
     notFound();

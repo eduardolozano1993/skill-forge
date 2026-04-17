@@ -7,6 +7,7 @@ import {
 } from "@/lib/table/utils";
 import type { TableResult } from "@/lib/table/types";
 import { requireAuth, requireEmployee } from "@/lib/auth/auth";
+import { Session } from "next-auth";
 
 const courseDetailSelect = {
   id: true,
@@ -116,7 +117,7 @@ export async function queryAdminCourses(
 }
 
 export async function queryCourses(
-  session: any,
+  session: Session,
   search: string,
   page: number,
 ): Promise<TableResult<CourseDetail>> {
@@ -209,7 +210,7 @@ export async function queryCourses(
 
 export async function findCourseById(
   courseId: number,
-  session?: any,
+  session: Session,
 ): Promise<CourseDetail | null> {
   if (!session) {
     const course = await prisma.course.findUnique({
@@ -283,7 +284,7 @@ export async function findCourseById(
 
 export async function findActiveCoursesById(
   courseId: number,
-  session: any,
+  session: Session,
 ): Promise<CourseDetail | null> {
   const userId = Number(session.user.id);
   const organizationId = Number(session.user.organizationId);
