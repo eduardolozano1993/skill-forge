@@ -9,7 +9,10 @@ import {
   DashboardSectionEmptyState,
 } from "@/components/dashboard/dashboard-section";
 import { getCourses } from "@/lib/courses/services";
-import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
+import {
+  getSingleQueryParam,
+  parsePageQueryParam,
+} from "@/lib/utils/table/table";
 import { requireAuth } from "@/lib/auth/auth";
 
 type CoursesPageProps = {

@@ -8,7 +8,7 @@ import {
   normalizeTablePage,
   normalizeTableSearch,
   parsePageQueryParam,
-} from "./utils";
+} from "./table";
 
 describe("getSingleQueryParam", () => {
   it("returns the first value when given an array", () => {

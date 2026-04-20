@@ -1,5 +1,8 @@
 import { requireManager } from "@/lib/auth/auth";
-import { deleteCacheKeys, getManagerDashboardCacheKey } from "@/lib/redis/cache";
+import {
+  deleteCacheKeys,
+  getManagerDashboardCacheKey,
+} from "@/lib/utils/redis/cache";
 
 import {
   assignBookmarkedCourseToOrganization,

@@ -4,7 +4,7 @@ const { getRedisClientMock } = vi.hoisted(() => ({
   getRedisClientMock: vi.fn(),
 }));
 
-vi.mock("@/lib/redis/redis", () => ({
+vi.mock("@/lib/utils/redis/redis", () => ({
   getRedisClient: getRedisClientMock,
 }));
 
@@ -79,11 +79,11 @@ describe("redis cache helpers", () => {
     const loadValue = vi.fn().mockResolvedValue({ count: 5 });
     getRedisClientMock.mockResolvedValue(client);
 
-    await expect(readThroughJsonCache("users", loadValue, 120)).resolves.toEqual(
-      {
-        count: 5,
-      },
-    );
+    await expect(
+      readThroughJsonCache("users", loadValue, 120),
+    ).resolves.toEqual({
+      count: 5,
+    });
 
     expect(client.del).toHaveBeenCalledWith("users");
     expect(loadValue).toHaveBeenCalledTimes(1);

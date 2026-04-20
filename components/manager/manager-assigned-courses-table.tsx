@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { removeAssignedCourseFromOrganizationAction } from "@/lib/manager/actions";
-import type { ManagerAssignedCourseSummary } from "@/lib/manager/data";
+import { ManagerAssignedCourseSummary } from "@/lib/manager/queries";
 
 type ManagerAssignedCoursesTableProps = {
   courses: ManagerAssignedCourseSummary[];

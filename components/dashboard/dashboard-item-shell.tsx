@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 
 type DashboardItemShellProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;

@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 
 type DashboardSectionProps = ComponentProps<"section"> & {
   children: ReactNode;

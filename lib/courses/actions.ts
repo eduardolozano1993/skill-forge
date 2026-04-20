@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth/auth";
 import {
   deleteCacheKeys,
   getManagerDashboardCacheKey,
-} from "@/lib/redis/cache";
+} from "@/lib/utils/redis/cache";
 import {
   toggleCourseSelectionSchema,
   updateCourseContentSchema,

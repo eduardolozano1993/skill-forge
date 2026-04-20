@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import type { Session, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 
 export type AuthUserType = "ADMIN" | "MANAGER" | "EMPLOYEE";
 

@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { assignBookmarkedCourseToOrganizationAction } from "@/lib/manager/actions";
-import type { ManagerBookmarkedCourseSummary } from "@/lib/manager/data";
+import { ManagerBookmarkedCourseSummary } from "@/lib/manager/queries";
 
 type ManagerBookmarksTableProps = {
   courses: ManagerBookmarkedCourseSummary[];

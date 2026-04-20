@@ -8,7 +8,7 @@ import {
   registerFailedSignInAttempt,
   resetFailedSignInAttempts,
 } from "@/lib/auth/sign-in-rate-limit";
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 
 const credentialUserSelect = {
   id: true,

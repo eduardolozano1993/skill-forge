@@ -1,4 +1,4 @@
-import { getRedisClient } from "@/lib/redis/redis";
+import { getRedisClient } from "@/lib/utils/redis/redis";
 
 const MAX_FAILURES = 5;
 const WINDOW_SECONDS = 15 * 60;

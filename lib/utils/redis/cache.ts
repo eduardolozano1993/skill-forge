@@ -1,4 +1,4 @@
-import { getRedisClient } from "@/lib/redis/redis";
+import { getRedisClient } from "@/lib/utils/redis/redis";
 
 const DEFAULT_CACHE_TTL_SECONDS = 60 * 60; // 1 hour
 

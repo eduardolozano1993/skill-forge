@@ -1,4 +1,17 @@
-import type { TablePagination } from "@/lib/table/types";
+export type TablePagination = {
+  page: number;
+  pageSize: number;
+  totalRows: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+};
+
+export type TableResult<Row> = {
+  search: string;
+  rows: Row[];
+  pagination?: TablePagination;
+};
 
 export const DEFAULT_TABLE_PAGE_SIZE = 10;
 

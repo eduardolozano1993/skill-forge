@@ -1,6 +1,6 @@
-import type { TableResult } from "@/lib/table/types";
 import { AdminTableCourseRow } from "../courses/types";
-import { User } from "../users/types";
+import { UsersTableRow } from "../users/types";
+import { TableResult } from "../utils/table/table";
 
 export type AdminUserStatus = "ACTIVE" | "DEACTIVATED";
 export type AdminOrganizationStatus = "ACTIVE" | "DEACTIVATED";
@@ -38,7 +38,7 @@ export type AdminSignInLogData = {
 
 export type AdminDashboardData = {
   summary: AdminPlatformSummary;
-  users: TableResult<User>;
+  users: TableResult<UsersTableRow>;
   organizations: TableResult<AdminOrganizationRow>;
   courses: TableResult<AdminTableCourseRow>;
 };

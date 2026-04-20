@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 import { buttonVariants } from "@/components/ui/button";
 
 type PaginationProps = {

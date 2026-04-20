@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useUiPreferences } from "@/components/providers/ui-preferences-provider";
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 
 type AuthenticatedShellProps = {
   children: ReactNode;

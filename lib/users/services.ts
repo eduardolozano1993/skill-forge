@@ -1,6 +1,9 @@
 import { requireAdmin } from "@/lib/auth/auth";
-import { normalizeTablePage, normalizeTableSearch } from "@/lib/table/utils";
-import type { TableResult } from "@/lib/table/types";
+import {
+  normalizeTablePage,
+  normalizeTableSearch,
+  TableResult,
+} from "@/lib/utils/table/table";
 import type { UsersTableRow } from "./types";
 import { queryUsers } from "./queries";
 

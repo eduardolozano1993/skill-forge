@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { CourseList } from "@/components/dashboard/course-list";
 import { Pagination } from "@/components/ui/pagination";
 import type { CourseDetail } from "@/lib/courses/types";
-import type { TablePagination } from "@/lib/table/types";
+
 import {
   toggleCourseBookmarkAction,
   toggleCourseCompletionAction,
 } from "@/lib/courses/actions";
+import { TablePagination } from "@/lib/utils/table/table";
 
 type CoursesLibraryListProps = {
   courses: CourseDetail[];

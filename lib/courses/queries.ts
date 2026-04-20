@@ -1,11 +1,11 @@
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 import { AdminTableCourseRow, CourseDetail } from "./types";
 import {
   buildTablePagination,
   DEFAULT_TABLE_PAGE_SIZE,
-} from "@/lib/table/utils";
-import type { TableResult } from "@/lib/table/types";
+  TableResult,
+} from "@/lib/utils/table/table";
 import { requireAuth, requireEmployee } from "@/lib/auth/auth";
 import { Session } from "next-auth";
 
@@ -102,10 +102,7 @@ function buildPaginationArgs({
   };
 }
 
-function buildCourseDetailSelect({
-  userId,
-  organizationId,
-}: CourseContext) {
+function buildCourseDetailSelect({ userId, organizationId }: CourseContext) {
   return {
     id: true,
     name: true,

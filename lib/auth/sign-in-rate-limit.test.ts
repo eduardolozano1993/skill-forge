@@ -4,7 +4,7 @@ const { getRedisClientMock } = vi.hoisted(() => ({
   getRedisClientMock: vi.fn(),
 }));
 
-vi.mock("@/lib/redis/redis", () => ({
+vi.mock("@/lib/utils/redis/redis", () => ({
   getRedisClient: getRedisClientMock,
 }));
 
@@ -49,9 +49,9 @@ describe("sign-in rate limit helpers", () => {
   });
 
   it("normalizes email and loopback IP values when building the Redis key", () => {
-    expect(getSignInRateLimitKey("  USER@Example.com ", "::ffff:127.0.0.1")).toBe(
-      "email:user%40example.com:ip:localhost",
-    );
+    expect(
+      getSignInRateLimitKey("  USER@Example.com ", "::ffff:127.0.0.1"),
+    ).toBe("email:user%40example.com:ip:localhost");
   });
 
   it("returns zero when the block ttl is expired or missing", async () => {
@@ -109,7 +109,9 @@ describe("sign-in rate limit helpers", () => {
       retryAfterSeconds: 0,
     });
 
-    expect(client.incr).toHaveBeenCalledWith("auth-rate-limited:signin:user-key");
+    expect(client.incr).toHaveBeenCalledWith(
+      "auth-rate-limited:signin:user-key",
+    );
     expect(client.expire).toHaveBeenCalledWith(
       "auth-rate-limited:signin:user-key",
       15 * 60,

@@ -12,7 +12,7 @@ import { AdminUserStatusAction } from "@/components/admin/admin-user-status-acti
 import type { AdminOrganizationRow } from "@/lib/admin/types";
 import { AdminTableCourseRow } from "@/lib/courses/types";
 import { UsersTableRow } from "@/lib/users/types";
-import { formatDate } from "@/lib/utils/date-format";
+import { formatDate } from "@/lib/utils/formatters/date-format";
 
 type AdminUsersTableProps = {
   rows: UsersTableRow[];

@@ -6,8 +6,11 @@ import {
   queryCourses,
 } from "./queries";
 import { requireAdmin, requireAuth } from "@/lib/auth/auth";
-import { normalizeTablePage, normalizeTableSearch } from "@/lib/table/utils";
-import type { TableResult } from "@/lib/table/types";
+import {
+  normalizeTablePage,
+  normalizeTableSearch,
+  TableResult,
+} from "@/lib/utils/table/table";
 
 export async function getCourseById(
   courseId: number,

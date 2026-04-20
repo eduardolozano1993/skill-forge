@@ -9,13 +9,13 @@ import {
   getAdminPlatformSummary,
   getAdminSignInLogData,
 } from "@/lib/admin/data";
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 import {
   ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
   deleteCacheKeys,
   deleteCacheKeysByPattern,
   getManagerDashboardCacheKey,
-} from "@/lib/redis/cache";
+} from "@/lib/utils/redis/cache";
 
 const adminTableSearchSchema = z.object({
   search: z.string().optional().nullable(),

@@ -2,19 +2,23 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { requireAdmin } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 import {
   ADMIN_PLATFORM_SUMMARY_CACHE_KEY,
   readThroughJsonCache,
-} from "@/lib/redis/cache";
-import { matchesSearch, normalizeTableSearch } from "@/lib/table/utils";
+} from "@/lib/utils/redis/cache";
+import {
+  matchesSearch,
+  normalizeTableSearch,
+  TableResult,
+} from "@/lib/utils/table/table";
 import type {
   AdminPlatformSummary,
   AdminSignInLogData,
 } from "@/lib/admin/types";
-import type { TableResult } from "@/lib/table/types";
+
 import { AdminTableCourseRow } from "../courses/types";
-import { sortByTextAndId } from "../utils/text-sort";
+import { sortByTextAndId } from "../utils/helpers/text-sort";
 
 const SIGN_IN_LOG_FILE = path.join(
   process.cwd(),

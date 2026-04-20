@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from "react";
 
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 
 type ProfileFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;

@@ -3,7 +3,10 @@ import { Pagination } from "@/components/ui/pagination";
 import { TableEmptyState } from "@/components/ui/table";
 import { TableUrlSearch } from "@/components/ui/table-url-search";
 import { getAdminCoursesTableData } from "@/lib/courses/services";
-import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
+import {
+  getSingleQueryParam,
+  parsePageQueryParam,
+} from "@/lib/utils/table/table";
 
 type AdminCoursesPageProps = {
   searchParams?: Promise<{

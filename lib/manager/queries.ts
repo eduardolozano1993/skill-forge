@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 import { requireManager } from "@/lib/auth/auth";
 import {
   getManagerDashboardCacheKey,
   readThroughJsonCache,
-} from "@/lib/redis/cache";
+} from "@/lib/utils/redis/cache";
 
 export type ManagerCourseSelection = {
   organizationId: number;

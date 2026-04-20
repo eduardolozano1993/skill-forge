@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { updateCourseContentAction } from "@/lib/courses/actions";
 import type { CourseDetail } from "@/lib/courses/types";
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 import { Button } from "@/components/ui/button";
 
 type CourseEditFormProps = {

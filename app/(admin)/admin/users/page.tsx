@@ -2,7 +2,10 @@ import { AdminUsersTable } from "@/components/admin/admin-tables";
 import { Pagination } from "@/components/ui/pagination";
 import { TableUrlSearch } from "@/components/ui/table-url-search";
 import { TableEmptyState } from "@/components/ui/table";
-import { getSingleQueryParam, parsePageQueryParam } from "@/lib/table/utils";
+import {
+  getSingleQueryParam,
+  parsePageQueryParam,
+} from "@/lib/utils/table/table";
 import { getUsers } from "@/lib/users/services";
 
 type AdminUsersPageProps = {

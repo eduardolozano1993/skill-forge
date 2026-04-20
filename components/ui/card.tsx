@@ -2,7 +2,7 @@ import * as React from "react";
 import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 
 const cardVariants = cva("rounded-lg border text-card-foreground shadow-card", {
   variants: {

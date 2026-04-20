@@ -1,4 +1,4 @@
-import { requireAuth } from "../auth/auth";
+import { requireAuth } from "../../auth/auth";
 
 export async function isAdmin(): Promise<boolean> {
   const session = await requireAuth();

@@ -1,10 +1,10 @@
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma/prisma";
+import { prisma } from "@/lib/utils/prisma/prisma";
 import {
   buildTablePagination,
   DEFAULT_TABLE_PAGE_SIZE,
-} from "@/lib/table/utils";
-import type { TableResult } from "@/lib/table/types";
+  TableResult,
+} from "@/lib/utils/table/table";
 import type { UsersTableRow } from "./types";
 
 function buildUserSearchWhere(search: string): Prisma.UserWhereInput {

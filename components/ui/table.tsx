@@ -7,7 +7,7 @@ import type {
   ThHTMLAttributes,
 } from "react";
 
-import { cn } from "@/lib/tailwind/utils";
+import { cn } from "@/lib/utils/tailwind/tailwind";
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {}
 
