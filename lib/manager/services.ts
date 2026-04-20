@@ -1,30 +1,13 @@
 import { requireManager } from "@/lib/auth/auth";
-import {
-  deleteCacheKeys,
-  getManagerDashboardCacheKey,
-  readThroughJsonCache,
-} from "@/lib/redis/cache";
+import { deleteCacheKeys, getManagerDashboardCacheKey } from "@/lib/redis/cache";
 
 import {
   assignBookmarkedCourseToOrganization,
   courseIsActive,
   createOrganizationCourseAssignment,
   deleteOrganizationCourseAssignment,
-} from "./repository";
-import { ManagerDashboardData } from "./queries";
-
-export async function getManagerDashboardData(): Promise<ManagerDashboardData> {
-  const session = await requireManager();
-  const organizationId = session.user.organizationId;
-
-  if (!organizationId) {
-    return getEmptyManagerDashboardData();
-  }
-
-  return readThroughJsonCache(getManagerDashboardCacheKey(organizationId), () =>
-    queryManagerDashboardData(organizationId),
-  );
-}
+} from "./queries";
+export { getManagerDashboardData } from "./queries";
 
 type ManagerCourseActionError = {
   success: false;
