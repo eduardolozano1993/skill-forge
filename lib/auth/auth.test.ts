@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
-vi.mock("@/lib/prisma/prisma", () => ({
+vi.mock("@/lib/utils/prisma/prisma", () => ({
   prisma: {
     user: {
       findUnique: findUniqueMock,

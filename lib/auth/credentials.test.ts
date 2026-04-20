@@ -33,7 +33,7 @@ vi.mock("@/lib/auth/sign-in-rate-limit", () => ({
   resetFailedSignInAttempts: resetFailedSignInAttemptsMock,
 }));
 
-vi.mock("@/lib/prisma/prisma", () => ({
+vi.mock("@/lib/utils/prisma/prisma", () => ({
   prisma: {
     user: {
       findUnique: findUniqueMock,

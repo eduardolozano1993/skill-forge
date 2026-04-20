@@ -25,7 +25,7 @@ vi.mock("@/lib/auth/auth", () => ({
   requireAdmin: requireAdminMock,
 }));
 
-vi.mock("@/lib/table/utils", () => ({
+vi.mock("@/lib/utils/table/table", () => ({
   normalizeTableSearch: normalizeTableSearchMock,
   normalizeTablePage: normalizeTablePageMock,
 }));

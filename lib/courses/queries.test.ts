@@ -34,7 +34,7 @@ const {
   requireEmployeeMock: vi.fn(),
 }));
 
-vi.mock("@/lib/prisma/prisma", () => ({
+vi.mock("@/lib/utils/prisma/prisma", () => ({
   prisma: prismaMock,
 }));
 

@@ -4,7 +4,7 @@ const { requireAuthMock } = vi.hoisted(() => ({
   requireAuthMock: vi.fn(),
 }));
 
-vi.mock("../auth/auth", () => ({
+vi.mock("../../auth/auth", () => ({
   requireAuth: requireAuthMock,
 }));
 

@@ -4,7 +4,7 @@ const { findUniqueMock } = vi.hoisted(() => ({
   findUniqueMock: vi.fn(),
 }));
 
-vi.mock("@/lib/prisma/prisma", () => ({
+vi.mock("@/lib/utils/prisma/prisma", () => ({
   prisma: {
     user: {
       findUnique: findUniqueMock,

@@ -47,7 +47,7 @@ vi.mock("@/lib/auth/auth", () => ({
   requireAdmin: requireAdminMock,
 }));
 
-vi.mock("@/lib/redis/cache", () => ({
+vi.mock("@/lib/utils/redis/cache", () => ({
   deleteCacheKeys: deleteCacheKeysMock,
   getManagerDashboardCacheKey: getManagerDashboardCacheKeyMock,
 }));
