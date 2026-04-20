@@ -107,10 +107,6 @@ export async function requireManager() {
   return requireUserType(["MANAGER"]);
 }
 
-export async function requireManagerOrAdmin() {
-  return requireUserType(["MANAGER", "ADMIN"]);
-}
-
 export async function requireAdmin() {
   return requireUserType(["ADMIN"]);
 }

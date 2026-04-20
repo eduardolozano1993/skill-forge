@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TableEmptyState } from "@/components/ui/table";
-import { getManagerDashboardData } from "@/lib/manager/data";
+import { getManagerDashboardData } from "@/lib/manager/services";
 
 export default async function ManagerPage() {
   const data = await getManagerDashboardData();
@@ -55,7 +55,8 @@ export default async function ManagerPage() {
           <CardEyebrow>Assigned courses</CardEyebrow>
           <CardTitle>Organization catalog</CardTitle>
           <CardDescription>
-            Assigned courses with organization completion progress and removal actions.
+            Assigned courses with organization completion progress and removal
+            actions.
           </CardDescription>
         </CardHeader>
         <CardContent>
