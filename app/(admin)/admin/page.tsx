@@ -10,7 +10,7 @@ import { TableEmptyState } from "@/components/ui/table";
 import {
   getAdminPlatformSummary,
   getAdminSignInLogData,
-} from "@/lib/admin/data";
+} from "@/lib/admin/services";
 
 export default async function AdminPage() {
   const [summary, logData] = await Promise.all([

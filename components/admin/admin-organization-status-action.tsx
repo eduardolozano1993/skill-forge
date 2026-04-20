@@ -48,7 +48,7 @@ export function AdminOrganizationStatusAction({
 
     setIsSubmitting(false);
 
-    if (result?.error) {
+    if (!result.success) {
       setError(result.error);
       return;
     }

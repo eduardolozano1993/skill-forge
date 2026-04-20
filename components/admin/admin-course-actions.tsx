@@ -44,7 +44,7 @@ export function AdminCourseActions({
 
     setIsSubmitting(false);
 
-    if (result?.error) {
+    if (!result.success) {
       setError(result.error);
       return;
     }

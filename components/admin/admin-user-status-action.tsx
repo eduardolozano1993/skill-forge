@@ -49,7 +49,7 @@ export function AdminUserStatusAction({
 
     setIsSubmitting(false);
 
-    if (result?.error) {
+    if (!result.success) {
       setError(result.error);
       return;
     }
