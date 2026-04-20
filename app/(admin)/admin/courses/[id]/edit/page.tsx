@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CourseEditForm } from "@/components/courses/course-edit-form";
 import { getCourseById } from "@/lib/courses/services";
 import { requireAdmin } from "@/lib/auth/auth";
+import { acquireCourseEditLock } from "@/lib/courses/edit-lock";
 
 type CourseEditPageProps = {
   params: Promise<{
@@ -11,7 +12,7 @@ type CourseEditPageProps = {
 };
 
 export default async function CourseEditPage({ params }: CourseEditPageProps) {
-  await requireAdmin();
+  const session = await requireAdmin();
   const { id } = await params;
   const courseId = Number(id);
 
@@ -25,5 +26,12 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
     notFound();
   }
 
-  return <CourseEditForm course={course} />;
+  const initialLockState = await acquireCourseEditLock(
+    courseId,
+    Number(session.user.id),
+  );
+
+  console.log("initial", initialLockState);
+
+  return <CourseEditForm course={course} initialLockState={initialLockState} />;
 }

@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/auth";
 import {
+  acquireCourseEditLock,
+  refreshCourseEditLock,
+  releaseCourseEditLock,
+} from "@/lib/courses/edit-lock";
+import {
   deleteCacheKeys,
   getManagerDashboardCacheKey,
 } from "@/lib/utils/redis/cache";
@@ -30,6 +35,10 @@ type ToggleActionError = {
 type ToggleActionSuccess = {
   success: true;
   error?: undefined;
+};
+
+export type UpdateCourseContentState = {
+  error?: string;
 };
 
 type ToggleCourseSelection = {
@@ -89,11 +98,15 @@ async function toggleCourseAction<TSelection extends ToggleCourseSelection>(
   };
 }
 
-export async function updateCourseContentAction(formData: FormData) {
+export async function updateCourseContentAction(
+  _previousState: UpdateCourseContentState,
+  formData: FormData,
+) {
   const session = await requireAdmin();
 
   const parsedPayload = updateCourseContentSchema.safeParse({
     courseId: formData.get("courseId"),
+    contentVersion: formData.get("contentVersion"),
     content: formData.get("content"),
   });
 
@@ -101,20 +114,61 @@ export async function updateCourseContentAction(formData: FormData) {
     notFound();
   }
 
-  const { courseId, content } = parsedPayload.data;
+  const { courseId, content, contentVersion } = parsedPayload.data;
   const course = await findCourseById(courseId, session);
 
   if (!course) {
     notFound();
   }
 
-  await updateCourse(courseId, { content });
+  const adminUserId = Number(session.user.id);
+  const lockState = await acquireCourseEditLock(courseId, adminUserId);
+
+  if (lockState.status === "conflict") {
+    return {
+      error:
+        "Another admin is already editing this course. Refresh the page and try again once the lock clears.",
+    };
+  }
+
+  const updatedCourse = await updateCourse(courseId, {
+    content,
+    expectedContentVersion: contentVersion,
+  });
+
+  if (!updatedCourse) {
+    return {
+      error:
+        "This course was updated from another session. Refresh the page to load the latest content before saving again.",
+    };
+  }
+
+  await releaseCourseEditLock(courseId, adminUserId);
 
   revalidatePath("/courses");
   revalidatePath(`/courses/${courseId}`);
   revalidatePath(`/admin/courses/${courseId}/edit`);
 
   redirect(`/courses/${courseId}`);
+}
+
+export async function refreshCourseEditLockAction(courseId: number) {
+  const session = await requireAdmin();
+
+  const refreshed = await refreshCourseEditLock(
+    courseId,
+    Number(session.user.id),
+  );
+
+  return {
+    success: refreshed,
+  };
+}
+
+export async function releaseCourseEditLockAction(courseId: number) {
+  const session = await requireAdmin();
+
+  await releaseCourseEditLock(courseId, Number(session.user.id));
 }
 
 export async function getDashboardCoursesAction(): Promise<DashboardCourses> {

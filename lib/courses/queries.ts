@@ -22,12 +22,14 @@ type CourseDetailSource = {
   name: string;
   summary: string;
   content: string;
+  contentVersion: number;
   status: CourseStatus;
 } & CourseUserState;
 
-type UpdateCourseInput = Partial<
-  Pick<CourseDetailSource, "name" | "summary" | "content" | "status">
->;
+type UpdateCourseContentInput = {
+  content: string;
+  expectedContentVersion: number;
+};
 
 type CourseContext = {
   userId: number;
@@ -108,6 +110,7 @@ function buildCourseDetailSelect({ userId, organizationId }: CourseContext) {
     name: true,
     summary: true,
     content: true,
+    contentVersion: true,
     status: true,
     organizations: {
       where: {
@@ -152,6 +155,7 @@ function toCourseDetail({
     name: course.name,
     summary: course.summary,
     content: course.content,
+    contentVersion: course.contentVersion,
     status: course.status,
     isAssigned: assignedCourseIds
       ? assignedCourseIds.has(course.id)
@@ -298,13 +302,29 @@ export async function findActiveCoursesById(
 
 export async function updateCourse(
   courseId: number,
-  content: UpdateCourseInput,
+  input: UpdateCourseContentInput,
 ) {
-  return prisma.course.update({
+  const updateResult = await prisma.course.updateMany({
+    where: {
+      id: courseId,
+      contentVersion: input.expectedContentVersion,
+    },
+    data: {
+      content: input.content,
+      contentVersion: {
+        increment: 1,
+      },
+    },
+  });
+
+  if (updateResult.count === 0) {
+    return null;
+  }
+
+  return prisma.course.findUnique({
     where: {
       id: courseId,
     },
-    data: content,
   });
 }
 

@@ -10,10 +10,12 @@ describe("updateCourseContentSchema", () => {
     expect(
       updateCourseContentSchema.parse({
         courseId: "12",
+        contentVersion: "3",
         content: "  Updated course content.  ",
       }),
     ).toEqual({
       courseId: 12,
+      contentVersion: 3,
       content: "Updated course content.",
     });
   });
@@ -21,6 +23,7 @@ describe("updateCourseContentSchema", () => {
   it("rejects content that is empty after trimming", () => {
     const result = updateCourseContentSchema.safeParse({
       courseId: 12,
+      contentVersion: 3,
       content: "   ",
     });
 
@@ -35,6 +38,7 @@ describe("updateCourseContentSchema", () => {
     expect(
       updateCourseContentSchema.safeParse({
         courseId: 0,
+        contentVersion: 1,
         content: "Valid content",
       }).success,
     ).toBe(false);
@@ -42,6 +46,17 @@ describe("updateCourseContentSchema", () => {
     expect(
       updateCourseContentSchema.safeParse({
         courseId: 1.5,
+        contentVersion: 1,
+        content: "Valid content",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects non-positive content versions", () => {
+    expect(
+      updateCourseContentSchema.safeParse({
+        courseId: 12,
+        contentVersion: 0,
         content: "Valid content",
       }).success,
     ).toBe(false);

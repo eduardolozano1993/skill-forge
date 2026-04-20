@@ -13,6 +13,7 @@ export type CourseDetail = {
   name: string;
   summary: string;
   content: string;
+  contentVersion: number;
   status: "ACTIVE" | "DEACTIVATED";
   isAssigned: boolean;
   isBookmarked: boolean;

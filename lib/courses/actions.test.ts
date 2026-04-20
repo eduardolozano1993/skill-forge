@@ -5,6 +5,9 @@ const {
   notFoundMock,
   redirectMock,
   requireAdminMock,
+  acquireCourseEditLockMock,
+  refreshCourseEditLockMock,
+  releaseCourseEditLockMock,
   deleteCacheKeysMock,
   getManagerDashboardCacheKeyMock,
   updateCourseContentSafeParseMock,
@@ -21,6 +24,9 @@ const {
   notFoundMock: vi.fn(),
   redirectMock: vi.fn(),
   requireAdminMock: vi.fn(),
+  acquireCourseEditLockMock: vi.fn(),
+  refreshCourseEditLockMock: vi.fn(),
+  releaseCourseEditLockMock: vi.fn(),
   deleteCacheKeysMock: vi.fn(),
   getManagerDashboardCacheKeyMock: vi.fn(),
   updateCourseContentSafeParseMock: vi.fn(),
@@ -45,6 +51,12 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/auth/auth", () => ({
   requireAdmin: requireAdminMock,
+}));
+
+vi.mock("@/lib/courses/edit-lock", () => ({
+  acquireCourseEditLock: acquireCourseEditLockMock,
+  refreshCourseEditLock: refreshCourseEditLockMock,
+  releaseCourseEditLock: releaseCourseEditLockMock,
 }));
 
 vi.mock("@/lib/utils/redis/cache", () => ({
@@ -91,6 +103,11 @@ describe("course actions", () => {
     getManagerDashboardCacheKeyMock.mockImplementation(
       (organizationId: number) => `cache:manager:${organizationId}:dashboard`,
     );
+    acquireCourseEditLockMock.mockResolvedValue({
+      status: "acquired",
+      holderUserId: 1,
+      expiresInSeconds: 120,
+    });
   });
 
   it("calls notFound when updateCourseContentAction receives invalid form data", async () => {
@@ -100,7 +117,7 @@ describe("course actions", () => {
     requireAdminMock.mockResolvedValue(session);
     updateCourseContentSafeParseMock.mockReturnValue({ success: false });
 
-    await expect(updateCourseContentAction(formData)).rejects.toThrow(
+    await expect(updateCourseContentAction({}, formData)).rejects.toThrow(
       "NEXT_NOT_FOUND",
     );
 
@@ -114,6 +131,7 @@ describe("course actions", () => {
     const session = { user: { id: "1", userType: "ADMIN" } };
 
     formData.set("courseId", "15");
+    formData.set("contentVersion", "2");
     formData.set("content", "Updated content");
 
     requireAdminMock.mockResolvedValue(session);
@@ -121,12 +139,13 @@ describe("course actions", () => {
       success: true,
       data: {
         courseId: 15,
+        contentVersion: 2,
         content: "Updated content",
       },
     });
     findCourseByIdMock.mockResolvedValue(null);
 
-    await expect(updateCourseContentAction(formData)).rejects.toThrow(
+    await expect(updateCourseContentAction({}, formData)).rejects.toThrow(
       "NEXT_NOT_FOUND",
     );
 
@@ -140,6 +159,7 @@ describe("course actions", () => {
     const session = { user: { id: "1", userType: "ADMIN" } };
 
     formData.set("courseId", "15");
+    formData.set("contentVersion", "2");
     formData.set("content", "Updated content");
 
     requireAdminMock.mockResolvedValue(session);
@@ -147,19 +167,22 @@ describe("course actions", () => {
       success: true,
       data: {
         courseId: 15,
+        contentVersion: 2,
         content: "Updated content",
       },
     });
     findCourseByIdMock.mockResolvedValue({ id: 15 });
     updateCourseMock.mockResolvedValue({ id: 15, content: "Updated content" });
 
-    await expect(updateCourseContentAction(formData)).rejects.toThrow(
+    await expect(updateCourseContentAction({}, formData)).rejects.toThrow(
       "NEXT_REDIRECT",
     );
 
     expect(updateCourseMock).toHaveBeenCalledWith(15, {
       content: "Updated content",
+      expectedContentVersion: 2,
     });
+    expect(releaseCourseEditLockMock).toHaveBeenCalledWith(15, 1);
     expect(revalidatePathMock).toHaveBeenNthCalledWith(1, "/courses");
     expect(revalidatePathMock).toHaveBeenNthCalledWith(2, "/courses/15");
     expect(revalidatePathMock).toHaveBeenNthCalledWith(
@@ -167,6 +190,67 @@ describe("course actions", () => {
       "/admin/courses/15/edit",
     );
     expect(redirectMock).toHaveBeenCalledWith("/courses/15");
+  });
+
+  it("returns an error when another admin owns the course edit lock", async () => {
+    const formData = new FormData();
+    const session = { user: { id: "1", userType: "ADMIN" } };
+
+    formData.set("courseId", "15");
+    formData.set("contentVersion", "2");
+    formData.set("content", "Updated content");
+
+    requireAdminMock.mockResolvedValue(session);
+    updateCourseContentSafeParseMock.mockReturnValue({
+      success: true,
+      data: {
+        courseId: 15,
+        contentVersion: 2,
+        content: "Updated content",
+      },
+    });
+    findCourseByIdMock.mockResolvedValue({ id: 15 });
+    acquireCourseEditLockMock.mockResolvedValue({
+      status: "conflict",
+      holderUserId: 9,
+      expiresInSeconds: 120,
+    });
+
+    await expect(updateCourseContentAction({}, formData)).resolves.toEqual({
+      error:
+        "Another admin is already editing this course. Refresh the page and try again once the lock clears.",
+    });
+
+    expect(updateCourseMock).not.toHaveBeenCalled();
+    expect(redirectMock).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the submitted content version is stale", async () => {
+    const formData = new FormData();
+    const session = { user: { id: "1", userType: "ADMIN" } };
+
+    formData.set("courseId", "15");
+    formData.set("contentVersion", "2");
+    formData.set("content", "Updated content");
+
+    requireAdminMock.mockResolvedValue(session);
+    updateCourseContentSafeParseMock.mockReturnValue({
+      success: true,
+      data: {
+        courseId: 15,
+        contentVersion: 2,
+        content: "Updated content",
+      },
+    });
+    findCourseByIdMock.mockResolvedValue({ id: 15 });
+    updateCourseMock.mockResolvedValue(null);
+
+    await expect(updateCourseContentAction({}, formData)).resolves.toEqual({
+      error:
+        "This course was updated from another session. Refresh the page to load the latest content before saving again.",
+    });
+
+    expect(redirectMock).not.toHaveBeenCalled();
   });
 
   it("builds dashboard course groups from visible course state", async () => {

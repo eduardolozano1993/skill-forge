@@ -11,7 +11,7 @@ const {
       findMany: vi.fn(),
       findUnique: vi.fn(),
       findFirst: vi.fn(),
-      update: vi.fn(),
+      updateMany: vi.fn(),
     },
     organizationCourse: {
       findMany: vi.fn(),
@@ -149,6 +149,7 @@ describe("course queries", () => {
         name: "Node.js API Design",
         summary: "Backend course",
         content: "Course content",
+        contentVersion: 1,
         status: "ACTIVE",
         organizations: [{ courseId: 3 }],
         bookmarks: [{ courseId: 3 }],
@@ -164,6 +165,7 @@ describe("course queries", () => {
           name: "Node.js API Design",
           summary: "Backend course",
           content: "Course content",
+          contentVersion: 1,
           status: "ACTIVE",
           isAssigned: true,
           isBookmarked: true,
@@ -210,6 +212,7 @@ describe("course queries", () => {
       name: "Advanced TypeScript",
       summary: "Deep dive",
       content: "Typed content",
+      contentVersion: 4,
       status: "DEACTIVATED",
       organizations: [],
       bookmarks: [{ courseId: 9 }],
@@ -221,6 +224,7 @@ describe("course queries", () => {
       name: "Advanced TypeScript",
       summary: "Deep dive",
       content: "Typed content",
+      contentVersion: 4,
       status: "DEACTIVATED",
       isAssigned: false,
       isBookmarked: true,
@@ -234,22 +238,43 @@ describe("course queries", () => {
     await expect(findActiveCoursesById(8, createSession())).resolves.toBeNull();
   });
 
-  it("updates a course with the provided partial payload", async () => {
-    const updatedCourse = { id: 4, content: "Updated content" };
-    prismaMock.course.update.mockResolvedValue(updatedCourse);
+  it("updates a course when the submitted content version still matches", async () => {
+    const updatedCourse = { id: 4, content: "Updated content", contentVersion: 3 };
+    prismaMock.course.updateMany.mockResolvedValue({ count: 1 });
+    prismaMock.course.findUnique.mockResolvedValue(updatedCourse);
 
-    await expect(updateCourse(4, { content: "Updated content" })).resolves.toBe(
-      updatedCourse,
-    );
+    await expect(
+      updateCourse(4, {
+        content: "Updated content",
+        expectedContentVersion: 2,
+      }),
+    ).resolves.toBe(updatedCourse);
 
-    expect(prismaMock.course.update).toHaveBeenCalledWith({
+    expect(prismaMock.course.updateMany).toHaveBeenCalledWith({
       where: {
         id: 4,
+        contentVersion: 2,
       },
       data: {
         content: "Updated content",
+        contentVersion: {
+          increment: 1,
+        },
       },
     });
+  });
+
+  it("returns null when the course version no longer matches", async () => {
+    prismaMock.course.updateMany.mockResolvedValue({ count: 0 });
+
+    await expect(
+      updateCourse(4, {
+        content: "Updated content",
+        expectedContentVersion: 2,
+      }),
+    ).resolves.toBeNull();
+
+    expect(prismaMock.course.findUnique).not.toHaveBeenCalled();
   });
 
   it("combines visible course state for the authenticated user", async () => {
@@ -260,6 +285,7 @@ describe("course queries", () => {
         name: "React Fundamentals",
         summary: "Intro",
         content: "Content",
+        contentVersion: 1,
         status: "ACTIVE",
       },
       {
@@ -267,6 +293,7 @@ describe("course queries", () => {
         name: "Advanced TypeScript",
         summary: "Types",
         content: "Content",
+        contentVersion: 1,
         status: "ACTIVE",
       },
     ]);
@@ -281,6 +308,7 @@ describe("course queries", () => {
           name: "React Fundamentals",
           summary: "Intro",
           content: "Content",
+          contentVersion: 1,
           status: "ACTIVE",
           isAssigned: true,
           isBookmarked: false,
@@ -291,6 +319,7 @@ describe("course queries", () => {
           name: "Advanced TypeScript",
           summary: "Types",
           content: "Content",
+          contentVersion: 1,
           status: "ACTIVE",
           isAssigned: false,
           isBookmarked: true,

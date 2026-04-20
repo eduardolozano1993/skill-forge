@@ -68,6 +68,7 @@ model Course {
   name             String
   summary          String
   content          String
+  contentVersion   Int                  @default(1) @map("content_version")
   status           CourseStatus         @default(ACTIVE)
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
